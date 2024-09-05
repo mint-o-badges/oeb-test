@@ -13,7 +13,7 @@ describe('Title Test', function() {
         await driver.get(url);
 
         let title = await driver.getTitle();
-        assert.equal('Open Educational Badges', title);
+        assert.equal(title, 'Open Educational Badges');
     });
 
     after(async () => await driver.quit());
