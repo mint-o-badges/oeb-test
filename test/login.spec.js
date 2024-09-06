@@ -12,20 +12,12 @@ export async function login(driver) {
     const emailField = await driver.findElement(By.css(
         'input[placeholder="Deine E-Mail Adresse"]'));
     assert(emailField);
-
-    emailField.click();
-    await driver.actions()
-        .sendKeys(username)
-        .perform();
+    await emailField.sendKeys(username);
 
     const passwordField = await driver.findElement(By.css(
         'input[placeholder="Dein Passwort"]'));
     assert(passwordField);
-
-    passwordField.click();
-    await driver.actions()
-        .sendKeys(password)
-        .perform();
+    await passwordField.sendKeys(password);
 
     const loginButton = await driver.findElement(By.css(
         'oeb-button[type="submit"]'));
@@ -36,14 +28,13 @@ export async function login(driver) {
 }
 
 describe('Login Test', function() {
+    this.timeout(20000);
     let driver;
 
     before(async () => driver = await new Builder().forBrowser(Browser.CHROME).build());
 
     it('should be able to log in', async function() {
-        this.timeout(20000);
-
-        login();
+        await login(driver);
     });
 
     after(async () => await driver.quit());

@@ -3,13 +3,12 @@ import assert from 'assert';
 import {url} from '../config.js';
 
 describe('Title Test', function() {
+    this.timeout(10000);
     let driver;
 
     before(async () => driver = await new Builder().forBrowser(Browser.CHROME).build());
 
     it('should match the expected title', async function() {
-        this.timeout(10000);
-
         await driver.get(url);
 
         let title = await driver.getTitle();
