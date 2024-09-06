@@ -11,17 +11,14 @@ export async function login(driver) {
 
     const emailField = await driver.findElement(By.css(
         'input[placeholder="Deine E-Mail Adresse"]'));
-    assert(emailField);
     await emailField.sendKeys(username);
 
     const passwordField = await driver.findElement(By.css(
         'input[placeholder="Dein Passwort"]'));
-    assert(passwordField);
     await passwordField.sendKeys(password);
 
     const loginButton = await driver.findElement(By.css(
         'oeb-button[type="submit"]'));
-    assert(loginButton);
     loginButton.click();
 
     await driver.wait(until.titleIs('Issuers - Open Educational Badges'), 2000);
