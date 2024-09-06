@@ -1,1 +1,1 @@
-export const url="https://staging.openbadges.education";
+export const url="http://localhost:4200";

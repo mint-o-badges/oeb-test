@@ -1,6 +1,6 @@
-const {By, Builder, Browser} = require('selenium-webdriver');
-const assert = require('assert');
-const {url} = require('../config.js');
+import {By, Builder, Browser} from 'selenium-webdriver';
+import assert from 'assert';
+import {url} from '../config.js';
 
 describe('Title Test', function() {
     let driver;
