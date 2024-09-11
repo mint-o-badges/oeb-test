@@ -87,12 +87,8 @@ describe('Issuer Test', function() {
             'button[type="submit"]')))[1];
         submitButton.click();
 
-        await driver.wait(until.titleIs('Issuer - Open Educational Badges'), 2000);
+        await driver.wait(until.titleIs('Issuer - automatedTestName - Open Educational Badges'), 2000);
 
-        // TODO: For some reason the issuer doesn't properly exist after creation
-        // It seems this is either an upstream error or one with my local setup.
-        // I'll need to test it on staging...
-        //
         // TODO: Verify issuer details and delete issuer again
     });
 
