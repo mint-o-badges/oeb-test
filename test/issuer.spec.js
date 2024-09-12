@@ -4,6 +4,7 @@ import {username, password} from '../secret.js';
 import {url} from '../config.js';
 import {login} from './login.spec.js';
 import path from 'path';
+import {requestToken, findIssuer, deleteIssuer} from '../util/api.js';
 
 describe('Issuer Test', function() {
     this.timeout(20000);
@@ -87,7 +88,16 @@ describe('Issuer Test', function() {
 
         await driver.wait(until.titleIs('Issuer - automatedTestName - Open Educational Badges'), 2000);
 
-        // TODO: Verify issuer details and delete issuer again
+        // TODO: Verify issuer details
+
+        const apiToken = await requestToken(username, password);
+        assert(apiToken);
+        const issuer = await findIssuer(apiToken, 'automatedTestName');
+        assert(issuer);
+        const slug = issuer.slug;
+        assert(slug);
+        const deletionResult = await deleteIssuer(apiToken, slug);
+        assert(deletionResult);
     });
 
     after(async () => await driver.quit());

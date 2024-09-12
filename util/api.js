@@ -20,13 +20,8 @@ export async function requestToken(username, password) {
     return await response.json();
 }
 
-export async function verifyIssuer(username, password, slug) {
-    const token = await requestToken(username, password);
-    return await tokenVerifyIssuer(token, slug);
-}
-
-async function tokenVerifyIssuer(token, slug) {
-    const issuer = await tokenGetIssuer(token, slug);
+export async function verifyIssuer(token, slug) {
+    const issuer = await getIssuer(token, slug);
     // TODO: This doesn't suffice (yet), since the verified option is ignored in the backend
     issuer.verified = true;
     // The image has to be deleted because otherwise it's `None`,
@@ -53,7 +48,7 @@ async function tokenVerifyIssuer(token, slug) {
     return await response.ok;
 }
 
-async function tokenGetIssuer(token, slug) {
+export async function getIssuer(token, slug) {
     const path = `${backendUrl}/v1/issuer/issuers/${slug}`;
     const response = await fetch(path, {
         method: 'GET',
@@ -65,6 +60,37 @@ async function tokenGetIssuer(token, slug) {
     });
 
     return await response.json();
+}
+
+export async function findIssuer(token, name) {
+    const path = `${backendUrl}/v1/issuer/issuers`;
+    const response = await fetch(path, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    const json = await response.json();
+    if (!Array.isArray(json))
+        return null;
+    return json.find(obj => obj.name == 'automatedTestName')
+}
+
+export async function deleteIssuer(token, slug) {
+    const path = `${backendUrl}/v1/issuer/issuers/${slug}`;
+    const response = await fetch(path, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    return response.ok;
 }
 
 function objectToFormData(obj) {
