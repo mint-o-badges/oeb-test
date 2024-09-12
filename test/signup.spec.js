@@ -1,6 +1,7 @@
 import {By, Builder, Browser, until} from 'selenium-webdriver';
 import assert from 'assert';
 import {url} from '../config.js';
+import {requestToken, deleteUser} from '../util/api.js';
 
 describe('Signup Test', function() {
     this.timeout(20000);
@@ -48,6 +49,12 @@ describe('Signup Test', function() {
         submitButton.click();
 
         await driver.wait(until.titleIs('Verification - Open Educational Badges'), 2000);
+
+
+        const apiToken = await requestToken('automated@test.mail', 'automatedTestPassword');
+        assert(apiToken);
+        const deletionResult = await deleteUser(apiToken);
+        assert(deletionResult);
     });
 
     after(async () => await driver.quit());

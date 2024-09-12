@@ -93,6 +93,23 @@ export async function deleteIssuer(token, slug) {
     return response.ok;
 }
 
+/**
+ * This deletes the user associated with the token
+ */
+export async function deleteUser(token) {
+    const path = `${backendUrl}/v1/user/profile`;
+    const response = await fetch(path, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    return response.ok;
+}
+
 function objectToFormData(obj) {
     const formData = new FormData();
 
