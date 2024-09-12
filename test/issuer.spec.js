@@ -14,7 +14,7 @@ describe('Issuer Test', function() {
 
     it('should create an issuer', async function() {
         await login(driver);
-        await driver.get(url + '/issuer/create');
+        await driver.get(`${url}/issuer/create`);
 
         let title = await driver.getTitle();
         assert.equal(title, 'Create Issuer - Open Educational Badges');
@@ -22,13 +22,11 @@ describe('Issuer Test', function() {
         const imageField = await driver.findElement(By.id(
             'image_field0'));
 
-        const image = path.resolve('../assets/image.png');
-        imageField.sendKeys(image);
+        const image = path.resolve('assets/image.png');
+        await imageField.sendKeys(image);
 
-        // TODO: Image is not being displayed, since the image isn't
-        // uploaded the "normal" way
-        //await driver.wait(until.elementIsVisible(
-            //driver.findElement(By.css('img[src^="data:image/png;base64,iVBORw0KGg"]'))));
+        await driver.wait(until.elementIsVisible(
+            driver.findElement(By.css('img[src^="data:image/png;base64,iVBORw0KGg"]'))));
 
         const textFields = await driver.findElements(By.css(
             'input[type="text"]'));

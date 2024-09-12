@@ -4,7 +4,7 @@ import {username, password} from '../secret.js';
 import {url} from '../config.js';
 
 export async function login(driver) {
-    await driver.get(url + '/auth/login');
+    await driver.get(`${url}/auth/login`);
 
     let title = await driver.getTitle();
     assert.equal(title, 'Login - Open Educational Badges');
