@@ -54,7 +54,7 @@ describe('Signup Test', function() {
         const apiToken = await requestToken('automated@test.mail', 'automatedTestPassword');
         assert(apiToken);
         const deletionResult = await deleteUser(apiToken);
-        assert(deletionResult);
+        assert.equal(deletionResult, true);
     });
 
     after(async () => await driver.quit());

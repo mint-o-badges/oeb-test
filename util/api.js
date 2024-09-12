@@ -27,7 +27,6 @@ export async function verifyIssuer(token, slug) {
     // The image has to be deleted because otherwise it's `None`,
     // which is not interpreted as none
     delete issuer.image;
-    console.log(issuer);
 
     const path = `${backendUrl}/v1/issuer/issuers/${slug}`;
     const response = await fetch(path, {
@@ -39,11 +38,6 @@ export async function verifyIssuer(token, slug) {
             'Authorization': `Bearer ${token.access_token}`
         }
     });
-
-    console.log(response);
-
-    const body = await response.json();
-    console.log(body);
 
     return await response.ok;
 }
@@ -76,7 +70,7 @@ export async function findIssuer(token, name) {
     const json = await response.json();
     if (!Array.isArray(json))
         return null;
-    return json.find(obj => obj.name == 'automatedTestName')
+    return json.find(obj => obj.name == name)
 }
 
 export async function deleteIssuer(token, slug) {
@@ -98,6 +92,38 @@ export async function deleteIssuer(token, slug) {
  */
 export async function deleteUser(token) {
     const path = `${backendUrl}/v1/user/profile`;
+    const response = await fetch(path, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    return response.ok;
+}
+
+export async function findBadge(token, name) {
+    const path = `${backendUrl}/v2/badgeclasses`;
+    const response = await fetch(path, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    const json = await response.json();
+    const result = json.result;
+    if (!Array.isArray(result))
+        return null;
+    return result.find(obj => obj.name == name)
+}
+
+export async function deleteBadge(token, entityId) {
+    const path = `${backendUrl}/v2/badgeclasses/${entityId}`;
     const response = await fetch(path, {
         method: 'DELETE',
         headers: {

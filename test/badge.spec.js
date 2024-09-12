@@ -4,7 +4,7 @@ import {username, password} from '../secret.js';
 import {url} from '../config.js';
 import {login} from './login.spec.js';
 import path from 'path';
-import {requestToken, findIssuer, deleteIssuer} from '../util/api.js';
+import {requestToken, findBadge, deleteBadge} from '../util/api.js';
 
 async function navigateToBadgeCreation(driver) {
     await driver.get(`${url}/issuer/issuers`);
@@ -22,7 +22,7 @@ async function navigateToBadgeCreation(driver) {
 }
 
 describe('Badge Test', function() {
-    this.timeout(20000);
+    this.timeout(30000);
     let driver;
 
     before(async () => driver = await new Builder().forBrowser(Browser.CHROME).build());
@@ -56,6 +56,9 @@ describe('Badge Test', function() {
         const image = path.resolve('assets/image.png');
         await imageField.sendKeys(image);
 
+        await driver.wait(until.elementLocated(By.css(
+            'img[src^="data:image/png;base64,iVBORw0KGg"]')));
+
         // TODO: Optionale Badge-Details
         const submitButton = await driver.findElement(By.css(
             'oeb-button[ng-reflect-text="Badge erstellen"]'));
@@ -63,7 +66,13 @@ describe('Badge Test', function() {
 
         await driver.wait(until.titleIs('Badge Class - automated test title - Open Educational Badges'), 20000);
 
-        // TODO: Delete badge again
+
+        const apiToken = await requestToken(username, password);
+        assert(apiToken);
+        const badge = await findBadge(apiToken, 'automated test title');
+        assert(badge);
+        const deletionResult = await deleteBadge(apiToken, badge.entityId);
+        assert.equal(deletionResult, true);
     });
 
     after(async () => await driver.quit());

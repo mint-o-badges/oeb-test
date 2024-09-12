@@ -26,8 +26,8 @@ describe('Issuer Test', function() {
         const image = path.resolve('assets/image.png');
         await imageField.sendKeys(image);
 
-        await driver.wait(until.elementIsVisible(
-            driver.findElement(By.css('img[src^="data:image/png;base64,iVBORw0KGg"]'))));
+        await driver.wait(until.elementLocated(By.css(
+            'img[src^="data:image/png;base64,iVBORw0KGg"]')));
 
         const textFields = await driver.findElements(By.css(
             'input[type="text"]'));
@@ -97,7 +97,7 @@ describe('Issuer Test', function() {
         const slug = issuer.slug;
         assert(slug);
         const deletionResult = await deleteIssuer(apiToken, slug);
-        assert(deletionResult);
+        assert.equal(deletionResult, true);
     });
 
     after(async () => await driver.quit());
