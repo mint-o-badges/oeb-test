@@ -9,7 +9,7 @@ describe('Signup Test', function() {
 
     before(async () => driver = await new Builder().forBrowser(Browser.CHROME).build());
 
-    it('should be able to log in', async function() {
+    it('should be able to sign up', async function() {
         await driver.get(`${url}/signup`);
 
         let title = await driver.getTitle();
