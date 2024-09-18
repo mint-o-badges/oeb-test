@@ -72,13 +72,6 @@ async function createIssuer(driver) {
     const cityField = textFields[2];
     cityField.sendKeys('automatedTestCity');
 
-    const altchaCheckbox = await driver.findElement(By.id(
-        'altcha_checkbox'));
-    altchaCheckbox.click();
-
-    await driver.wait(until.elementLocated(By.css(
-        'div[data-state="verified"]')), 200*1000);
-
     const submitButton = (await driver.findElements(By.css(
         'button[type="submit"]')))[1];
     submitButton.click();
