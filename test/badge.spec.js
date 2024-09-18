@@ -4,7 +4,7 @@ import {username, password} from '../secret.js';
 import {url} from '../config.js';
 import {login} from './login.spec.js';
 import path from 'path';
-import {requestToken, findBadge, deleteBadge} from '../util/api.js';
+import {requestToken, findBadge, deleteBadge, findAssertions, revokeAssertions} from '../util/api.js';
 
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
@@ -25,6 +25,36 @@ async function navigateToBadgeCreation(driver) {
 }
 
 /**
+ * Expects the badge to have been created already
+ */
+async function navigateToBadgeAwarding(driver, name = 'automated test title') {
+    // This ensures that the same issuer is used as for the created badge
+    await navigateToBadgeCreation(driver);
+
+    const breadcrumbs = await driver.findElements(By.css(
+        'span.breadcrumbs-x-text'));
+    const issuerBreadcrumb = breadcrumbs[1];
+    issuerBreadcrumb.click();
+
+    await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), 2000);
+
+    const badgeLink = await driver.findElement(By.js(() => {
+        const elements = document.querySelectorAll('span.tw-text-oebblack')
+        const elementArray = Array.from(elements);
+        return elementArray.find(node => node.textContent = 'Bild Test');
+    }));
+    badgeLink.click();
+
+    await driver.wait(until.titleIs(`Badge Class - ${name} - Open Educational Badges`), 2000);
+
+    const badgeAwardButton = await driver.findElement(By.css(
+        'oeb-button[ng-reflect-text="Badge direkt vergeben"'));
+    badgeAwardButton.click();
+
+    await driver.wait(until.titleIs(`Award Badge - ${name} - Open Educational Badges`), 2000);
+}
+
+/**
  * This assumes that the driver already navigated to the badge creation page
  */
 async function createBadge(driver) {
@@ -32,6 +62,7 @@ async function createBadge(driver) {
         'button[role="combobox"]'));
     await categoryDropdownButton.click();
 
+    // TODO: Also create competency badge
     const participationOption = await driver.findElement(By.css(
         'hlm-option[ng-reflect-value="participation"]'));
     participationOption.click();
@@ -63,11 +94,36 @@ async function createBadge(driver) {
     await driver.wait(until.titleIs('Badge Class - automated test title - Open Educational Badges'), 20000);
 }
 
+/**
+ * This assumes that the driver already navigated to the badge awarding page
+ */
+async function awardBadge(driver, email = username, badgeName = 'automated test title') {
+    const nameField = await driver.findElement(By.css(
+        'input[type="text"]'));
+    await nameField.sendKeys('automated test name');
+
+    const identifierField = await driver.findElement(By.css(
+        'input[type="email"]'));
+    await identifierField.sendKeys(email);
+
+    // TODO: optional details
+
+    const submitButton = await driver.findElement(By.css(
+        'button[type="submit"].tw-relative'));
+    submitButton.click();
+
+    await driver.wait(until.titleIs(`Badge Class - ${badgeName} - Open Educational Badges`), 20000);
+}
+
 async function deleteBadgeOverApi(title = 'automated test title') {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
     const badge = await findBadge(apiToken, title);
     assert(badge, "Failed to find the badge");
+    const assertions = await findAssertions(apiToken, badge.entityId);
+    const revokationResult = await revokeAssertions(apiToken, assertions);
+    assert.equal(revokationResult, true,
+        "Revokation for at least one assertion failed, probably because the HTTP response code wasn't 2xx");
     const deletionResult = await deleteBadge(apiToken, badge.entityId);
     assert.equal(deletionResult, true,
         "The badge deletion failed, probably because the HTTP response code wasn't 2xx");
@@ -84,6 +140,11 @@ describe('Badge Test', function() {
         await login(driver);
         await navigateToBadgeCreation(driver);
         await createBadge(driver);
+    });
+
+    it('should award the badge', async function() {
+        await navigateToBadgeAwarding(driver);
+        await awardBadge(driver);
     });
 
     after(async () => {

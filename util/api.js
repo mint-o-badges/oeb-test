@@ -122,6 +122,44 @@ export async function findBadge(token, name) {
     return result.find(obj => obj.name == name)
 }
 
+export async function findAssertions(token, badgeId) {
+    const path = `${backendUrl}/v2/badgeclasses/${badgeId}/assertions?include_revoked=false`;
+    const response = await fetch(path, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    const json = await response.json();
+    return json.result;
+}
+
+export async function revokeAssertions(token, assertions) {
+    const results = assertions.map(assertion => revokeAssertion(token, assertion.entityId));
+    return results.every(res => res);
+}
+
+export async function revokeAssertion(token, assertionId) {
+    const path = `${backendUrl}/v2/assertions/${assertionId}`;
+    const body = {
+        "revocation_reason": "automated deletion"
+    }
+    const response = await fetch(path, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        },
+        body: JSON.stringify(body)
+    });
+
+    return response.ok;
+}
+
 export async function deleteBadge(token, entityId) {
     const path = `${backendUrl}/v2/badgeclasses/${entityId}`;
     const response = await fetch(path, {
