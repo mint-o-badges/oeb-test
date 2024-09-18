@@ -122,6 +122,9 @@ async function awardBadge(driver, email = username, badgeName = 'automated test 
     await driver.wait(until.titleIs(`Badge Class - ${badgeName} - Open Educational Badges`), 20000);
 }
 
+/**
+ * This assumes that the driver already navigated to the backpack page
+ */
 async function receiveBadge(driver, badgeName = 'automated test title') {
     const receivedBadges = await driver.findElements(By.css(
         `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
