@@ -103,8 +103,10 @@ describe('Issuer Test', function() {
         await navigateToIssuerCreation(driver);
         await createIssuer(driver);
         // TODO: Verify issuer details
-        await deleteIssuerOverApi();
     });
 
-    after(async () => await driver.quit());
+    after(async () => {
+        await deleteIssuerOverApi();
+        await driver.quit();
+    });
 });

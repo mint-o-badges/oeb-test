@@ -84,8 +84,10 @@ describe('Badge Test', function() {
         await login(driver);
         await navigateToBadgeCreation(driver);
         await createBadge(driver);
-        await deleteBadgeOverApi();
     });
 
-    after(async () => await driver.quit());
+    after(async () => {
+        await deleteBadgeOverApi();
+        await driver.quit();
+    });
 });

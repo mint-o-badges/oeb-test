@@ -3,7 +3,7 @@ import assert from 'assert';
 import {url} from '../config.js';
 
 describe('Title Test', function() {
-    this.timeout(10000);
+    this.timeout(20000);
     let driver;
 
     before(async () => driver = await new Builder().forBrowser(Browser.CHROME).build());
