@@ -24,10 +24,7 @@ async function navigateToBadgeCreation(driver) {
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), 2000);
 }
 
-/**
- * Expects the badge to have been created already
- */
-async function navigateToBadgeAwarding(driver, name = 'automated test title') {
+async function navigateToBadgeDetails(driver, name = 'automated test title') {
     // This ensures that the same issuer is used as for the created badge
     await navigateToBadgeCreation(driver);
 
@@ -46,6 +43,13 @@ async function navigateToBadgeAwarding(driver, name = 'automated test title') {
     badgeLink.click();
 
     await driver.wait(until.titleIs(`Badge Class - ${name} - Open Educational Badges`), 2000);
+}
+
+/**
+ * Expects the badge to have been created already
+ */
+async function navigateToBadgeAwarding(driver, name = 'automated test title') {
+    await navigateToBadgeDetails(driver, name);
 
     const badgeAwardButton = await driver.findElement(By.css(
         'oeb-button[ng-reflect-text="Badge direkt vergeben"'));
@@ -131,6 +135,29 @@ async function receiveBadge(driver, badgeName = 'automated test title') {
     assert.equal(receivedBadges.length, 1, "Expected to have received one badge with the specified title");
 }
 
+/**
+ * This assumes that the driver already navigated to the badge detail page
+ */
+async function revokeBadge(driver, badgeName = 'automated test title') {
+    const revokeButton = await driver.findElement(By.css(
+        'oeb-button[ng-reflect-text="zurücknehmen"]'));
+    await revokeButton.click();
+
+    const confirmDialog = await driver.findElement(By.tagName('confirm-dialog'));
+    const confirmButton = await confirmDialog.findElement(By.css(
+        'button.button:not(.button-secondary)'));
+    await confirmButton.click();
+}
+
+/**
+ * This assumes that the driver already navigated to the backpack page
+ */
+async function confirmRevokedBadge(driver, badgeName = 'automated test title') {
+    const receivedBadges = await driver.findElements(By.css(
+        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
+    assert.equal(receivedBadges.length, 0, "Expected to have received no badge with the specified title");
+}
+
 async function deleteBadgeOverApi(title = 'automated test title') {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
@@ -166,6 +193,13 @@ describe('Badge Test', function() {
     it('should receive the badge', async function() {
         await navigateToBackpack(driver);
         await receiveBadge(driver);
+    });
+
+    it('should revoke the badge', async function() {
+        await navigateToBadgeDetails(driver);
+        await revokeBadge(driver);
+        await navigateToBackpack(driver);
+        await confirmRevokedBadge(driver);
     });
 
     after(async () => {
