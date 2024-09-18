@@ -65,11 +65,12 @@ async function createBadge(driver) {
 
 async function deleteBadgeOverApi(title = 'automated test title') {
     const apiToken = await requestToken(username, password);
-    assert(apiToken);
+    assert(apiToken, "Failed to request an API token");
     const badge = await findBadge(apiToken, title);
-    assert(badge);
+    assert(badge, "Failed to find the badge");
     const deletionResult = await deleteBadge(apiToken, badge.entityId);
-    assert.equal(deletionResult, true);
+    assert.equal(deletionResult, true,
+        "The badge deletion failed, probably because the HTTP response code wasn't 2xx");
 }
 
 describe('Badge Test', function() {

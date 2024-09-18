@@ -81,13 +81,14 @@ async function createIssuer(driver) {
 
 async function deleteIssuerOverApi(name = 'automatedTestName') {
     const apiToken = await requestToken(username, password);
-    assert(apiToken);
+    assert(apiToken, "Failed to request an API token");
     const issuer = await findIssuer(apiToken, name);
-    assert(issuer);
+    assert(issuer, "Failed to find the issuer");
     const slug = issuer.slug;
-    assert(slug);
+    assert(slug, "Failed to obtain the slug of the issuer");
     const deletionResult = await deleteIssuer(apiToken, slug);
-    assert.equal(deletionResult, true);
+    assert.equal(deletionResult, true,
+        "The issuer deletion failed, probably because the HTTP response code wasn't 2xx");
 }
 
 describe('Issuer Test', function() {
