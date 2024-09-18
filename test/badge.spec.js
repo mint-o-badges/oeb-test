@@ -54,6 +54,13 @@ async function navigateToBadgeAwarding(driver, name = 'automated test title') {
     await driver.wait(until.titleIs(`Award Badge - ${name} - Open Educational Badges`), 2000);
 }
 
+async function navigateToBackpack(driver) {
+    await driver.get(`${url}/recipient/badges`);
+
+    let title = await driver.getTitle();
+    assert.equal(title, 'Backpack - Open Educational Badges');
+}
+
 /**
  * This assumes that the driver already navigated to the badge creation page
  */
@@ -115,6 +122,12 @@ async function awardBadge(driver, email = username, badgeName = 'automated test 
     await driver.wait(until.titleIs(`Badge Class - ${badgeName} - Open Educational Badges`), 20000);
 }
 
+async function receiveBadge(driver, badgeName = 'automated test title') {
+    const receivedBadges = await driver.findElements(By.css(
+        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
+    assert.equal(receivedBadges.length, 1, "Expected to have received one badge with the specified title");
+}
+
 async function deleteBadgeOverApi(title = 'automated test title') {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
@@ -145,6 +158,11 @@ describe('Badge Test', function() {
     it('should award the badge', async function() {
         await navigateToBadgeAwarding(driver);
         await awardBadge(driver);
+    });
+
+    it('should receive the badge', async function() {
+        await navigateToBackpack(driver);
+        await receiveBadge(driver);
     });
 
     after(async () => {
