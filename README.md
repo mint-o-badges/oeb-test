@@ -28,7 +28,7 @@ npx mocha test
 To run a specific test, use
 ```bash
 npx mocha test/<test>.spec.js
-// E.g.:
+# E.g.:
 npx mocha test/title.spec.js
 ```
 
