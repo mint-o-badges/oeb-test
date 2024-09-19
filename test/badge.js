@@ -75,6 +75,8 @@ export async function navigateToBackpack(driver) {
 
 export async function navigateToReceivedBadge(driver, badgeName = 'automated test title') {
     await navigateToBackpack(driver);
+    await driver.wait(until.elementLocated(By.css(
+        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`)));
     const receivedBadgeCard = await driver.findElement(By.css(
         `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
     const receivedBadgeLink = await receivedBadgeCard.findElement(By.tagName('a'));
@@ -177,7 +179,7 @@ export async function downloadPdfFromBackpack(driver, badgeName = 'automated tes
         'button[type="submit"]'));
     await downloadButton.click();
 
-    await waitForPdfDownload(driver, badgeName);
+    await waitForDownload(driver, new RegExp(`^${badgeName} - \\d+\\.pdf$`));
     // TODO: Verify file content
     fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
 }
@@ -191,28 +193,34 @@ export async function downloadPdfFromIssuer(driver, badgeName = 'automated test 
     assert.equal(certificateButtons.length, 1, "Only expected one assertion and thus one certificate");
     await certificateButtons[0].click();
 
-    await waitForPdfDownload(driver, badgeName);
+    await waitForDownload(driver, new RegExp(`^${badgeName} - \\d+\\.pdf$`));
     // TODO: Verify file content
     fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
 }
 
-async function waitForPdfDownload(driver, badgeName = 'automated test title') {
+export async function waitForDownload(driver, regex) {
+    let pollId;
     const downloadPoll = resolve => {
         const files = fs.readdirSync(downloadDirectory);
         if (files.length == 0) {
-            setTimeout(_ => downloadPoll(resolve), 100);
+            pollId = setTimeout(_ => downloadPoll(resolve), 100);
             return;
         }
         assert(files.length, 1, "Expected one downloaded file");
-        const regex = new RegExp(`${badgeName} - \\d+\\.pdf`);
         if (!regex.test(files[0])) {
-            setTimeout(_ => downloadPoll(resolve), 100);
+            pollId = setTimeout(_ => downloadPoll(resolve), 100);
             return;
         }
+        clearTimeout(pollId);
         resolve();
     };
     const pollingPromise = new Promise(downloadPoll);
-    await driver.wait(pollingPromise, 20000, "Download didn't finish or file content didn't match the pattern within the specified timeout");
+    try {
+        await driver.wait(pollingPromise, 2000, "Download didn't finish or file content didn't match the pattern within the specified timeout");
+    } catch(error) {
+        clearTimeout(pollId);
+        throw error;
+    }
 }
 
 /**
