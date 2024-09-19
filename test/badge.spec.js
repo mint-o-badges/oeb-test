@@ -8,6 +8,8 @@ import path from 'path';
 import fs from 'fs';
 import {requestToken, findBadge, deleteBadge, findAssertions, revokeAssertions} from '../util/api.js';
 
+const downloadDirectory = './download'
+
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
  */
@@ -171,8 +173,28 @@ async function downloadPdfFromBackpack(driver, badgeName = 'automated test title
         'button[type="submit"]'));
     await downloadButton.click();
 
+    await waitForPdfDownload(driver, badgeName);
+    // TODO: Verify file content
+    fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
+}
+
+/**
+ * This assumes that the driver already navigated to badge detail page
+ */
+async function downloadPdfFromIssuer(driver, badgeName = 'automated test title') {
+    const certificateButtons = await driver.findElements(By.css(
+        'oeb-button[ng-reflect-text="PDF-Zertifikat"]'));
+    assert.equal(certificateButtons.length, 1, "Only expected one assertion and thus one certificate");
+    await certificateButtons[0].click();
+
+    await waitForPdfDownload(driver, badgeName);
+    // TODO: Verify file content
+    fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
+}
+
+async function waitForPdfDownload(driver, badgeName = 'automated test title') {
     const downloadPoll = resolve => {
-        const files = fs.readdirSync('./download');
+        const files = fs.readdirSync(downloadDirectory);
         if (files.length == 0) {
             setTimeout(_ => downloadPoll(resolve), 100);
             return;
@@ -187,7 +209,6 @@ async function downloadPdfFromBackpack(driver, badgeName = 'automated test title
     };
     const pollingPromise = new Promise(downloadPoll);
     await driver.wait(pollingPromise, 20000, "Download didn't finish or file content didn't match the pattern within the specified timeout");
-    // TODO: Verify file content
 }
 
 /**
@@ -232,8 +253,8 @@ describe('Badge Test', function() {
     let driver;
 
     before(async () => {
-        if (!fs.existsSync('./download')){
-            fs.mkdirSync('./download');
+        if (!fs.existsSync(downloadDirectory)){
+            fs.mkdirSync(downloadDirectory);
         }
         const downloadPath = path.resolve('download');
         let options = new chrome.Options();
@@ -268,6 +289,11 @@ describe('Badge Test', function() {
         await downloadPdfFromBackpack(driver);
     });
 
+    it('should download the pdf from the internal issuer page', async function() {
+        await navigateToBadgeDetails(driver);
+        await downloadPdfFromIssuer(driver);
+    });
+
     it('should revoke the badge', async function() {
         await navigateToBadgeDetails(driver);
         await revokeBadge(driver);
@@ -278,6 +304,6 @@ describe('Badge Test', function() {
     after(async () => {
         await deleteBadgeOverApi();
         await driver.quit();
-        fs.rmSync('./download', { recursive: true, force: true });
+        fs.rmSync(downloadDirectory, { recursive: true, force: true });
     });
 });
