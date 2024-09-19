@@ -24,3 +24,12 @@ Finally, run the tests with
 ```bash
 npx mocha test
 ```
+
+To run a specific test, use
+```bash
+npx mocha test/<test>.spec.js
+// E.g.:
+npx mocha test/title.spec.js
+```
+
+...according to the files in the `test` directory. Note that the `mocha` test files are called `*.spec.js`.
