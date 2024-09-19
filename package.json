@@ -1,7 +1,9 @@
 {
     "type": "module",
     "dependencies": {
-        "selenium-webdriver": "^4.24.0",
-        "mocha": "10.7.3"
+        "jimp": "^1.6.0",
+        "jsqr": "^1.4.0",
+        "mocha": "10.7.3",
+        "selenium-webdriver": "^4.24.0"
     }
 }

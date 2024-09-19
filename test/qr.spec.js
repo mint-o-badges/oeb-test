@@ -1,17 +1,24 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import {login} from './login.js';
+import {url} from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import {
+    navigateToBadgeDetails,
     navigateToBadgeCreation,
     createBadge,
-    deleteBadgeOverApi
+    deleteBadgeOverApi,
+    navigateToBackpack,
+    receiveBadge
 } from './badge.js';
 import {
     navigateToQrCreation,
     generateQrCode,
-    downloadQrCode
+    downloadQrCode,
+    readQrCode,
+    requestBadgeViaQr,
+    confirmBadgeAwarding
 } from './qr.js';
 
 const downloadDirectory = './download'
@@ -44,6 +51,22 @@ describe('QR test', function() {
         await navigateToQrCreation(driver);
         await generateQrCode(driver);
         await downloadQrCode(driver);
+    });
+    
+    it('should read the QR code', async function() {
+        const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`));
+        await driver.get(qrCodeUrl);
+        await requestBadgeViaQr(driver);
+    });
+
+    it('should confirm the QR code awarding', async function() {
+        await navigateToBadgeDetails(driver);
+        await confirmBadgeAwarding(driver);
+    });
+
+    it('should receive the badge', async function() {
+        await navigateToBackpack(driver);
+        await receiveBadge(driver);
     });
 
     after(async () => {
