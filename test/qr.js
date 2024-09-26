@@ -2,6 +2,7 @@ import {By, until} from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import assert from 'assert';
 import {username, password} from '../secret.js';
+import {ExtendedBy} from '../util/selection.js';
 import {
     downloadDirectory,
     navigateToBadgeDetails,
@@ -13,8 +14,8 @@ import jsQR from "jsqr";
 export async function navigateToQrCreation(driver, name = 'automated test title') {
     await navigateToBadgeDetails(driver, name);
 
-    const qrCodeButton = driver.findElement(By.css(
-        'oeb-button[ng-reflect-text="Badge über QR-Code vergeben"]'));
+    const qrCodeButton = driver.findElement(
+        ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben'));
     await qrCodeButton.click();
     await driver.wait(until.elementLocated(By.css(
         'oeb-input[label="Titel"]')));
@@ -52,10 +53,11 @@ export async function generateQrCode(driver) {
  * This assumes that the QR code already got created
  */
 export async function downloadQrCode(driver) {
-    const downloadQrButton = await driver.findElement(By.css(
-        'oeb-button[ng-reflect-text="Download QR-Code"]'));
+    const downloadQrButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('Download QR-Code'));
     await downloadQrButton.click();
 
+    console.log("Clicked the button!");
     await waitForDownload(driver, new RegExp('^qrcode\\.png$'));
 }
 
@@ -113,10 +115,10 @@ export async function confirmBadgeAwarding(driver) {
         'button[role="heading"]'));
     await dropdownButton.click();
 
-    await driver.wait(until.elementLocated(By.css(
-        'oeb-button[ng-reflect-text="Badge vergeben"]')));
-    const confirmButton = await driver.findElement(By.css(
-        'oeb-button[ng-reflect-text="Badge vergeben"]'));
+    await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge vergeben')));
+    const confirmButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('Badge vergeben'));
 
     await driver.wait(until.elementIsVisible(confirmButton));
     await confirmButton.click();

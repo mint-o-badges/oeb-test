@@ -39,4 +39,17 @@ export class ExtendedBy {
             By.css('button[type="submit"]'), By.tagName('span'),
             text);
     }
+
+    static tagWithText(tag, text) {
+        return (async (driver) => {
+            const selected = await driver.findElements(By.tagName(tag));
+            const selectedArray = Array.from(selected);
+            const mappedPromises = selectedArray.map(async node => {
+                const nodeText = await node.getText();
+                return nodeText === text;
+            });
+            const mapped = await Promise.all(mappedPromises);
+            return selectedArray.filter((_, i) => mapped[i]);
+        });
+    }
 }

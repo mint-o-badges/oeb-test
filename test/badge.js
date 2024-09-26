@@ -24,7 +24,8 @@ export async function navigateToBadgeCreation(driver) {
     let title = await driver.getTitle();
     assert.equal(title, 'Issuers - Open Educational Badges');
 
-    const newBadgeButtonLocator = ExtendedBy.submitButtonWithText(
+    const newBadgeButtonLocator = ExtendedBy.containingText(
+        By.css('oeb-button:not(.disabled)'), By.tagName('span'),
         'Neuen Badge erstellen');
     await driver.wait(until.elementLocated(newBadgeButtonLocator), 2000);
 
@@ -94,15 +95,9 @@ export async function createBadge(driver) {
     await categoryDropdownButton.click();
 
     // TODO: Also create competency badge
-    const participationOptions = await driver.findElements(By.tagName(
-        'hlm-option'));
-    for (const participationOption of participationOptions) {
-        const text = await participationOption.getText();
-        if (text === 'Teilnahme') {
-            await participationOption.click();
-            break;
-        }
-    }
+    const participationOption = await driver.findElement(
+        ExtendedBy.tagWithText('hlm-option', 'Teilnahme'));
+    await participationOption.click();
 
     const shortDescriptionField = await driver.findElement(By.css(
         'textarea'));

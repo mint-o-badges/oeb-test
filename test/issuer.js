@@ -3,6 +3,7 @@ import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url} from '../config.js';
 import {requestToken, findIssuer, deleteIssuer} from '../util/api.js';
+import {ExtendedBy} from '../util/selection.js';
 import path from 'path';
 
 export async function navigateToIssuerCreation(driver) {
@@ -41,13 +42,14 @@ export async function createIssuer(driver) {
     const mailDropdownButton = dropdownButtons[0];
     await mailDropdownButton.click();
 
-    const mailOption = await driver.findElement(By.css(
-        'hlm-option[ng-reflect-value="' + username + '"]'));
+    const mailOption = await driver.findElement(
+        ExtendedBy.tagWithText('hlm-option', username));
     await mailOption.click();
 
     const description = await driver.findElement(By.tagName(
         'textarea'));
-    await description.sendKeys('automatedTestDescription');
+    await description.sendKeys(
+        'automatedTestDescription with a minimum length of 200 characters. These are indeed a looot of characters. This seems quite useless, but who am I to judge? I\'m just the miserable person writing such a uselessly long description, ain\'t I.');
 
     const categoryDropdownButton = dropdownButtons[1];
     await categoryDropdownButton.click();
