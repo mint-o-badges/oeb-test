@@ -11,6 +11,7 @@ import {
     findAssertions,
     revokeAssertions
 } from '../util/api.js';
+import {ExtendedBy} from '../util/selection.js';
 
 export const downloadDirectory = './download'
 
@@ -23,8 +24,8 @@ export async function navigateToBadgeCreation(driver) {
     let title = await driver.getTitle();
     assert.equal(title, 'Issuers - Open Educational Badges');
 
-    const newBadgeButtonLocator = By.css(
-        'oeb-button[ng-reflect-text="Neuen Badge erstellen"][ng-reflect-disabled="false"]');
+    const newBadgeButtonLocator = ExtendedBy.submitButtonWithText(
+        'Neuen Badge erstellen');
     await driver.wait(until.elementLocated(newBadgeButtonLocator), 2000);
 
     const createBadgeButton = await driver.findElement(newBadgeButtonLocator);
@@ -43,12 +44,14 @@ export async function navigateToBadgeDetails(driver, name = 'automated test titl
 
     await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), 2000);
 
-    const badgeLink = await driver.findElement(By.js(() => {
-        const elements = document.querySelectorAll('span.tw-text-oebblack')
-        const elementArray = Array.from(elements);
-        return elementArray.find(node => node.textContent = 'Bild Test');
-    }));
-    badgeLink.click();
+    const spans = Array.from(await driver.findElements(By.css('span.tw-text-oebblack')));
+    for (const span of spans) {
+        const text = await span.getText();
+        if (text === name) {
+            span.click();
+            break;
+        }
+    }
 
     await driver.wait(until.titleIs(`Badge Class - ${name} - Open Educational Badges`), 2000);
 }
@@ -59,8 +62,8 @@ export async function navigateToBadgeDetails(driver, name = 'automated test titl
 export async function navigateToBadgeAwarding(driver, name = 'automated test title') {
     await navigateToBadgeDetails(driver, name);
 
-    const badgeAwardButton = await driver.findElement(By.css(
-        'oeb-button[ng-reflect-text="Badge direkt vergeben"'));
+    const badgeAwardButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
     badgeAwardButton.click();
 
     await driver.wait(until.titleIs(`Award Badge - ${name} - Open Educational Badges`), 2000);
@@ -75,11 +78,8 @@ export async function navigateToBackpack(driver) {
 
 export async function navigateToReceivedBadge(driver, badgeName = 'automated test title') {
     await navigateToBackpack(driver);
-    await driver.wait(until.elementLocated(By.css(
-        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`)));
-    const receivedBadgeCard = await driver.findElement(By.css(
-        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
-    const receivedBadgeLink = await receivedBadgeCard.findElement(By.tagName('a'));
+    await driver.wait(until.elementLocated(By.linkText(badgeName)), 2000);
+    const receivedBadgeLink = await driver.findElement(By.linkText(badgeName));
     receivedBadgeLink.click();
 
     await driver.wait(until.titleIs(`Backpack - ${badgeName} - Open Educational Badges`), 2000);
@@ -94,9 +94,15 @@ export async function createBadge(driver) {
     await categoryDropdownButton.click();
 
     // TODO: Also create competency badge
-    const participationOption = await driver.findElement(By.css(
-        'hlm-option[ng-reflect-value="participation"]'));
-    participationOption.click();
+    const participationOptions = await driver.findElements(By.tagName(
+        'hlm-option'));
+    for (const participationOption of participationOptions) {
+        const text = await participationOption.getText();
+        if (text === 'Teilnahme') {
+            await participationOption.click();
+            break;
+        }
+    }
 
     const shortDescriptionField = await driver.findElement(By.css(
         'textarea'));
@@ -118,8 +124,8 @@ export async function createBadge(driver) {
         'img[src^="data:image/png;base64,iVBORw0KGg"]')));
 
     // TODO: Optionale Badge-Details
-    const submitButton = await driver.findElement(By.css(
-        'oeb-button[ng-reflect-text="Badge erstellen"]'));
+    const submitButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('Badge erstellen'));
     submitButton.click();
 
     await driver.wait(until.titleIs('Badge Class - automated test title - Open Educational Badges'), 20000);
@@ -150,8 +156,9 @@ export async function awardBadge(driver, email = username, badgeName = 'automate
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveBadge(driver, badgeName = 'automated test title') {
-    const receivedBadges = await driver.findElements(By.css(
-        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
+    await driver.wait(until.elementLocated(By.linkText(badgeName)), 2000);
+    const receivedBadges = await driver.findElements(By.linkText(
+        badgeName));
     assert.equal(receivedBadges.length, 1, "Expected to have received one badge with the specified title");
 }
 
@@ -188,8 +195,8 @@ export async function downloadPdfFromBackpack(driver, badgeName = 'automated tes
  * This assumes that the driver already navigated to badge detail page
  */
 export async function downloadPdfFromIssuer(driver, badgeName = 'automated test title') {
-    const certificateButtons = await driver.findElements(By.css(
-        'oeb-button[ng-reflect-text="PDF-Zertifikat"]'));
+    const certificateButtons = await driver.findElements(
+        ExtendedBy.submitButtonWithText('PDF-Zertifikat'));
     assert.equal(certificateButtons.length, 1, "Only expected one assertion and thus one certificate");
     await certificateButtons[0].click();
 
@@ -202,7 +209,7 @@ export async function waitForDownload(driver, regex) {
     let pollId;
     const downloadPoll = resolve => {
         const files = fs.readdirSync(downloadDirectory);
-        if (files.length == 0) {
+        if (files.length === 0) {
             pollId = setTimeout(_ => downloadPoll(resolve), 100);
             return;
         }
@@ -216,7 +223,7 @@ export async function waitForDownload(driver, regex) {
     };
     const pollingPromise = new Promise(downloadPoll);
     try {
-        await driver.wait(pollingPromise, 2000, "Download didn't finish or file content didn't match the pattern within the specified timeout");
+        await driver.wait(pollingPromise, 5000, "Download didn't finish or file content didn't match the pattern within the specified timeout");
     } catch(error) {
         clearTimeout(pollId);
         throw error;
@@ -227,8 +234,8 @@ export async function waitForDownload(driver, regex) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function revokeBadge(driver, badgeName = 'automated test title') {
-    const revokeButton = await driver.findElement(By.css(
-        'oeb-button[ng-reflect-text="zurücknehmen"]'));
+    const revokeButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('zurücknehmen'));
     await revokeButton.click();
 
     const confirmDialog = await driver.findElement(By.tagName('confirm-dialog'));
@@ -241,8 +248,8 @@ export async function revokeBadge(driver, badgeName = 'automated test title') {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function confirmRevokedBadge(driver, badgeName = 'automated test title') {
-    const receivedBadges = await driver.findElements(By.css(
-        `bg-badgecard[ng-reflect-badge-title="${badgeName}"]`));
+    const receivedBadges = await driver.findElements(By.linkText(
+        badgeName));
     assert.equal(receivedBadges.length, 0, "Expected to have received no badge with the specified title");
 }
 
