@@ -1,6 +1,6 @@
 import {By, until} from 'selenium-webdriver';
 import assert from 'assert';
-import {url} from '../config.js';
+import {url, defaultWait} from '../config.js';
 import {requestToken, deleteUser} from '../util/api.js';
 
 export async function navigateToSignup(driver) {

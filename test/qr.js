@@ -111,6 +111,8 @@ async function convertPdfToImg(pdfFilename, imageFilename,
 }
 
 export async function requestBadgeViaQr(driver) {
+    await driver.wait(until.elementLocated(By.css(
+        'oeb-input[label="Vorname"]')), defaultWait);
     const vornameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Vorname"]'));
     const vornameField = await vornameOebInput.findElement(By.tagName(
@@ -145,6 +147,8 @@ export async function requestBadgeViaQr(driver) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function confirmBadgeAwarding(driver) {
+    await driver.wait(until.elementLocated(By.css(
+        'button[role="heading"]')), defaultWait);
     const dropdownButton = await driver.findElement(By.css(
         'button[role="heading"]'));
     await dropdownButton.click();

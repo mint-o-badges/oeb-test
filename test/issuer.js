@@ -42,6 +42,10 @@ export async function createIssuer(driver) {
     const mailDropdownButton = dropdownButtons[0];
     await mailDropdownButton.click();
 
+    // The implicit wait doesn't seem to apply to custom
+    // locators, so we need to make it explicit here
+    await driver.wait(until.elementLocated(
+        ExtendedBy.tagWithText('hlm-option', username)), defaultWait);
     const mailOption = await driver.findElement(
         ExtendedBy.tagWithText('hlm-option', username));
     await mailOption.click();

@@ -5,12 +5,16 @@ import {
     createIssuer,
     deleteIssuerOverApi
 } from './issuer.js';
+import {implicitWait} from '../config.js';
 
 describe('Issuer Test', function() {
     this.timeout(20000);
     let driver;
 
-    before(async () => driver = await new Builder().forBrowser(Browser.CHROME).build());
+    before(async () => {
+        driver = await new Builder().forBrowser(Browser.CHROME).build();
+        await driver.manage().setTimeouts({ implicit: implicitWait });
+    });
 
 
     it('should create an issuer', async function() {

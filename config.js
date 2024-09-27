@@ -2,4 +2,5 @@
 //export const backendUrl = "http://localhost:8000";
 export const url = "https://staging.openbadges.education";
 export const backendUrl = "https://api.staging.openbadges.education";
-export const defaultWait = 4000;
+export const defaultWait = 8000;
+export const implicitWait = 2000;

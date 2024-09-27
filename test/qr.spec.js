@@ -1,7 +1,7 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import {login} from './login.js';
-import {url} from '../config.js';
+import {url, implicitWait} from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -40,6 +40,7 @@ describe('QR test', function() {
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()
+        await driver.manage().setTimeouts({ implicit: implicitWait });
 
         // Create badge
         await login(driver);

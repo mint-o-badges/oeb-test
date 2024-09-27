@@ -38,6 +38,7 @@ export async function navigateToBadgeDetails(driver, name = 'automated test titl
     // This ensures that the same issuer is used as for the created badge
     await navigateToBadgeCreation(driver);
 
+    await driver.wait(until.elementLocated(By.css('span.breadcrumbs-x-text')), defaultWait);
     const breadcrumbs = await driver.findElements(By.css(
         'span.breadcrumbs-x-text'));
     const issuerBreadcrumb = breadcrumbs[1];

@@ -40,3 +40,6 @@ npx mocha test/title.spec.js
 ```
 
 ...according to the files in the `test` directory. Note that the `mocha` test files are called `*.spec.js`.
+
+Note that if you want to **cancel** a test, you should close the browser window instead of hitting `CTRL+C` or something similar.
+This has the effect that the cleanup still happens.

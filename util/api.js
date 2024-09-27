@@ -84,6 +84,9 @@ export async function deleteIssuer(token, slug) {
         }
     });
 
+    if (!response.ok)
+        console.log("Deleting the issuer failed. Response:", response);
+
     return response.ok;
 }
 
@@ -100,6 +103,9 @@ export async function deleteUser(token) {
             'Authorization': `Bearer ${token.access_token}`
         }
     });
+
+    if (!response.ok)
+        console.log("Deleting the user failed. Response:", response);
 
     return response.ok;
 }
