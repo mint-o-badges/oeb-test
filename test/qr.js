@@ -9,7 +9,9 @@ import {
     waitForDownload
 } from './badge.js';
 import {Jimp} from 'jimp';
-import jsQR from "jsqr";
+import jsQR from 'jsqr';
+import {fromPath} from 'pdf2pic';
+import sharp from 'sharp';
 
 export async function navigateToQrCreation(driver, name = 'automated test title') {
     await navigateToBadgeDetails(driver, name);
@@ -52,18 +54,19 @@ export async function generateQrCode(driver) {
 /**
  * This assumes that the QR code already got created
  */
-export async function downloadQrCode(driver) {
+export async function downloadQrCode(driver, title = 'automated test QR title') {
     const downloadQrButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Download QR-Code'));
     await downloadQrButton.click();
 
-    console.log("Clicked the button!");
-    await waitForDownload(driver, new RegExp('^qrcode\\.png$'));
+    await waitForDownload(driver, new RegExp(`^${title}\\.pdf$`));
 }
 
-export async function readQrCode(pattern, fileName = 'qrcode.png') {
-    const path = `${downloadDirectory}/${fileName}`;
+export async function readQrCode(pattern, filename = 'automated test QR title.pdf') {
+    await convertPdfToImg(filename, 'qrcode.png');
+    const path = `${downloadDirectory}/qrcode.png`;
     const image = await Jimp.read(path);
+
     const imageData = {
         data: new Uint8ClampedArray(image.bitmap.data),
         width: image.bitmap.width,
@@ -71,9 +74,39 @@ export async function readQrCode(pattern, fileName = 'qrcode.png') {
     };
     const decodedQR = jsQR(imageData.data, imageData.width, imageData.height);
 
+    assert(decodedQR, 'QR code reading failed!');
     const qrCodeValue = decodedQR.data;
+
     assert.match(qrCodeValue, pattern);
     return qrCodeValue;
+}
+
+async function convertPdfToImg(pdfFilename, imageFilename,
+    cropOptions = {left: 600, top: 850, width: 900, height: 900}) {
+    const splitFilename = imageFilename.split('.');
+    // Remove the file ending, since it gets attached again anyway
+    let imageName = imageFilename;
+    if (splitFilename.length > 1) {
+        assert.equal(splitFilename.at(-1), 'png');
+        imageName = splitFilename.slice(0,-1).reduce((a, b) => a.concat('.').concat(b))
+    }
+    const options = {
+        density: 100,
+        saveFilename: imageName,
+        savePath: downloadDirectory,
+        format: "png",
+        // DIN A4 dimensions
+        width: 2100,
+        height: 2970
+    };
+    const convert = fromPath(`${downloadDirectory}/${pdfFilename}`, options);
+    const pageToConvertAsImage = 1;
+
+    await convert(pageToConvertAsImage, { responseType: "image" });
+
+    await sharp(`${downloadDirectory}/${imageName}.1.png`)
+        .extract(cropOptions)
+        .toFile(`${downloadDirectory}/${imageFilename}`);
 }
 
 export async function requestBadgeViaQr(driver) {

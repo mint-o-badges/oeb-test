@@ -200,7 +200,7 @@ export async function downloadPdfFromIssuer(driver, badgeName = 'automated test 
     fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
 }
 
-export async function waitForDownload(driver, regex) {
+export async function waitForDownload(driver, regex, timeout = 5000) {
     let pollId;
     const downloadPoll = resolve => {
         const files = fs.readdirSync(downloadDirectory);
@@ -218,7 +218,7 @@ export async function waitForDownload(driver, regex) {
     };
     const pollingPromise = new Promise(downloadPoll);
     try {
-        await driver.wait(pollingPromise, 5000, "Download didn't finish or file content didn't match the pattern within the specified timeout");
+        await driver.wait(pollingPromise, timeout, "Download didn't finish or file content didn't match the pattern within the specified timeout");
     } catch(error) {
         clearTimeout(pollId);
         throw error;

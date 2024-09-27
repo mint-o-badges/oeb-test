@@ -13,6 +13,13 @@ Then install the dependencies via
 npm install
 ```
 
+You also need to [GraphicsMagick](https://github.com/yakovmeister/pdf2image/blob/HEAD/docs/gm-installation.md) for being able to convert the QR pdf to an image. For this, install `ghostscript` and `graphicsmagick` via your systems package manager, e.g.:
+```bash
+sudo apt-get update
+sudo apt-get install ghostscript
+sudo apt-get install graphicsmagick
+```
+
 Then you need to set up some credentials to be able to log in in the staging environment. For this, clone the example and adjust the values as needed:
 ```bash
 cp example.secret.js secret.js
