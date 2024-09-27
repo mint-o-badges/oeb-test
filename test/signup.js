@@ -47,7 +47,7 @@ export async function signup(driver) {
         'button[type="submit"]')))[1];
     submitButton.click();
 
-    await driver.wait(until.titleIs('Verification - Open Educational Badges'), 2000);
+    await driver.wait(until.titleIs('Verification - Open Educational Badges'), defaultWait);
 }
 
 export async function deleteUserOverApi(username = 'automated@test.mail', password = 'automatedTestPassword') {

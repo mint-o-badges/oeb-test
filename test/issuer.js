@@ -1,7 +1,7 @@
 import {By, until, WebElementCondition} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
-import {url} from '../config.js';
+import {url, defaultWait} from '../config.js';
 import {requestToken, findIssuer, deleteIssuer} from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
 import path from 'path';
@@ -77,7 +77,7 @@ export async function createIssuer(driver) {
         'button[type="submit"]')))[1];
     submitButton.click();
 
-    await driver.wait(until.titleIs('Issuer - automatedTestName - Open Educational Badges'), 2000);
+    await driver.wait(until.titleIs('Issuer - automatedTestName - Open Educational Badges'), defaultWait);
 }
 
 export async function deleteIssuerOverApi(name = 'automatedTestName') {

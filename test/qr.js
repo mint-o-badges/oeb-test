@@ -8,6 +8,7 @@ import {
     navigateToBadgeDetails,
     waitForDownload
 } from './badge.js';
+import {defaultWait} from '../config.js';
 import {Jimp} from 'jimp';
 import jsQR from 'jsqr';
 import {fromPath} from 'pdf2pic';
@@ -20,7 +21,7 @@ export async function navigateToQrCreation(driver, name = 'automated test title'
         ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben'));
     await qrCodeButton.click();
     await driver.wait(until.elementLocated(By.css(
-        'oeb-input[label="Titel"]')));
+        'oeb-input[label="Titel"]')), defaultWait);
 }
 
 /**
@@ -44,7 +45,7 @@ export async function generateQrCode(driver) {
     await generateQrCodeButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')));
+        'hlm-icon[name="lucideCheck"]')), defaultWait);
     
     const closeDialogButton = await driver.findElement(By.css(
         'button[brndialogclose]'));
@@ -137,7 +138,7 @@ export async function requestBadgeViaQr(driver) {
     await submitButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')));
+        'hlm-icon[name="lucideCheck"]')), defaultWait);
 }
 
 /**
@@ -149,13 +150,13 @@ export async function confirmBadgeAwarding(driver) {
     await dropdownButton.click();
 
     await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('Badge vergeben')));
+        ExtendedBy.submitButtonWithText('Badge vergeben')), defaultWait);
     const confirmButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge vergeben'));
 
-    await driver.wait(until.elementIsVisible(confirmButton));
+    await driver.wait(until.elementIsVisible(confirmButton), defaultWait);
     await confirmButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')));
+        'hlm-icon[name="lucideCheck"]')), defaultWait);
 }

@@ -1,7 +1,7 @@
 import {By, until, WebElementCondition} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
-import {url} from '../config.js';
+import {url, defaultWait} from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -27,11 +27,11 @@ export async function navigateToBadgeCreation(driver) {
     const newBadgeButtonLocator = ExtendedBy.containingText(
         By.css('oeb-button:not(.disabled)'), By.tagName('span'),
         'Neuen Badge erstellen');
-    await driver.wait(until.elementLocated(newBadgeButtonLocator), 2000);
+    await driver.wait(until.elementLocated(newBadgeButtonLocator), defaultWait);
 
     const createBadgeButton = await driver.findElement(newBadgeButtonLocator);
     createBadgeButton.click();
-    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), 2000);
+    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait);
 }
 
 export async function navigateToBadgeDetails(driver, name = 'automated test title') {
@@ -43,7 +43,7 @@ export async function navigateToBadgeDetails(driver, name = 'automated test titl
     const issuerBreadcrumb = breadcrumbs[1];
     issuerBreadcrumb.click();
 
-    await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), 2000);
+    await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), defaultWait);
 
     const spans = Array.from(await driver.findElements(By.css('span.tw-text-oebblack')));
     for (const span of spans) {
@@ -54,7 +54,7 @@ export async function navigateToBadgeDetails(driver, name = 'automated test titl
         }
     }
 
-    await driver.wait(until.titleIs(`Badge Class - ${name} - Open Educational Badges`), 2000);
+    await driver.wait(until.titleIs(`Badge Class - ${name} - Open Educational Badges`), defaultWait);
 }
 
 /**
@@ -67,23 +67,23 @@ export async function navigateToBadgeAwarding(driver, name = 'automated test tit
         ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
     badgeAwardButton.click();
 
-    await driver.wait(until.titleIs(`Award Badge - ${name} - Open Educational Badges`), 2000);
+    await driver.wait(until.titleIs(`Award Badge - ${name} - Open Educational Badges`), defaultWait);
 }
 
 export async function navigateToBackpack(driver) {
     await driver.get(`${url}/recipient/badges`);
 
     const title = await driver.getTitle();
-    driver.wait(until.titleIs('Backpack - Open Educational Badges'), 2000);
+    driver.wait(until.titleIs('Backpack - Open Educational Badges'), defaultWait);
 }
 
 export async function navigateToReceivedBadge(driver, badgeName = 'automated test title') {
     await navigateToBackpack(driver);
-    await driver.wait(until.elementLocated(By.linkText(badgeName)), 2000);
+    await driver.wait(until.elementLocated(By.linkText(badgeName)), defaultWait);
     const receivedBadgeLink = await driver.findElement(By.linkText(badgeName));
     receivedBadgeLink.click();
 
-    await driver.wait(until.titleIs(`Backpack - ${badgeName} - Open Educational Badges`), 2000);
+    await driver.wait(until.titleIs(`Backpack - ${badgeName} - Open Educational Badges`), defaultWait);
 }
 
 /**
@@ -151,7 +151,7 @@ export async function awardBadge(driver, email = username, badgeName = 'automate
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveBadge(driver, badgeName = 'automated test title') {
-    await driver.wait(until.elementLocated(By.linkText(badgeName)), 2000);
+    await driver.wait(until.elementLocated(By.linkText(badgeName)), defaultWait);
     const receivedBadges = await driver.findElements(By.linkText(
         badgeName));
     assert.equal(receivedBadges.length, 1, "Expected to have received one badge with the specified title");

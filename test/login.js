@@ -1,7 +1,7 @@
 import assert from 'assert';
 import {By, until} from 'selenium-webdriver';
 import {username, password} from '../secret.js';
-import {url} from '../config.js';
+import {url, defaultWait} from '../config.js';
 
 export async function login(driver) {
     await driver.get(`${url}/auth/login`);
@@ -21,5 +21,5 @@ export async function login(driver) {
         'oeb-button[type="submit"]'));
     loginButton.click();
 
-    await driver.wait(until.titleIs('Issuers - Open Educational Badges'), 2000);
+    await driver.wait(until.titleIs('Issuers - Open Educational Badges'), defaultWait);
 }
