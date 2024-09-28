@@ -18,7 +18,8 @@ import {
     downloadPdfFromIssuer,
     revokeBadge,
     confirmRevokedBadge,
-    deleteBadgeOverApi
+    deleteBadgeOverApi,
+    validateParticipationBadge
 } from './badge.js';
 
 describe('Badge Test', function() {
@@ -46,6 +47,11 @@ describe('Badge Test', function() {
         await login(driver);
         await navigateToBadgeCreation(driver);
         await createBadge(driver);
+    });
+
+    it('should validate the participation badge', async function() {
+        await navigateToBadgeDetails(driver);
+        await validateParticipationBadge(driver);
     });
 
     it('should award the badge', async function() {

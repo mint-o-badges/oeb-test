@@ -1,4 +1,4 @@
-import {By} from 'selenium-webdriver';
+import {By, WebElement} from 'selenium-webdriver';
 
 export class ExtendedBy {
     static containingText(selector, childSelector, text) {
@@ -40,16 +40,42 @@ export class ExtendedBy {
             text);
     }
 
-    static tagWithText(tag, text) {
+    static tagWithText(tag, text, trim = true) {
         return (async (driver) => {
             const selected = await driver.findElements(By.tagName(tag));
             const selectedArray = Array.from(selected);
             const mappedPromises = selectedArray.map(async node => {
-                const nodeText = await node.getText();
+                let nodeText = await node.getText();
+                if (trim) {
+                    nodeText = nodeText.trim();
+                    text = text.trim();
+                }
                 return nodeText === text;
             });
             const mapped = await Promise.all(mappedPromises);
             return selectedArray.filter((_, i) => mapped[i]);
+        });
+    }
+
+    static parentElement(element) {
+        return (async (driver) => {
+            const res = await element.findElement(By.xpath('./..'));
+            return res;
+        });
+    }
+
+    static sibling(element, selector) {
+        return (async (driver) => {
+            const parentElement = await driver.findElement(
+                ExtendedBy.parentElement(element));
+            const children = await parentElement.findElements(selector);
+            const mappedPromises = children.map(async (child) => {
+                const parentOfChild = await driver.findElement(
+                    ExtendedBy.parentElement(child));
+                return await WebElement.equals(parentElement, parentOfChild);
+            });
+            const map = await Promise.all(mappedPromises);
+            return children.filter((_, i) => map[i]);
         });
     }
 }

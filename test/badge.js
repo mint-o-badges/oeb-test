@@ -70,6 +70,8 @@ export async function navigateToBadgeDetails(driver) {
 export async function navigateToBadgeAwarding(driver) {
     await navigateToBadgeDetails(driver);
 
+    await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge direkt vergeben')));
     const badgeAwardButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
     badgeAwardButton.click();
@@ -272,4 +274,53 @@ export async function deleteBadgeOverApi() {
     const deletionResult = await deleteBadge(apiToken, badge.entityId);
     assert.equal(deletionResult, true,
         "The badge deletion failed, probably because the HTTP response code wasn't 2xx");
+}
+
+export async function validateParticipationBadge(driver) {
+    const titleElement = await driver.findElement(By.css(
+        'h1.tw-text-purple'));
+    const titleText = await titleElement.getText();
+    assert.equal(titleText, testBadgeTitle);
+
+    const descriptionHeading = await driver.findElement(
+        ExtendedBy.tagWithText('h3', 'Kurzbeschreibung'));
+    const descriptionElement = await driver.findElement(
+        ExtendedBy.sibling(descriptionHeading, By.tagName('p')));
+    const descriptionText = await descriptionElement.getText();
+    assert.equal(descriptionText, testBadgeDescription);
+
+    const divElements = await driver.findElements(By.css('div.tag'));
+    assert.equal(divElements.length, 0);
+
+    const categoryHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Kategorie'));
+    const categoryElement = await driver.findElement(
+        ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
+    const categoryText = await categoryElement.getText();
+    // TODO: It seems the text *should* be "Teilnahme-Badge"
+    assert.equal(categoryText, 'Teilnahme- Badge');
+
+    const now = new Date();
+    // Construct date string. Make sure that there are leading 0s
+    const todayString = ('0' + now.getDate()).slice(-2) + '.'
+        + ('0' + (now.getMonth()+1)).slice(-2) + '.'
+        + now.getFullYear();
+
+    const lastEditedHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
+    const lastEditedElement = await driver.findElement(
+        ExtendedBy.sibling(lastEditedHeading, By.tagName('dd')));
+    const lastEditedTime = await lastEditedElement.findElement(
+        By.tagName('time'));
+    const lastEditedText = await lastEditedTime.getText();
+    assert.equal(lastEditedText, todayString);
+
+    const createdHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Erstellt am'));
+    const createdElement = await driver.findElement(
+        ExtendedBy.sibling(createdHeading, By.tagName('dd')));
+    const createdTime = await createdElement.findElement(
+        By.tagName('time'));
+    const createdText = await createdTime.getText();
+    assert.equal(createdText, todayString);
 }
