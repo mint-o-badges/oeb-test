@@ -15,6 +15,12 @@ import {ExtendedBy} from '../util/selection.js';
 
 export const downloadDirectory = './download'
 
+const testBadgeTitle = 'automated test title';
+const testBadgeDescription = 'automated test description';
+const testDuration = '42';
+const testImagePath = 'assets/image.png';
+const testAwardName = 'automated test name';
+
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
  */
@@ -34,7 +40,7 @@ export async function navigateToBadgeCreation(driver) {
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait);
 }
 
-export async function navigateToBadgeDetails(driver, name = 'automated test title') {
+export async function navigateToBadgeDetails(driver) {
     // This ensures that the same issuer is used as for the created badge
     await navigateToBadgeCreation(driver);
 
@@ -49,26 +55,26 @@ export async function navigateToBadgeDetails(driver, name = 'automated test titl
     const spans = Array.from(await driver.findElements(By.css('span.tw-text-oebblack')));
     for (const span of spans) {
         const text = await span.getText();
-        if (text === name) {
+        if (text === testBadgeTitle) {
             span.click();
             break;
         }
     }
 
-    await driver.wait(until.titleIs(`Badge Class - ${name} - Open Educational Badges`), defaultWait);
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
 
 /**
  * Expects the badge to have been created already
  */
-export async function navigateToBadgeAwarding(driver, name = 'automated test title') {
-    await navigateToBadgeDetails(driver, name);
+export async function navigateToBadgeAwarding(driver) {
+    await navigateToBadgeDetails(driver);
 
     const badgeAwardButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
     badgeAwardButton.click();
 
-    await driver.wait(until.titleIs(`Award Badge - ${name} - Open Educational Badges`), defaultWait);
+    await driver.wait(until.titleIs(`Award Badge - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
 
 export async function navigateToBackpack(driver) {
@@ -78,13 +84,13 @@ export async function navigateToBackpack(driver) {
     driver.wait(until.titleIs('Backpack - Open Educational Badges'), defaultWait);
 }
 
-export async function navigateToReceivedBadge(driver, badgeName = 'automated test title') {
+export async function navigateToReceivedBadge(driver) {
     await navigateToBackpack(driver);
-    await driver.wait(until.elementLocated(By.linkText(badgeName)), defaultWait);
-    const receivedBadgeLink = await driver.findElement(By.linkText(badgeName));
+    await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
+    const receivedBadgeLink = await driver.findElement(By.linkText(testBadgeTitle));
     receivedBadgeLink.click();
 
-    await driver.wait(until.titleIs(`Backpack - ${badgeName} - Open Educational Badges`), defaultWait);
+    await driver.wait(until.titleIs(`Backpack - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
 
 /**
@@ -102,18 +108,18 @@ export async function createBadge(driver) {
 
     const shortDescriptionField = await driver.findElement(By.css(
         'textarea'));
-    await shortDescriptionField.sendKeys('automated test description');
+    await shortDescriptionField.sendKeys(testBadgeDescription);
 
     const durationField = await driver.findElement(By.css(
         'input[type="number"]'));
-    await durationField.sendKeys('42');
+    await durationField.sendKeys(testDuration);
 
     const titleField = await driver.findElement(By.css(
         'input[type="text"]'));
-    await titleField.sendKeys('automated test title');
+    await titleField.sendKeys(testBadgeTitle);
 
     const imageField = await driver.findElement(By.id('image_field0'));
-    const image = path.resolve('assets/image.png');
+    const image = path.resolve(testImagePath);
     await imageField.sendKeys(image);
 
     await driver.wait(until.elementLocated(By.css(
@@ -124,16 +130,16 @@ export async function createBadge(driver) {
         ExtendedBy.submitButtonWithText('Badge erstellen'));
     submitButton.click();
 
-    await driver.wait(until.titleIs('Badge Class - automated test title - Open Educational Badges'), 20000);
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
 }
 
 /**
  * This assumes that the driver already navigated to the badge awarding page
  */
-export async function awardBadge(driver, email = username, badgeName = 'automated test title') {
+export async function awardBadge(driver, email = username) {
     const nameField = await driver.findElement(By.css(
         'input[type="text"]'));
-    await nameField.sendKeys('automated test name');
+    await nameField.sendKeys(testAwardName);
 
     const identifierField = await driver.findElement(By.css(
         'input[type="email"]'));
@@ -145,23 +151,23 @@ export async function awardBadge(driver, email = username, badgeName = 'automate
         'button[type="submit"].tw-relative'));
     submitButton.click();
 
-    await driver.wait(until.titleIs(`Badge Class - ${badgeName} - Open Educational Badges`), 20000);
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
 }
 
 /**
  * This assumes that the driver already navigated to the backpack page
  */
-export async function receiveBadge(driver, badgeName = 'automated test title') {
-    await driver.wait(until.elementLocated(By.linkText(badgeName)), defaultWait);
+export async function receiveBadge(driver) {
+    await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
     const receivedBadges = await driver.findElements(By.linkText(
-        badgeName));
+        testBadgeTitle));
     assert.equal(receivedBadges.length, 1, "Expected to have received one badge with the specified title");
 }
 
 /**
  * This assumes that the driver already navigated to the received badge page
  */
-export async function downloadPdfFromBackpack(driver, badgeName = 'automated test title') {
+export async function downloadPdfFromBackpack(driver) {
     const moreSvgButton = await driver.findElement(By.css(
         'svg[icon="icon_more"]'));
     await moreSvgButton.click();
@@ -182,7 +188,7 @@ export async function downloadPdfFromBackpack(driver, badgeName = 'automated tes
         'button[type="submit"]'));
     await downloadButton.click();
 
-    await waitForDownload(driver, new RegExp(`^${badgeName} - \\d+\\.pdf$`));
+    await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
     // TODO: Verify file content
     fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
 }
@@ -190,13 +196,13 @@ export async function downloadPdfFromBackpack(driver, badgeName = 'automated tes
 /**
  * This assumes that the driver already navigated to badge detail page
  */
-export async function downloadPdfFromIssuer(driver, badgeName = 'automated test title') {
+export async function downloadPdfFromIssuer(driver) {
     const certificateButtons = await driver.findElements(
         ExtendedBy.submitButtonWithText('PDF-Zertifikat'));
     assert.equal(certificateButtons.length, 1, "Only expected one assertion and thus one certificate");
     await certificateButtons[0].click();
 
-    await waitForDownload(driver, new RegExp(`^${badgeName} - \\d+\\.pdf$`));
+    await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
     // TODO: Verify file content
     fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
 }
@@ -229,7 +235,7 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
 /**
  * This assumes that the driver already navigated to the badge detail page
  */
-export async function revokeBadge(driver, badgeName = 'automated test title') {
+export async function revokeBadge(driver) {
     const revokeButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('zurücknehmen'));
     await revokeButton.click();
@@ -238,21 +244,26 @@ export async function revokeBadge(driver, badgeName = 'automated test title') {
     const confirmButton = await confirmDialog.findElement(By.css(
         'button.button:not(.button-secondary)'));
     await confirmButton.click();
+
+    const issuerDatatable = await driver.findElement(By.tagName(
+        'issuer-detail-datatable'));
+    const heading = await issuerDatatable.findElement(By.tagName('h3'));
+    await driver.wait(until.elementTextIs(heading, '0 Badge Empfänger:innen'), defaultWait);
 }
 
 /**
  * This assumes that the driver already navigated to the backpack page
  */
-export async function confirmRevokedBadge(driver, badgeName = 'automated test title') {
+export async function confirmRevokedBadge(driver) {
     const receivedBadges = await driver.findElements(By.linkText(
-        badgeName));
+        testBadgeTitle));
     assert.equal(receivedBadges.length, 0, "Expected to have received no badge with the specified title");
 }
 
-export async function deleteBadgeOverApi(title = 'automated test title') {
+export async function deleteBadgeOverApi() {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
-    const badge = await findBadge(apiToken, title);
+    const badge = await findBadge(apiToken, testBadgeTitle);
     assert(badge, "Failed to find the badge");
     const assertions = await findAssertions(apiToken, badge.entityId);
     const revokationResult = await revokeAssertions(apiToken, assertions);
