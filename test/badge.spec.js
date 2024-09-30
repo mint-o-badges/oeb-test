@@ -19,7 +19,8 @@ import {
     revokeBadge,
     confirmRevokedBadge,
     deleteBadgeOverApi,
-    validateParticipationBadge
+    validateParticipationBadge,
+    verifyBadgeOverApi
 } from './badge.js';
 
 describe('Badge Test', function() {
@@ -52,6 +53,7 @@ describe('Badge Test', function() {
     it('should validate the participation badge', async function() {
         await navigateToBadgeDetails(driver);
         await validateParticipationBadge(driver);
+        await verifyBadgeOverApi(driver);
     });
 
     it('should award the badge', async function() {

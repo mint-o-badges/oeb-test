@@ -324,3 +324,18 @@ export async function validateParticipationBadge(driver) {
     const createdText = await createdTime.getText();
     assert.equal(createdText, todayString);
 }
+
+export async function verifyBadgeOverApi() {
+    const apiToken = await requestToken(username, password);
+    assert(apiToken, "Failed to request an API token");
+    const badge = await findBadge(apiToken, testBadgeTitle);
+    assert(badge, "Failed to find the badge");
+
+    assert.equal(badge.name, testBadgeTitle);
+    assert.equal(badge.description, testBadgeDescription);
+
+    const extensions = badge.extensions;
+    const studyLoadExtension = extensions['extensions:StudyLoadExtension'];
+    const studyLoad = studyLoadExtension.StudyLoad;
+    assert.equal(studyLoad, testDuration);
+}
