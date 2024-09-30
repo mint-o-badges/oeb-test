@@ -3,7 +3,10 @@ import {login} from './login.js';
 import {
     navigateToIssuerCreation,
     createIssuer,
-    deleteIssuerOverApi
+    deleteIssuerOverApi,
+    navigateToIssuerDetails,
+    verifyIssuerDetails,
+    verifyIssuerOverApi
 } from './issuer.js';
 import {implicitWait} from '../config.js';
 
@@ -21,7 +24,12 @@ describe('Issuer Test', function() {
         await login(driver);
         await navigateToIssuerCreation(driver);
         await createIssuer(driver);
-        // TODO: Verify issuer details
+    });
+
+    it('should verify the issuer details', async function() {
+        await navigateToIssuerDetails(driver);
+        await verifyIssuerDetails(driver);
+        await verifyIssuerOverApi();
     });
 
     after(async () => {
