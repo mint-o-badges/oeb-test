@@ -110,6 +110,27 @@ export async function deleteUser(token) {
     return response.ok;
 }
 
+/**
+ * This gets the user associated with the token
+ */
+export async function getUser(token) {
+    const path = `${backendUrl}/v1/user/profile`;
+    const response = await fetch(path, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+
+    if (!response.ok)
+        console.log("Getting the user failed. Response:", response);
+
+    const json = await response.json();
+    return json;
+}
+
 export async function findBadge(token, name) {
     const path = `${backendUrl}/v2/badgeclasses`;
     const response = await fetch(path, {

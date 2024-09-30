@@ -2,7 +2,8 @@ import {Builder, Browser} from 'selenium-webdriver';
 import {
     navigateToSignup,
     signup,
-    deleteUserOverApi
+    deleteUserOverApi,
+    verifyUserOverApi
 } from './signup.js';
 import {implicitWait} from '../config.js';
 
@@ -18,6 +19,10 @@ describe('Signup Test', function() {
     it('should be able to sign up', async function() {
         await navigateToSignup(driver);
         await signup(driver);
+    });
+
+    it('should verify user details', async function() {
+        await verifyUserOverApi();
     });
 
     after(async () => {
