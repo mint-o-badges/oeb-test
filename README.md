@@ -32,6 +32,8 @@ Finally, run the tests with
 npx mocha test
 ```
 
+Note that it might be necessary that **the browser window stays focuesed**.
+
 To run a specific test, use
 ```bash
 npx mocha test/<test>.spec.js
