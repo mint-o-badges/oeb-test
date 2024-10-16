@@ -199,6 +199,9 @@ export async function downloadPdfFromBackpack(driver) {
  * This assumes that the driver already navigated to badge detail page
  */
 export async function downloadPdfFromIssuer(driver) {
+    await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('PDF-Zertifikat')),
+        defaultWait);
     const certificateButtons = await driver.findElements(
         ExtendedBy.submitButtonWithText('PDF-Zertifikat'));
     assert.equal(certificateButtons.length, 1, "Only expected one assertion and thus one certificate");
@@ -238,6 +241,9 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function revokeBadge(driver) {
+    await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('zurücknehmen')),
+        defaultWait);
     const revokeButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('zurücknehmen'));
     await revokeButton.click();
