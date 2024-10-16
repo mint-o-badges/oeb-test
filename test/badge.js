@@ -71,7 +71,7 @@ export async function navigateToBadgeAwarding(driver) {
     await navigateToBadgeDetails(driver);
 
     await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('Badge direkt vergeben')));
+        ExtendedBy.submitButtonWithText('Badge direkt vergeben')), defaultWait);
     const badgeAwardButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
     badgeAwardButton.click();
@@ -104,6 +104,8 @@ export async function createBadge(driver) {
     await categoryDropdownButton.click();
 
     // TODO: Also create competency badge
+    await driver.wait(until.elementLocated(
+        ExtendedBy.tagWithText('hlm-option', 'Teilnahme')), defaultWait);
     const participationOption = await driver.findElement(
         ExtendedBy.tagWithText('hlm-option', 'Teilnahme'));
     await participationOption.click();
@@ -125,7 +127,7 @@ export async function createBadge(driver) {
     await imageField.sendKeys(image);
 
     await driver.wait(until.elementLocated(By.css(
-        'img[src^="data:image/png;base64,iVBORw0KGg"]')));
+        'img[src^="data:image/png;base64,iVBORw0KGg"]')), defaultWait);
 
     // TODO: Optionale Badge-Details
     const submitButton = await driver.findElement(
@@ -179,11 +181,11 @@ export async function downloadPdfFromBackpack(driver) {
     const pdfExportButton = dropdownButtons[1];
     await pdfExportButton.click();
 
-    await driver.wait(until.elementLocated(By.css('embed[src^="blob:http"]')));
+    await driver.wait(until.elementLocated(By.css('embed[src^="blob:http"]')), defaultWait);
     const htmlEmbed = await driver.findElement(By.css('embed[src^="blob:http"]'));
     await driver.switchTo().frame(htmlEmbed);
 
-    await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')));
+    await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')), defaultWait);
 
     await driver.switchTo().defaultContent();
     const downloadButton = await driver.findElement(By.css(

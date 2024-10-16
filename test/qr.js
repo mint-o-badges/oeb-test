@@ -17,7 +17,9 @@ import sharp from 'sharp';
 export async function navigateToQrCreation(driver, name = 'automated test title') {
     await navigateToBadgeDetails(driver, name);
 
-    const qrCodeButton = driver.findElement(
+    await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben')), defaultWait);
+    const qrCodeButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben'));
     await qrCodeButton.click();
     await driver.wait(until.elementLocated(By.css(
