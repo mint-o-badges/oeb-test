@@ -52,7 +52,10 @@ export async function navigateToBadgeDetails(driver) {
 
     await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), defaultWait);
 
-    const spans = Array.from(await driver.findElements(By.css('span.tw-text-oebblack')));
+    await driver.wait(until.elementLocated(
+        By.css('span.tw-text-oebblack')), defaultWait);
+    const spans = Array.from(await driver.findElements(
+        By.css('span.tw-text-oebblack')));
     for (const span of spans) {
         const text = await span.getText();
         if (text === testBadgeTitle) {
