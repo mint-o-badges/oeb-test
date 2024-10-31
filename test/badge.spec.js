@@ -28,14 +28,17 @@ describe('Badge Test', function() {
     let driver;
 
     before(async () => {
+        // Create download directory if it doesn't exist
         if (!fs.existsSync(downloadDirectory)){
             fs.mkdirSync(downloadDirectory);
         }
-        const downloadPath = path.resolve('download');
+        // Set download directory path 
+        const downloadPath =  path.resolve('download');
         let options = new chrome.Options();
         options.setUserPreferences({
             "download.default_directory": downloadPath,
         });
+        // Setting up webDriver
         driver = await new Builder()
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
