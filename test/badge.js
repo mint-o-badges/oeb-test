@@ -20,6 +20,7 @@ const testBadgeDescription = 'automated test description';
 const testDuration = '42';
 const testImagePath = 'assets/image.png';
 const testAwardName = 'automated test name';
+const nounProjectSearchText = 'test';
 
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
@@ -107,30 +108,36 @@ export async function createBadge(driver) {
     await categoryDropdownButton.click();
 
     // TODO: Also create competency badge
+
+    // Category selection 
     await driver.wait(until.elementLocated(
         ExtendedBy.tagWithText('hlm-option', 'Teilnahme')), defaultWait);
     const participationOption = await driver.findElement(
         ExtendedBy.tagWithText('hlm-option', 'Teilnahme'));
     await participationOption.click();
 
+    // Description field
     const shortDescriptionField = await driver.findElement(By.css(
         'textarea'));
     await shortDescriptionField.sendKeys(testBadgeDescription);
 
+    // Duration field
     const durationField = await driver.findElement(By.css(
         'input[type="number"]'));
     await durationField.sendKeys(testDuration);
 
+    // Title field
     const titleField = await driver.findElement(By.css(
         'input[type="text"]'));
     await titleField.sendKeys(testBadgeTitle);
 
-    const imageField = await driver.findElement(By.id('image_field0'));
-    const image = path.resolve(testImagePath);
-    await imageField.sendKeys(image);
-
-    await driver.wait(until.elementLocated(By.css(
-        'img[src^="data:image/png;base64,iVBORw0KGg"]')), defaultWait);
+    // Image field
+    // 1. Upload own image (insterted into badge frame)
+    uploadImage(driver, "image_field0", testImagePath);
+    // 2. Upload own image
+    setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 1000);
+    // 3. Select an image from nounproject
+    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1000);
 
     // TODO: Optionale Badge-Details
     const submitButton = await driver.findElement(
