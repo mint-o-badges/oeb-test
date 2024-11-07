@@ -12,6 +12,7 @@ import {
     revokeAssertions
 } from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
+import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
 export const downloadDirectory = './download'
 
@@ -31,13 +32,14 @@ export async function navigateToBadgeCreation(driver) {
     let title = await driver.getTitle();
     assert.equal(title, 'Issuers - Open Educational Badges');
 
-    const newBadgeButtonLocator = ExtendedBy.containingText(
-        By.css('oeb-button:not(.disabled)'), By.tagName('span'),
-        'Neuen Badge erstellen');
-    await driver.wait(until.elementLocated(newBadgeButtonLocator), defaultWait);
+    try {
+        await driver.wait(until.elementLocated(By.id('create-new-badge-btn')), defaultWait);
+        const createBadgeButton = await driver.findElement(By.id('create-new-badge-btn'));
+        createBadgeButton.click();
+    } catch (e){
+        console.error("Couldn't find a verified issuer for the user associated with the configured credentials.")
+    }
 
-    const createBadgeButton = await driver.findElement(newBadgeButtonLocator);
-    createBadgeButton.click();
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait);
 }
 
