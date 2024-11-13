@@ -43,6 +43,8 @@ describe('Badge Test', function() {
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()
+        // maximiz screen to avoid error `element not interactable`
+        await driver.manage().window().maximize();
         await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
