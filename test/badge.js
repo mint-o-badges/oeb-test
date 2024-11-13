@@ -12,6 +12,7 @@ import {
     revokeAssertions
 } from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
+import {setOEBInputValueById, setOEBInputValueByCSS} from '../util/components.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
 export const downloadDirectory = './download'
@@ -142,14 +143,12 @@ export async function createBadge(driver) {
     // 3. Select an image from nounproject
     setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1000);
 
-    // TODO: Optionale Badge-Details
-
     // * Optional Badge-Details
     // Open optional badge-detail section
     const optionalDetailSection = await driver.findElement(By.css(
         'hlm-icon[name="lucideChevronRight"]'));
     await optionalDetailSection.click();
-    
+
     // Add new tag
     const tagField = await driver.findElement(By.css(
         'input[placeholder="Neuer Tag..."]'));
@@ -194,27 +193,13 @@ export async function createBadge(driver) {
 
     
 
-
-    /* const submitButton = await driver.findElement(
+    const submitButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge erstellen'));
-    submitButton.click(); */
+    submitButton.click();
 
-    // await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), defaultWait * 3); // update others * 2 
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), defaultWait * 3); // ToDo update others * 2 
 }
 
-async function setOEBInputValueById( driver, id, value){
-    const linkDescOebInput = await driver.findElement(By.id(
-        id));
-    const linkDescField = await linkDescOebInput.findElement(By.tagName('input'));
-    await linkDescField.sendKeys(value);
-}
-
-async function setOEBInputValueByCSS( driver, cssSelector, value){
-    const linkDescOebInput = await driver.findElement(By.css(
-        `oeb-input[label=${cssSelector}]`));
-    const linkDescField = await linkDescOebInput.findElement(By.tagName('input'));
-    await linkDescField.sendKeys(value);
-}
 
 /**
  * This assumes that the driver already navigated to the badge awarding page
