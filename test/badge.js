@@ -22,6 +22,7 @@ const testDuration = '42';
 const testImagePath = 'assets/image.png';
 const testAwardName = 'automated test name';
 const nounProjectSearchText = 'test';
+const tagName = 'automated test tag'
 
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
@@ -142,11 +143,77 @@ export async function createBadge(driver) {
     setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1000);
 
     // TODO: Optionale Badge-Details
-    const submitButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Badge erstellen'));
-    submitButton.click();
 
-    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
+    // * Optional Badge-Details
+    // Open optional badge-detail section
+    const optionalDetailSection = await driver.findElement(By.css(
+        'hlm-icon[name="lucideChevronRight"]'));
+    await optionalDetailSection.click();
+    
+    // Add new tag
+    const tagField = await driver.findElement(By.css(
+        'input[placeholder="Neuer Tag..."]'));
+    await tagField.sendKeys(tagName);
+    const addTagButton = await driver.findElement(By.id(
+        'add-tag-btn'));
+    await addTagButton.click()
+
+    // Link badge to educational standards
+    const linkStandardsSection = await driver.findElement(By.id(
+        'link-standards-btn'));
+    await linkStandardsSection.click(); 
+    setOEBInputValueByCSS(driver, "Name", "link Name");
+    setOEBInputValueByCSS(driver, "URL", "http://test.de");
+    setOEBInputValueById(driver, "alignment_description_0", "link Desc");
+
+    // educational standards more options
+    // open section
+    const LinkMoreOptionsSection = await driver.findElement(By.id(
+        'link-more-options-btn'));
+    await LinkMoreOptionsSection.click(); 
+    // Add Frame
+    const frameField = await driver.findElement(By.id('forminput2'));
+    await frameField.sendKeys("Frame");
+    // Add code
+    const frameCodeField = await driver.findElement(By.id('url'));
+    await frameCodeField.sendKeys(12345);
+    
+    // Badge validity
+    // open section
+    const badgeValiditySection = await driver.findElement(By.id(
+        'badge-validity-btn'));
+    await badgeValiditySection.click(); 
+    // Set duration number
+    setOEBInputValueById(driver, "duration-number", 2);
+    // Set duration type
+    const DurationDropdownButton = await driver.findElement(By.id(
+        'duration-type'));
+    await DurationDropdownButton.click(); 
+    const MonthOption = driver.findElement(By.xpath("//*[text()='Monate']"))        
+    await MonthOption.click(); 
+
+    
+
+
+    /* const submitButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('Badge erstellen'));
+    submitButton.click(); */
+
+    // await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), defaultWait * 3); // update others * 2 
+}
+
+async function setOEBInputValueById( driver, id, value){
+    const linkDescOebInput = await driver.findElement(By.id(
+        id));
+    const linkDescField = await linkDescOebInput.findElement(By.tagName('input'));
+    await linkDescField.sendKeys(value);
+}
+
+async function setOEBInputValueByCSS( driver, cssSelector, value){
+    const linkDescOebInput = await driver.findElement(By.css(
+        `oeb-input[label=${cssSelector}]`));
+    const linkDescField = await linkDescOebInput.findElement(By.tagName('input'));
+    await linkDescField.sendKeys(value);
 }
 
 /**
