@@ -31,8 +31,10 @@ const tagName = 'automated test tag'
 export async function navigateToBadgeCreation(driver) {
     await driver.get(`${url}/issuer/issuers`);
 
-    let title = await driver.getTitle();
-    assert.equal(title, 'Issuers - Open Educational Badges');
+    const expectedTitle  = 'Issuers - Open Educational Badges';
+    driver.wait(until.titleIs(expectedTitle), defaultWait);
+    const actualTitle = await driver.getTitle();
+    assert.equal(actualTitle, expectedTitle);
 
     try {
         await driver.wait(until.elementLocated(By.id('create-new-badge-btn')), defaultWait);
