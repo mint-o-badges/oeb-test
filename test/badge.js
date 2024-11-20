@@ -144,11 +144,13 @@ export async function createBadge(driver) {
 
     // * Optional Badge-Details
     // Open optional badge-detail section
-    const optionalDetailSection = await driver.findElement(By.css(
-        'hlm-icon[name="lucideChevronRight"]'));
+    const optionalDetailSection = await driver.findElement(By.id(
+        'optional-details'));
     await optionalDetailSection.click();
 
     // Add new tag
+    await driver.wait(until.elementLocated(
+        By.css('input[placeholder="Neuer Tag..."]')), defaultWait);
     const tagField = await driver.findElement(By.css(
         'input[placeholder="Neuer Tag..."]'));
     await tagField.sendKeys(tagName);
@@ -189,8 +191,6 @@ export async function createBadge(driver) {
     await DurationDropdownButton.click(); 
     const MonthOption = driver.findElement(By.xpath("//*[text()='Monate']"))        
     await MonthOption.click(); 
-
-    
 
     const submitButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge erstellen'));
@@ -361,7 +361,7 @@ export async function validateParticipationBadge(driver) {
     assert.equal(descriptionText, testBadgeDescription);
 
     const divElements = await driver.findElements(By.css('div.tag'));
-    assert.equal(divElements.length, 0);
+    assert.equal(divElements.length, 1);
 
     const categoryHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Kategorie'));
