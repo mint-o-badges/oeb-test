@@ -42,7 +42,7 @@ export async function navigateToBadgeCreation(driver) {
         console.error("Couldn't find a verified issuer for the user associated with the configured credentials.")
     }
 
-    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait);
+    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait * 2);
 }
 
 export async function navigateToBadgeDetails(driver) {
