@@ -90,7 +90,6 @@ export async function navigateToBadgeAwarding(driver) {
 export async function navigateToBackpack(driver) {
     await driver.get(`${url}/recipient/badges`);
 
-    const title = await driver.getTitle();
     driver.wait(until.titleIs('Backpack - Open Educational Badges'), defaultWait);
 }
 
