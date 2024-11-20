@@ -409,5 +409,6 @@ export async function verifyBadgeOverApi() {
     const extensions = badge.extensions;
     const studyLoadExtension = extensions['extensions:StudyLoadExtension'];
     const studyLoad = studyLoadExtension.StudyLoad;
-    assert.equal(studyLoad, testDuration);
+    // Study-load is in minutes while test-duration is in hours
+    assert.equal(studyLoad/60, testDuration);
 }
