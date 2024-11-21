@@ -20,7 +20,8 @@ import {
     confirmRevokedBadge,
     deleteBadgeOverApi,
     validateParticipationBadge,
-    verifyBadgeOverApi
+    verifyBadgeOverApi,
+    validateCompetencyBadge
 } from './badge.js';
 
 describe('Badge Test', function() {
@@ -49,6 +50,7 @@ describe('Badge Test', function() {
     });
 
     // This requires that there exists a verified issuer for the user associated with the configured credentials
+    // Participation badge
     it('should create a participation badge', async function() {
         await login(driver);
         await navigateToBadgeCreation(driver);
@@ -61,12 +63,12 @@ describe('Badge Test', function() {
         await verifyBadgeOverApi(driver);
     });
 
-    it('should award the badge', async function() {
+    it('should award the participation badge', async function() {
         await navigateToBadgeAwarding(driver);
         await awardBadge(driver);
     });
 
-    it('should receive the badge', async function() {
+    it('should receive the participation badge', async function() {
         await navigateToBackpack(driver);
         await receiveBadge(driver);
     });
@@ -81,15 +83,61 @@ describe('Badge Test', function() {
         await downloadPdfFromIssuer(driver);
     });
 
-    it('should revoke the badge', async function() {
+    it('should revoke the participation badge', async function() {
         await navigateToBadgeDetails(driver);
         await revokeBadge(driver);
         await navigateToBackpack(driver);
         await confirmRevokedBadge(driver);
     });
 
-    after(async () => {
+    it('delete the participation badge', async function() {
         await deleteBadgeOverApi();
+    })
+
+    // Competency badge
+    it('should create a competency badge', async function() {
+        await navigateToBadgeCreation(driver);
+        await createBadge(driver, 'Kompetenz');
+    });
+
+    it('should validate the competency badge', async function() {
+        await navigateToBadgeDetails(driver);
+        await validateCompetencyBadge(driver);
+        await verifyBadgeOverApi(driver);
+    });
+
+    it('should award the competency badge', async function() {
+        await navigateToBadgeAwarding(driver);
+        await awardBadge(driver);
+    });
+
+    it('should receive the competency badge', async function() {
+        await navigateToBackpack(driver);
+        await receiveBadge(driver);
+    });
+
+    it('should download the pdf from the backpack', async function() {
+        await navigateToReceivedBadge(driver);
+        await downloadPdfFromBackpack(driver);
+    });
+
+    it('should download the pdf from the internal issuer page', async function() {
+        await navigateToBadgeDetails(driver);
+        await downloadPdfFromIssuer(driver);
+    });
+
+    it('should revoke the competency badge', async function() {
+        await navigateToBadgeDetails(driver);
+        await revokeBadge(driver);
+        await navigateToBackpack(driver);
+        await confirmRevokedBadge(driver);
+    });
+
+    it('delete the competency badge', async function() {
+        await deleteBadgeOverApi();
+    })
+
+    after(async () => {
         await driver.quit();
         fs.rmSync(downloadDirectory, { recursive: true, force: true });
     });

@@ -1,10 +1,11 @@
 import { By } from "selenium-webdriver";
 
-export async function setOEBInputValueById(driver, id, value) {
+export async function setOEBInputValueById(driver, id, value, fieldType='input') {
     const linkDescOebInput = await driver.findElement(By.id(id));
     const linkDescField = await linkDescOebInput.findElement(
-      By.tagName("input")
+      By.tagName(fieldType)
     );
+    await linkDescField.clear()
     await linkDescField.sendKeys(value);
 
 }
@@ -15,8 +16,4 @@ export async function setOEBInputValueByCSS(driver, cssSelector, value) {
   );
   const linkDescField = await linkDescOebInput.findElement(By.tagName("input"));
   await linkDescField.sendKeys(value);
-}
-    };
-  }
-
 }

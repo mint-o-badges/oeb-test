@@ -23,6 +23,7 @@ const testDuration = '42';
 const testImagePath = 'assets/image.png';
 const testAwardName = 'automated test name';
 const nounProjectSearchText = 'test';
+const aiCompetenciesDescriptionText = 'With solid computer skills, you can automate routine tasks, analyze data more effectively, and communicate with colleagues more efficiently.'
 const tagName = 'automated test tag'
 
 /**
@@ -107,18 +108,16 @@ export async function navigateToReceivedBadge(driver) {
 /**
  * This assumes that the driver already navigated to the badge creation page
  */
-export async function createBadge(driver) {
+export async function createBadge(driver, badgeType = 'Teilnahme') {
     const categoryDropdownButton = await driver.findElement(By.css(
         'button[role="combobox"]'));
     await categoryDropdownButton.click();
 
-    // TODO: Also create competency badge
-
     // Category selection 
     await driver.wait(until.elementLocated(
-        ExtendedBy.tagWithText('hlm-option', 'Teilnahme')), defaultWait);
+        ExtendedBy.tagWithText('hlm-option', badgeType)), defaultWait);
     const participationOption = await driver.findElement(
-        ExtendedBy.tagWithText('hlm-option', 'Teilnahme'));
+        ExtendedBy.tagWithText('hlm-option', badgeType));
     await participationOption.click();
 
     // Description field
@@ -144,6 +143,43 @@ export async function createBadge(driver) {
     // 3. Select an image from nounproject
     setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1000);
 
+    // * Badge with skills - only with competency badge type
+    if(badgeType == 'Kompetenz'){
+        // Add competencies using AI
+        const aiCompetenciesDescField = await driver.findElement(By.id(
+            'ai-competencies-description'));
+        await aiCompetenciesDescField.sendKeys(aiCompetenciesDescriptionText);
+        const suggestCompetenciesButton = await driver.findElement(By.id(
+            'suggest-competencies-btn'));
+        await suggestCompetenciesButton.click();
+        // Select first and third skills
+        // ToDo: add validation
+        const firstAISkillCheckbox = await driver.findElement(By.id(
+            'checkboxAiSkill_0'));
+        firstAISkillCheckbox.click();
+        const thirdAISkillCheckbox = await driver.findElement(By.id(
+            'checkboxAiSkill_2'));
+        thirdAISkillCheckbox.click();
+
+        // Add competencies by hand
+        const competenciesByHandSection = await driver.findElement(By.id(
+            'competencies-by-hand-section'));
+        await competenciesByHandSection.click();
+        setOEBInputValueById(driver, "competencyTitle_0", "competency title");
+        setOEBInputValueById(driver, "competencyDurationHour_0", 2);
+        setOEBInputValueById(driver, "competencyDurationMinutes_0", 30);
+        const competencyCategoryDropdownButton = await driver.findElement(By.id(
+            'competencyCategory_0'));
+        await competencyCategoryDropdownButton.click();
+        await driver.wait(until.elementLocated(
+            ExtendedBy.tagWithText('hlm-option', "Fähigkeit")), defaultWait);
+        const skillOption = await driver.findElement(
+            ExtendedBy.tagWithText('hlm-option', "Fähigkeit"));
+        await skillOption.click();
+        setOEBInputValueById(driver, "competencyDescriptionInput_0", "competency description", "textarea");
+        setOEBInputValueById(driver, "escoIdentifierInput_0", "test/skill/0000-0000-0000-0000-0000");
+    }
+    
     // * Optional Badge-Details
     // Open optional badge-detail section
     const optionalDetailSection = await driver.findElement(By.id(
@@ -371,6 +407,54 @@ export async function validateParticipationBadge(driver) {
         ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
     const categoryText = await categoryElement.getText();
     assert.equal(categoryText, 'Teilnahme-Badge');
+
+    const now = new Date();
+    // Construct date string. Make sure that there are leading 0s
+    const todayString = ('0' + now.getDate()).slice(-2) + '.'
+        + ('0' + (now.getMonth()+1)).slice(-2) + '.'
+        + now.getFullYear();
+
+    const lastEditedHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
+    const lastEditedElement = await driver.findElement(
+        ExtendedBy.sibling(lastEditedHeading, By.tagName('dd')));
+    const lastEditedTime = await lastEditedElement.findElement(
+        By.tagName('time'));
+    const lastEditedText = await lastEditedTime.getText();
+    assert.equal(lastEditedText, todayString);
+
+    const createdHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Erstellt am'));
+    const createdElement = await driver.findElement(
+        ExtendedBy.sibling(createdHeading, By.tagName('dd')));
+    const createdTime = await createdElement.findElement(
+        By.tagName('time'));
+    const createdText = await createdTime.getText();
+    assert.equal(createdText, todayString);
+}
+
+export async function validateCompetencyBadge(driver) {
+    const titleElement = await driver.findElement(By.css(
+        'h1.tw-text-purple'));
+    const titleText = await titleElement.getText();
+    assert.equal(titleText, testBadgeTitle);
+
+    const descriptionHeading = await driver.findElement(
+        ExtendedBy.tagWithText('h3', 'Kurzbeschreibung'));
+    const descriptionElement = await driver.findElement(
+        ExtendedBy.sibling(descriptionHeading, By.tagName('p')));
+    const descriptionText = await descriptionElement.getText();
+    assert.equal(descriptionText, testBadgeDescription);
+
+    const divElements = await driver.findElements(By.css('div.tag'));
+    assert.equal(divElements.length, 1);
+
+    const categoryHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Kategorie'));
+    const categoryElement = await driver.findElement(
+        ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
+    const categoryText = await categoryElement.getText();
+    assert.equal(categoryText, 'Kompetenz-Badge');
 
     const now = new Date();
     // Construct date string. Make sure that there are leading 0s
