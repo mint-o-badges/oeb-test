@@ -27,7 +27,7 @@ describe('QR test', function() {
     this.timeout(30000);
     let driver;
 
-    before(async () => {
+    beforeEach(async () => {
         if (!fs.existsSync(downloadDirectory)){
             fs.mkdirSync(downloadDirectory);
         }
@@ -36,12 +36,18 @@ describe('QR test', function() {
         options.setUserPreferences({
             "download.default_directory": downloadPath,
         });
+
+        const host = process.env.SELENIUM || undefined;
+        const server = host ? `http://${host}:4444` : '';
         driver = await new Builder()
+            .usingServer(server)
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()
         await driver.manage().setTimeouts({ implicit: implicitWait });
+    });
 
+    before(async () => {
         // Create badge
         await login(driver);
         await navigateToBadgeCreation(driver);

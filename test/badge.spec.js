@@ -27,7 +27,7 @@ describe('Badge Test', function() {
     this.timeout(30000);
     let driver;
 
-    before(async () => {
+    beforeEach(async () => {
         if (!fs.existsSync(downloadDirectory)){
             fs.mkdirSync(downloadDirectory);
         }
@@ -36,7 +36,11 @@ describe('Badge Test', function() {
         options.setUserPreferences({
             "download.default_directory": downloadPath,
         });
+
+        const host = process.env.SELENIUM || undefined;
+        const server = host ? `http://${host}:4444` : '';
         driver = await new Builder()
+            .usingServer(server)
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()

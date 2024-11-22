@@ -14,8 +14,13 @@ describe('Issuer Test', function() {
     this.timeout(20000);
     let driver;
 
-    before(async () => {
-        driver = await new Builder().forBrowser(Browser.CHROME).build();
+    beforeEach(async () => {
+        const host = process.env.SELENIUM || undefined;
+        const server = host ? `http://${host}:4444` : '';
+        driver = await new Builder()
+            .usingServer(server)
+            .forBrowser(Browser.CHROME)
+            .build();
         await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
