@@ -1,0 +1,18 @@
+# Inspired by https://www.testmo.com/guides/github-actions-selenium/
+services:
+  chrome:
+    image: selenium/standalone-chrome
+    shm_size: '2gb'
+    ports:
+      - 4444:4444 # Selenium service
+      - 5900:5900 # VNC server
+      - 7900:7900 # VNC browser client
+
+  node:
+    image: node:19
+    volumes:
+      - ./:/project
+    working_dir: /project
+    tty: true
+    depends_on:
+      - chrome
