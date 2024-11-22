@@ -11,7 +11,7 @@ describe('Signup Test', function() {
     this.timeout(20000);
     let driver;
 
-    beforeEach(async () => {
+    before(async () => {
         const host = process.env.SELENIUM || undefined;
         const server = host ? `http://${host}:4444` : '';
         driver = await new Builder()

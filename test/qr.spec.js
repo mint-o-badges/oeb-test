@@ -27,7 +27,7 @@ describe('QR test', function() {
     this.timeout(30000);
     let driver;
 
-    beforeEach(async () => {
+    before(async () => {
         if (!fs.existsSync(downloadDirectory)){
             fs.mkdirSync(downloadDirectory);
         }
@@ -45,9 +45,7 @@ describe('QR test', function() {
             .setChromeOptions(options)
             .build()
         await driver.manage().setTimeouts({ implicit: implicitWait });
-    });
 
-    before(async () => {
         // Create badge
         await login(driver);
         await navigateToBadgeCreation(driver);

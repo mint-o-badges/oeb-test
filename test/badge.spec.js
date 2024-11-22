@@ -27,7 +27,7 @@ describe('Badge Test', function() {
     this.timeout(30000);
     let driver;
 
-    beforeEach(async () => {
+    before(async () => {
         if (!fs.existsSync(downloadDirectory)){
             fs.mkdirSync(downloadDirectory);
         }
