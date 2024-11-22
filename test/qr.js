@@ -47,7 +47,7 @@ export async function generateQrCode(driver) {
     await generateQrCodeButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')), defaultWait);
+        'svg.checkmark')), defaultWait);
     
     const closeDialogButton = await driver.findElement(By.css(
         'button[brndialogclose]'));
@@ -142,7 +142,7 @@ export async function requestBadgeViaQr(driver) {
     await submitButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')), defaultWait);
+        'svg.checkmark')), defaultWait);
 }
 
 /**
@@ -164,5 +164,5 @@ export async function confirmBadgeAwarding(driver) {
     await confirmButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')), defaultWait);
+        'svg.checkmark')), defaultWait);
 }

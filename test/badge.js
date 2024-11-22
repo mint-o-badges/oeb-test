@@ -32,7 +32,7 @@ export async function navigateToBadgeCreation(driver) {
 
     const newBadgeButtonLocator = ExtendedBy.containingText(
         By.css('oeb-button:not(.disabled)'), By.tagName('span'),
-        'Neuen Badge erstellen');
+        '+');
     await driver.wait(until.elementLocated(newBadgeButtonLocator), defaultWait);
 
     const createBadgeButton = await driver.findElement(newBadgeButtonLocator);
@@ -117,9 +117,10 @@ export async function createBadge(driver) {
         'textarea'));
     await shortDescriptionField.sendKeys(testBadgeDescription);
 
-    const durationField = await driver.findElement(By.css(
+    const durationFields = await driver.findElements(By.css(
         'input[type="number"]'));
-    await durationField.sendKeys(testDuration);
+    await durationFields[0].sendKeys('0');
+    await durationFields[1].sendKeys(testDuration);
 
     const titleField = await driver.findElement(By.css(
         'input[type="text"]'));
@@ -192,7 +193,7 @@ export async function downloadPdfFromBackpack(driver) {
 
     await driver.switchTo().defaultContent();
     const downloadButton = await driver.findElement(By.css(
-        'button[type="submit"]'));
+        'button[type="submit"][loading-message="Downloading..."]'));
     await downloadButton.click();
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
