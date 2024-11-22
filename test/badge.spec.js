@@ -34,7 +34,15 @@ describe('Badge Test', function() {
         const downloadPath = path.resolve('download');
         let options = new chrome.Options();
         options.setUserPreferences({
+            "profile.default_content_settings.popups": 0,
             "download.default_directory": downloadPath,
+            "download.prompt_for_download": false,
+            "download.directory_upgrade": true,
+            "download.prompt_for_download": false,
+            "plugins.always_open_pdf_externally": true,
+            "plugins.plugins_disabled": "Chrome PDF Viewer",
+            "pdfjs.disabled": true,
+            "download.extensions_to_open": "applications/pdf"
         });
 
         const host = process.env.SELENIUM || undefined;

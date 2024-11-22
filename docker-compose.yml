@@ -7,6 +7,10 @@ services:
       - 4444:4444 # Selenium service
       - 5900:5900 # VNC server
       - 7900:7900 # VNC browser client
+    volumes:
+      - ./:/project
+      - ./download:/Downloads
+    working_dir: /project
 
   node:
     image: node:19
