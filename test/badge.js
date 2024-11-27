@@ -1,7 +1,7 @@
 import {By, until, WebElementCondition} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
-import {url, defaultWait} from '../config.js';
+import {url, defaultWait, extendedWait} from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -43,7 +43,7 @@ export async function navigateToBadgeCreation(driver) {
         console.error("Couldn't find a verified issuer for the user associated with the configured credentials.")
     }
 
-    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait * 2);
+    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
 }
 
 export async function navigateToBadgeDetails(driver) {
@@ -232,7 +232,7 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
         ExtendedBy.submitButtonWithText('Badge erstellen'));
     submitButton.click();
 
-    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), defaultWait * 3); // ToDo update others * 2 
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
 
 
