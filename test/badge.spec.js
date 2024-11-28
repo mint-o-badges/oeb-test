@@ -42,7 +42,8 @@ describe('Badge Test', function() {
             "plugins.always_open_pdf_externally": true,
             "plugins.plugins_disabled": "Chrome PDF Viewer",
             "pdfjs.disabled": true,
-            "download.extensions_to_open": "applications/pdf"
+            "download.extensions_to_open": "applications/pdf",
+            "safebrowsing.enabled": false
         });
 
         const host = process.env.SELENIUM || undefined;
