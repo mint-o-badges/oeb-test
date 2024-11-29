@@ -309,8 +309,7 @@ export async function validateParticipationBadge(driver) {
     const categoryElement = await driver.findElement(
         ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
     const categoryText = await categoryElement.getText();
-    // TODO: It seems the text *should* be "Teilnahme-Badge"
-    assert.equal(categoryText, 'Teilnahme- Badge');
+    assert.equal(categoryText, 'Teilnahme-Badge');
 
     const now = new Date();
     // Construct date string. Make sure that there are leading 0s
