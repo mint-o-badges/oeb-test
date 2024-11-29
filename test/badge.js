@@ -32,7 +32,7 @@ export async function navigateToBadgeCreation(driver) {
 
     const newBadgeButtonLocator = ExtendedBy.containingText(
         By.css('oeb-button:not(.disabled)'), By.tagName('span'),
-        '+');
+        'Badge erstellen');
     await driver.wait(until.elementLocated(newBadgeButtonLocator), defaultWait);
 
     const createBadgeButton = await driver.findElement(newBadgeButtonLocator);
