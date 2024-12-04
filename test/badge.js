@@ -36,8 +36,8 @@ export async function navigateToBadgeCreation(driver) {
     driver.wait(until.titleIs(expectedTitle), defaultWait);
 
     try {
-        await driver.wait(until.elementLocated(By.id('create-new-badge-btn')), defaultWait);
-        const createBadgeButton = await driver.findElement(By.id('create-new-badge-btn'));
+        await driver.wait(until.elementLocated(By.css("[id^='create-new-badge-btn']")), defaultWait);
+        const createBadgeButton = await driver.findElement(By.css("[id^='create-new-badge-btn']"));
         createBadgeButton.click();
     } catch (e){
         console.error("Couldn't find a verified issuer for the user associated with the configured credentials.")
