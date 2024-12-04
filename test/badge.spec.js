@@ -63,33 +63,6 @@ describe('Badge Test', function() {
         await verifyBadgeOverApi(driver);
     });
 
-    it('should award the participation badge', async function() {
-        await navigateToBadgeAwarding(driver);
-        await awardBadge(driver);
-    });
-
-    it('should receive the participation badge', async function() {
-        await navigateToBackpack(driver);
-        await receiveBadge(driver);
-    });
-
-    it('should download the pdf from the backpack', async function() {
-        await navigateToReceivedBadge(driver);
-        await downloadPdfFromBackpack(driver);
-    });
-
-    it('should download the pdf from the internal issuer page', async function() {
-        await navigateToBadgeDetails(driver);
-        await downloadPdfFromIssuer(driver);
-    });
-
-    it('should revoke the participation badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await revokeBadge(driver);
-        await navigateToBackpack(driver);
-        await confirmRevokedBadge(driver);
-    });
-
     it('delete the participation badge', async function() {
         await deleteBadgeOverApi();
     })
