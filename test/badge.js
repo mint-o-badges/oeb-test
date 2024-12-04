@@ -254,6 +254,12 @@ export async function awardBadge(driver, email = username) {
         'button[type="submit"].tw-relative'));
     submitButton.click();
 
+    // Disable badge editing dialog
+    await driver.wait(until.elementLocated(By.tagName('app-end-of-edit-dialog')), defaultWait);
+    const endEditingDialog = await driver.findElement(By.tagName('app-end-of-edit-dialog'));
+    const confirmDialogButton = await endEditingDialog.findElement(By.id('confirm-award-badge'));
+    await confirmDialogButton.click();
+
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
 }
 
