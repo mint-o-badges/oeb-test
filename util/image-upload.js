@@ -21,13 +21,13 @@ export async function selectNounProjectImage(driver, searchText) {
     defaultWait
   );
   await nounProject_option.click();
-  // search for an image
+  // Search for an image
   const searchIconField = await driver.wait(
     until.elementLocated(By.id("forminput")),
     defaultWait
   );
   await searchIconField.sendKeys(searchText);
-  // select first image in the list
+  // Select first image in the list
   const chooseIconButton = await driver.wait(
     until.elementLocated(
       By.css(

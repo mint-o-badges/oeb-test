@@ -2,8 +2,7 @@ import { By } from "selenium-webdriver";
 
 export async function setOEBInputValueById(driver, id, value, fieldType='input') {
     const linkDescOebInput = await driver.findElement(By.id(id));
-    const linkDescField = await linkDescOebInput.findElement(
-      By.tagName(fieldType)
+    const linkDescField = await linkDescOebInput.findElement(By.tagName(fieldType)
     );
     await linkDescField.clear()
     await linkDescField.sendKeys(value);

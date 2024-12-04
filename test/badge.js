@@ -139,7 +139,7 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // 2. Upload own image
     setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 1000);
     // 3. Select an image from nounproject
-    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1000);
+    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1500);
 
     // * Badge with skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
