@@ -130,6 +130,7 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     await titleField.sendKeys(testBadgeTitle);
 
     // Image field
+    // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
     uploadImage(driver, "image_field0", testImagePath);
     // 2. Upload own image
