@@ -34,9 +34,8 @@ export async function navigateToBadgeCreation(driver) {
 
     const expectedTitle  = 'Issuers - Open Educational Badges';
     driver.wait(until.titleIs(expectedTitle), defaultWait);
-
-    await driver.wait(until.elementLocated(By.css("[id^='create-new-badge-btn']")), defaultWait);
-    const createBadgeButton = await driver.findElement(By.css("[id^='create-new-badge-btn']"));
+    const createBadgeButton = await driver.wait(until.elementLocated(By.css("[id^='create-new-badge-btn']")), defaultWait);
+    await driver.wait(until.elementIsEnabled(createBadgeButton), defaultWait);
     createBadgeButton.click();
 
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
