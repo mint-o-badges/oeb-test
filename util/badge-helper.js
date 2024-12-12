@@ -1,8 +1,9 @@
 import {By, until} from "selenium-webdriver";
 import {defaultWait} from '../config.js';
 import {ExtendedBy} from './selection.js';
+import {setOEBInputValueById, setOEBInputValueByCSS } from './components.js';
 
-export async function badgeAddNewTag(driver, tagName ){
+export async function addNewTag(driver, tagName ){
     await driver.wait(until.elementLocated(By.css('input[placeholder="Neuer Tag..."]')), defaultWait);
     const tagField = await driver.findElement(By.css('input[placeholder="Neuer Tag..."]'));
     await tagField.sendKeys(tagName);
