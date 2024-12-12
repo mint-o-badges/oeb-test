@@ -21,7 +21,7 @@ import {
     deleteBadgeOverApi,
     validateParticipationBadge,
     verifyBadgeOverApi,
-    validateCompetencyBadge
+    validateBadge
 } from './badge.js';
 
 describe('Badge Test', function() {
@@ -59,7 +59,7 @@ describe('Badge Test', function() {
 
     it('should validate the participation badge', async function() {
         await navigateToBadgeDetails(driver);
-        await validateParticipationBadge(driver);
+        await validateBadge(driver);
         await verifyBadgeOverApi(driver);
     });
 
@@ -75,7 +75,7 @@ describe('Badge Test', function() {
 
     it('should validate the competency badge', async function() {
         await navigateToBadgeDetails(driver);
-        await validateCompetencyBadge(driver);
+        await validateBadge(driver, 'Kompetenz');
         await verifyBadgeOverApi(driver);
     });
 

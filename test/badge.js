@@ -370,7 +370,7 @@ export async function validateParticipationBadge(driver) {
     assert.equal(createdText, todayString);
 }
 
-export async function validateCompetencyBadge(driver) {
+export async function validateBadge(driver, badgeType = 'Teilnahme') {
     const titleElement = await driver.findElement(By.css(
         'h1.tw-text-purple'));
     const titleText = await titleElement.getText();
@@ -391,7 +391,7 @@ export async function validateCompetencyBadge(driver) {
     const categoryElement = await driver.findElement(
         ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
     const categoryText = await categoryElement.getText();
-    assert.equal(categoryText, 'Kompetenz-Badge');
+    assert.equal(categoryText, `${badgeType}-Badge`);
 
     const now = new Date();
     // Construct date string. Make sure that there are leading 0s
@@ -416,6 +416,11 @@ export async function validateCompetencyBadge(driver) {
         By.tagName('time'));
     const createdText = await createdTime.getText();
     assert.equal(createdText, todayString);
+
+    if(badgeType == 'Kompetenz'){
+        const BadgeCompetencies = await driver.findElements(By.css('competency-accordion'))
+        assert.equal(BadgeCompetencies.length, 3);
+    }
 }
 
 export async function verifyBadgeOverApi() {
