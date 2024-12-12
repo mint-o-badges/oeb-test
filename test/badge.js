@@ -121,6 +121,7 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // Duration field
     const durationField = await driver.findElement(By.css(
         'input[type="number"]'));
+    await durationField.clear()
     await durationField.sendKeys(testDuration);
 
     // Title field
@@ -133,49 +134,31 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // 1. Upload own image (insterted into badge frame)
     uploadImage(driver, "image_field0", testImagePath);
     // 2. Upload own image
-    setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 1000);
+    setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 100);
     // 3. Select an image from nounproject
-    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 1500);
+    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 300);
 
     // * Badge with skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
         // Add competencies using AI
-        // await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
-        const aiCompetenciesDescField = await driver.findElement(By.id(
-            'ai-competencies-description'));
-          await aiCompetenciesDescField.sendKeys(aiCompetenciesDescriptionText);
-          const suggestCompetenciesButton = await driver.findElement(By.id(
-              'suggest-competencies-btn'));
-          await suggestCompetenciesButton.click();
-          
-          // Select first and third skills
-          const firstAISkillCheckbox = await driver.findElement(By.id(
-              'checkboxAiSkill_0'));
-          firstAISkillCheckbox.click();
-          const thirdAISkillCheckbox = await driver.findElement(By.id(
-              'checkboxAiSkill_2'));
-          thirdAISkillCheckbox.click();
-        
+        setTimeout(async _ => await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText), 400);
         // Add competencies by hand
-        await addCompetenciesByHand(driver);
+        setTimeout(async _ => await addCompetenciesByHand(driver), 700);
     }
     
     // * Optional Badge-Details
-    await addOptionalDetails(driver);
+    setTimeout(async _ => await addOptionalDetails(driver), 900);
 
-    const submitButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Badge erstellen'));
-    submitButton.click();
-
+    const submitButton = await driver.findElement(By.id('create-badge-btn'));
+    setTimeout(async _ => submitButton.click(), 8000);
+    
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
 
 async function addOptionalDetails(driver){
     // Open optional badge-detail section
-    await driver.findElement(By.id(
-        'optional-details')).click();
-    /* const optionalDetailSection = await driver.findElement(By.id('optional-details')).click();
-    await optionalDetailSection.click(); */
+    const optionalDetailSection = await driver.findElement(By.id('optional-details'));
+    await optionalDetailSection.click();
 
     // Add new tag
     await addNewTag(driver, tagName);

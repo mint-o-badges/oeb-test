@@ -21,13 +21,11 @@ export async function setOEBInputValueByCSS(driver, cssSelector, value) {
 }
 
 export async function addNewTag(driver, tagName ){
-  await driver.wait(until.elementLocated(
-    By.css('input[placeholder="Neuer Tag..."]')), defaultWait);
-  await driver.findElement(By.css(
-      'input[placeholder="Neuer Tag..."]')).sendKeys(tagName);;
-  await driver.findElement(By.id(
-      'add-tag-btn')).click();
-  await addTagButton.click() 
+  await driver.wait(until.elementLocated(By.css('input[placeholder="Neuer Tag..."]')), defaultWait);
+  const tagField = await driver.findElement(By.css('input[placeholder="Neuer Tag..."]'));
+  await tagField.sendKeys(tagName);
+  const addTagButton = await driver.findElement(By.id('add-tag-btn'));
+  await addTagButton.click()
 }
 
 export async function linkToEduStandards(driver ){
