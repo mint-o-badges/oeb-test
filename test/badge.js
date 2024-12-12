@@ -12,7 +12,7 @@ import {
     revokeAssertions
 } from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
-import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/components.js';
+import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
 export const downloadDirectory = './download'
