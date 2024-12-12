@@ -141,13 +141,13 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // * Badge with skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
         // Add competencies using AI
-        setTimeout(async _ => await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText), 400);
+        setTimeout(async _ => await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText), 500);
         // Add competencies by hand
-        setTimeout(async _ => await addCompetenciesByHand(driver), 700);
+        setTimeout(async _ => await addCompetenciesByHand(driver), 1500);
     }
     
     // * Optional Badge-Details
-    setTimeout(async _ => await addOptionalDetails(driver), 900);
+    setTimeout(async _ => await addOptionalDetails(driver), 3000);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
     setTimeout(async _ => submitButton.click(), 8000);
