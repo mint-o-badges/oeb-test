@@ -1,7 +1,7 @@
 import {By, until, WebElementCondition} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
-import {url, defaultWait} from '../config.js';
+import {url, defaultWait, extendedWait} from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -12,6 +12,8 @@ import {
     revokeAssertions
 } from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
+import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
+import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
 export const downloadDirectory = './download'
 
@@ -20,6 +22,9 @@ const testBadgeDescription = 'automated test description';
 const testDuration = '42';
 const testImagePath = 'assets/image.png';
 const testAwardName = 'automated test name';
+const nounProjectSearchText = 'test';
+const aiCompetenciesDescriptionText = 'With solid computer skills, you can automate routine tasks, analyze data more effectively, and communicate with colleagues more efficiently.'
+const tagName = 'automated test tag'
 
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
@@ -27,17 +32,13 @@ const testAwardName = 'automated test name';
 export async function navigateToBadgeCreation(driver) {
     await driver.get(`${url}/issuer/issuers`);
 
-    let title = await driver.getTitle();
-    assert.equal(title, 'Issuers - Open Educational Badges');
-
-    const newBadgeButtonLocator = ExtendedBy.containingText(
-        By.css('oeb-button:not(.disabled)'), By.tagName('span'),
-        'Neuen Badge erstellen');
-    await driver.wait(until.elementLocated(newBadgeButtonLocator), defaultWait);
-
-    const createBadgeButton = await driver.findElement(newBadgeButtonLocator);
+    const expectedTitle  = 'Issuers - Open Educational Badges';
+    driver.wait(until.titleIs(expectedTitle), defaultWait);
+    const createBadgeButton = await driver.wait(until.elementLocated(By.css("[id^='create-new-badge-btn']")), defaultWait);
+    await driver.wait(until.elementIsEnabled(createBadgeButton), defaultWait);
     createBadgeButton.click();
-    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), defaultWait);
+
+    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
 }
 
 export async function navigateToBadgeDetails(driver) {
@@ -85,7 +86,6 @@ export async function navigateToBadgeAwarding(driver) {
 export async function navigateToBackpack(driver) {
     await driver.get(`${url}/recipient/badges`);
 
-    const title = await driver.getTitle();
     driver.wait(until.titleIs('Backpack - Open Educational Badges'), defaultWait);
 }
 
@@ -101,44 +101,73 @@ export async function navigateToReceivedBadge(driver) {
 /**
  * This assumes that the driver already navigated to the badge creation page
  */
-export async function createBadge(driver) {
+export async function createBadge(driver, badgeType = 'Teilnahme') {
     const categoryDropdownButton = await driver.findElement(By.css(
         'button[role="combobox"]'));
     await categoryDropdownButton.click();
 
-    // TODO: Also create competency badge
+    // Category selection 
     await driver.wait(until.elementLocated(
-        ExtendedBy.tagWithText('hlm-option', 'Teilnahme')), defaultWait);
+        ExtendedBy.tagWithText('hlm-option', badgeType)), defaultWait);
     const participationOption = await driver.findElement(
-        ExtendedBy.tagWithText('hlm-option', 'Teilnahme'));
+        ExtendedBy.tagWithText('hlm-option', badgeType));
     await participationOption.click();
 
+    // Description field
     const shortDescriptionField = await driver.findElement(By.css(
         'textarea'));
     await shortDescriptionField.sendKeys(testBadgeDescription);
 
+    // Duration field
     const durationField = await driver.findElement(By.css(
         'input[type="number"]'));
+    await durationField.clear()
     await durationField.sendKeys(testDuration);
 
+    // Title field
     const titleField = await driver.findElement(By.css(
         'input[type="text"]'));
     await titleField.sendKeys(testBadgeTitle);
 
-    const imageField = await driver.findElement(By.id('image_field0'));
-    const image = path.resolve(testImagePath);
-    await imageField.sendKeys(image);
+    // Image field
+    // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
+    // 1. Upload own image (insterted into badge frame)
+    uploadImage(driver, "image_field0", testImagePath);
+    // 2. Upload own image
+    setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 100);
+    // 3. Select an image from nounproject
+    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 300);
 
-    await driver.wait(until.elementLocated(By.css(
-        'img[src^="data:image/png;base64,iVBORw0KGg"]')), defaultWait);
+    // * Badge with skills - only with competency badge type
+    if(badgeType == 'Kompetenz'){
+        // Add competencies using AI
+        setTimeout(async _ => await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText), 500);
+        // Add competencies by hand
+        setTimeout(async _ => await addCompetenciesByHand(driver), 1500);
+    }
+    
+    // * Optional Badge-Details
+    setTimeout(async _ => await addOptionalDetails(driver), 3000);
 
-    // TODO: Optionale Badge-Details
-    const submitButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Badge erstellen'));
-    submitButton.click();
-
-    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
+    const submitButton = await driver.findElement(By.id('create-badge-btn'));
+    setTimeout(async _ => submitButton.click(), 8000);
+    
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
+
+async function addOptionalDetails(driver){
+    // Open optional badge-detail section
+    const optionalDetailSection = await driver.findElement(By.id('optional-details'));
+    await optionalDetailSection.click();
+
+    // Add new tag
+    await addNewTag(driver, tagName);
+    // Link badge to educational standards
+    await linkToEduStandards(driver);
+    // Badge validity
+    await setBdgeValidaty(driver);
+}
+
 
 /**
  * This assumes that the driver already navigated to the badge awarding page
@@ -157,6 +186,12 @@ export async function awardBadge(driver, email = username) {
     const submitButton = await driver.findElement(By.css(
         'button[type="submit"].tw-relative'));
     submitButton.click();
+
+    // Disable badge editing dialog
+    await driver.wait(until.elementLocated(By.tagName('app-end-of-edit-dialog')), defaultWait);
+    const endEditingDialog = await driver.findElement(By.tagName('app-end-of-edit-dialog'));
+    const confirmDialogButton = await endEditingDialog.findElement(By.id('confirm-award-badge'));
+    await confirmDialogButton.click();
 
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
 }
@@ -191,8 +226,8 @@ export async function downloadPdfFromBackpack(driver) {
     await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')), defaultWait);
 
     await driver.switchTo().defaultContent();
-    const downloadButton = await driver.findElement(By.css(
-        'button[type="submit"]'));
+    const downloadButton = await driver.findElement(By.id(
+        'download-pdf-backpack'));
     await downloadButton.click();
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
@@ -301,15 +336,14 @@ export async function validateParticipationBadge(driver) {
     assert.equal(descriptionText, testBadgeDescription);
 
     const divElements = await driver.findElements(By.css('div.tag'));
-    assert.equal(divElements.length, 0);
+    assert.equal(divElements.length, 1);
 
     const categoryHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Kategorie'));
     const categoryElement = await driver.findElement(
         ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
     const categoryText = await categoryElement.getText();
-    // TODO: It seems the text *should* be "Teilnahme-Badge"
-    assert.equal(categoryText, 'Teilnahme- Badge');
+    assert.equal(categoryText, 'Teilnahme-Badge');
 
     const now = new Date();
     // Construct date string. Make sure that there are leading 0s
@@ -336,6 +370,59 @@ export async function validateParticipationBadge(driver) {
     assert.equal(createdText, todayString);
 }
 
+export async function validateBadge(driver, badgeType = 'Teilnahme') {
+    const titleElement = await driver.findElement(By.css(
+        'h1.tw-text-purple'));
+    const titleText = await titleElement.getText();
+    assert.equal(titleText, testBadgeTitle);
+
+    const descriptionHeading = await driver.findElement(
+        ExtendedBy.tagWithText('h3', 'Kurzbeschreibung'));
+    const descriptionElement = await driver.findElement(
+        ExtendedBy.sibling(descriptionHeading, By.tagName('p')));
+    const descriptionText = await descriptionElement.getText();
+    assert.equal(descriptionText, testBadgeDescription);
+
+    const divElements = await driver.findElements(By.css('div.tag'));
+    assert.equal(divElements.length, 1);
+
+    const categoryHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Kategorie'));
+    const categoryElement = await driver.findElement(
+        ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
+    const categoryText = await categoryElement.getText();
+    assert.equal(categoryText, `${badgeType}-Badge`);
+
+    const now = new Date();
+    // Construct date string. Make sure that there are leading 0s
+    const todayString = ('0' + now.getDate()).slice(-2) + '.'
+        + ('0' + (now.getMonth()+1)).slice(-2) + '.'
+        + now.getFullYear();
+
+    const lastEditedHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
+    const lastEditedElement = await driver.findElement(
+        ExtendedBy.sibling(lastEditedHeading, By.tagName('dd')));
+    const lastEditedTime = await lastEditedElement.findElement(
+        By.tagName('time'));
+    const lastEditedText = await lastEditedTime.getText();
+    assert.equal(lastEditedText, todayString);
+
+    const createdHeading = await driver.findElement(
+        ExtendedBy.tagWithText('dt', 'Erstellt am'));
+    const createdElement = await driver.findElement(
+        ExtendedBy.sibling(createdHeading, By.tagName('dd')));
+    const createdTime = await createdElement.findElement(
+        By.tagName('time'));
+    const createdText = await createdTime.getText();
+    assert.equal(createdText, todayString);
+
+    if(badgeType == 'Kompetenz'){
+        const BadgeCompetencies = await driver.findElements(By.css('competency-accordion'))
+        assert.equal(BadgeCompetencies.length, 3);
+    }
+}
+
 export async function verifyBadgeOverApi() {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
@@ -348,5 +435,6 @@ export async function verifyBadgeOverApi() {
     const extensions = badge.extensions;
     const studyLoadExtension = extensions['extensions:StudyLoadExtension'];
     const studyLoad = studyLoadExtension.StudyLoad;
-    assert.equal(studyLoad, testDuration);
+    // Study-load is in minutes while test-duration is in hours
+    assert.equal(studyLoad/60, testDuration);
 }
