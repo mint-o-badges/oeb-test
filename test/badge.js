@@ -32,10 +32,10 @@ const tagName = 'automated test tag'
 export async function navigateToBadgeCreation(driver) {
     await driver.get(`${url}/issuer/issuers`);
 
-    // The title *has* to be issuers already (since the wait is
-    // supposed to happen in login)
-    const title = await driver.getTitle();
-    assert.equal(title, 'Issuers - Open Educational Badges');
+    // Sometimes the title seems to oscillate back and forth, so we
+    // wait here as well
+    const expectedTitle = 'Issuers - Open Educational Badges';
+    driver.wait(until.titleIs(expectedTitle), defaultWait);
     // The rendering process of the issuers page is quite weird,
     // so we wait for that to finish.
     // For that we take the first card (and hope that it's a valid
@@ -156,23 +156,23 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // 1. Upload own image (insterted into badge frame)
     uploadImage(driver, "image_field0", testImagePath);
     // 2. Upload own image
-    setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 100);
+    await uploadImage(driver, "image_field1", testImagePath);
     // 3. Select an image from nounproject
-    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 300);
+    await selectNounProjectImage(driver, nounProjectSearchText);
 
     // * Badge with skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
         // Add competencies using AI
-        setTimeout(async _ => await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText), 500);
+        await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
         // Add competencies by hand
-        setTimeout(async _ => await addCompetenciesByHand(driver), 1500);
+        await addCompetenciesByHand(driver);
     }
     
     // * Optional Badge-Details
-    setTimeout(async _ => await addOptionalDetails(driver), 3000);
+    await addOptionalDetails(driver);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
-    setTimeout(async _ => submitButton.click(), 8000);
+    await submitButton.click();
     
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
