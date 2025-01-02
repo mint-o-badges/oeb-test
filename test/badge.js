@@ -1,4 +1,4 @@
-import {By, until, WebElementCondition} from 'selenium-webdriver';
+import {By, until, Condition} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url, defaultWait, extendedWait} from '../config.js';
@@ -32,10 +32,32 @@ const tagName = 'automated test tag'
 export async function navigateToBadgeCreation(driver) {
     await driver.get(`${url}/issuer/issuers`);
 
-    const expectedTitle  = 'Issuers - Open Educational Badges';
-    driver.wait(until.titleIs(expectedTitle), defaultWait);
-    const createBadgeButton = await driver.wait(until.elementLocated(By.css("[id^='create-new-badge-btn']")), defaultWait);
-    await driver.wait(until.elementIsEnabled(createBadgeButton), defaultWait);
+    // The title *has* to be issuers already (since the wait is
+    // supposed to happen in login)
+    const title = await driver.getTitle();
+    assert.equal(title, 'Issuers - Open Educational Badges');
+    // The rendering process of the issuers page is quite weird,
+    // so we wait for that to finish.
+    // For that we take the first card (and hope that it's a valid
+    // issuer) and wait until it has all three buttons
+    const card = await driver.wait(until.elementLocated(
+        ExtendedBy.containingText(
+            By.css('div.tw-border-purple.tw-grow'),
+            By.tagName('p'),
+            'Deine Rolle: Eigentümer:in')),
+        defaultWait,
+        "Couldn't find card");
+    const condition = new Condition("for issuers to have fully loaded",
+        async driver => {
+            const children = await card.findElements(By.tagName('oeb-button'));
+            return children.length === 3;
+        });
+    await driver.wait(condition, defaultWait,
+        "Issuer loading didn't complete");
+
+    const createBadgeButton = await driver.wait(until.elementLocated(
+        By.css("[id^='create-new-badge-btn']:not(.disabled)")),
+        defaultWait);
     createBadgeButton.click();
 
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
@@ -253,28 +275,20 @@ export async function downloadPdfFromIssuer(driver) {
 }
 
 export async function waitForDownload(driver, regex, timeout = 5000) {
-    let pollId;
-    const downloadPoll = resolve => {
-        const files = fs.readdirSync(downloadDirectory);
-        if (files.length === 0) {
-            pollId = setTimeout(_ => downloadPoll(resolve), 100);
-            return;
-        }
-        assert(files.length, 1, "Expected one downloaded file");
-        if (!regex.test(files[0])) {
-            pollId = setTimeout(_ => downloadPoll(resolve), 100);
-            return;
-        }
-        clearTimeout(pollId);
-        resolve();
-    };
-    const pollingPromise = new Promise(downloadPoll);
-    try {
-        await driver.wait(pollingPromise, timeout, "Download didn't finish or file content didn't match the pattern within the specified timeout");
-    } catch(error) {
-        clearTimeout(pollId);
-        throw error;
-    }
+    const condition = new Condition("for download",
+        driver => {
+            const files = fs.readdirSync(downloadDirectory);
+            if (files.length === 0)
+                return false;
+
+            assert(files.length, 1, "Expected one downloaded file");
+            if (!regex.test(files[0]))
+                return false;
+
+            return true;
+        });
+    await driver.wait(condition, timeout,
+        "Download didn't finish or file content didn't match the pattern within the specified timeout");
 }
 
 /**
