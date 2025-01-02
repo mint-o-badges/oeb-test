@@ -20,7 +20,8 @@ import {
     confirmRevokedBadge,
     deleteBadgeOverApi,
     validateParticipationBadge,
-    verifyBadgeOverApi
+    verifyBadgeOverApi,
+    validateBadge
 } from './badge.js';
 
 describe('Badge Test', function() {
@@ -28,10 +29,12 @@ describe('Badge Test', function() {
     let driver;
 
     before(async () => {
+        // Create download directory if it doesn't exist
         if (!fs.existsSync(downloadDirectory)){
             fs.mkdirSync(downloadDirectory);
         }
-        const downloadPath = path.resolve('download');
+        // Set download directory path 
+        const downloadPath =  path.resolve('download');
         let options = new chrome.Options();
         options.setUserPreferences({
             "profile.default_content_settings.popups": 0,
@@ -48,15 +51,20 @@ describe('Badge Test', function() {
 
         const host = process.env.SELENIUM || undefined;
         const server = host ? `http://${host}:4444` : '';
+
+        // Setting up webDriver
         driver = await new Builder()
             .usingServer(server)
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()
+        // maximiz screen to avoid error `element not interactable`
+        await driver.manage().window().maximize();
         await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
     // This requires that there exists a verified issuer for the user associated with the configured credentials
+    // Participation badge
     it('should create a participation badge', async function() {
         await login(driver);
         await navigateToBadgeCreation(driver);
@@ -65,16 +73,32 @@ describe('Badge Test', function() {
 
     it('should validate the participation badge', async function() {
         await navigateToBadgeDetails(driver);
-        await validateParticipationBadge(driver);
+        await validateBadge(driver);
         await verifyBadgeOverApi(driver);
     });
 
-    it('should award the badge', async function() {
+    it('delete the participation badge', async function() {
+        await deleteBadgeOverApi();
+    })
+
+    // Competency badge
+    it('should create a competency badge', async function() {
+        await navigateToBadgeCreation(driver);
+        await createBadge(driver, 'Kompetenz');
+    });
+
+    it('should validate the competency badge', async function() {
+        await navigateToBadgeDetails(driver);
+        await validateBadge(driver, 'Kompetenz');
+        await verifyBadgeOverApi(driver);
+    });
+
+    it('should award the competency badge', async function() {
         await navigateToBadgeAwarding(driver);
         await awardBadge(driver);
     });
 
-    it('should receive the badge', async function() {
+    it('should receive the competency badge', async function() {
         await navigateToBackpack(driver);
         await receiveBadge(driver);
     });
@@ -89,15 +113,18 @@ describe('Badge Test', function() {
         await downloadPdfFromIssuer(driver);
     });
 
-    it('should revoke the badge', async function() {
+    it('should revoke the competency badge', async function() {
         await navigateToBadgeDetails(driver);
         await revokeBadge(driver);
         await navigateToBackpack(driver);
         await confirmRevokedBadge(driver);
     });
 
-    after(async () => {
+    it('delete the competency badge', async function() {
         await deleteBadgeOverApi();
+    })
+
+    after(async () => {
         await driver.quit();
         fs.rmSync(downloadDirectory, { recursive: true, force: true });
     });
