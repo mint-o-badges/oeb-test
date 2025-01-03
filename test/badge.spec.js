@@ -64,9 +64,12 @@ describe('Badge Test', function() {
     });
 
     // This requires that there exists a verified issuer for the user associated with the configured credentials
+    it('should login', async function() {
+        await login(driver);
+    });
+
     // Participation badge
     it('should create a participation badge', async function() {
-        await login(driver);
         await navigateToBadgeCreation(driver);
         await createBadge(driver);
     });

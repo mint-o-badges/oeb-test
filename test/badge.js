@@ -96,11 +96,16 @@ export async function navigateToBadgeDetails(driver) {
 export async function navigateToBadgeAwarding(driver) {
     await navigateToBadgeDetails(driver);
 
-    await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('Badge direkt vergeben')), defaultWait);
-    const badgeAwardButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
-    badgeAwardButton.click();
+    const badgeAwardButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge direkt vergeben')),
+        defaultWait);
+    await badgeAwardButton.click();
+
+    const confirmButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge vergeben')),
+        defaultWait,
+        "Couldn't find confirm button");
+    await confirmButton.click();
 
     await driver.wait(until.titleIs(`Award Badge - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
@@ -208,12 +213,6 @@ export async function awardBadge(driver, email = username) {
     const submitButton = await driver.findElement(By.css(
         'button[type="submit"].tw-relative'));
     submitButton.click();
-
-    // Disable badge editing dialog
-    await driver.wait(until.elementLocated(By.tagName('app-end-of-edit-dialog')), defaultWait);
-    const endEditingDialog = await driver.findElement(By.tagName('app-end-of-edit-dialog'));
-    const confirmDialogButton = await endEditingDialog.findElement(By.id('confirm-award-badge'));
-    await confirmDialogButton.click();
 
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
 }

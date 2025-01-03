@@ -1,7 +1,7 @@
 import {By, WebElement} from 'selenium-webdriver';
 
 export class ExtendedBy {
-    static containingText(selector, childSelector, text) {
+    static containingText(selector, childSelector, text, trim = true) {
         return (async (driver) => {
             // Find elements from outer selector
             const selected = await driver.findElements(selector);
@@ -15,7 +15,11 @@ export class ExtendedBy {
                 // Find if one or more children match the text.
                 // Since this is done asnyc, first map them
                 const mappedPromises = childrenArray.map(async node => {
-                    const nodeText = await node.getText();
+                    let nodeText = await node.getText();
+                    if (trim) {
+                        nodeText = nodeText.trim();
+                        text = text.trim();
+                    }
                     return nodeText == text;
                 });
                 // Wait for the results of the mapping

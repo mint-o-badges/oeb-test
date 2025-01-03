@@ -28,7 +28,6 @@ export async function login(driver) {
 }
 
 export async function acceptTerms(driver) {
-    console.error("accepting terms...");
     let termsBox = undefined;
     try {
         // The box to accept terms only appears in a later step in
@@ -43,8 +42,6 @@ export async function acceptTerms(driver) {
             ExtendedBy.parentElement(headline));
     } catch(e) {
         // No new terms to accept
-        console.error("No new terms!");
-        console.error(e);
         return;
     }
     
@@ -58,5 +55,4 @@ export async function acceptTerms(driver) {
 
     await driver.get(`${url}/issuer`);
     await driver.wait(until.titleIs('Issuers - Open Educational Badges'), defaultWait);
-    console.error("Accepted the terms!");
 }
