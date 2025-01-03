@@ -45,12 +45,18 @@ export class ExtendedBy {
             const selected = await driver.findElements(By.tagName(tag));
             const selectedArray = Array.from(selected);
             const mappedPromises = selectedArray.map(async node => {
-                let nodeText = await node.getText();
-                if (trim) {
-                    nodeText = nodeText.trim();
-                    text = text.trim();
+                try {
+                    let nodeText = await node.getText();
+                    if (trim) {
+                        nodeText = nodeText.trim();
+                        text = text.trim();
+                    }
+                    return nodeText === text;
+                } catch(e) {
+                    if (e.name === 'StaleElementReferenceError')
+                        return false;
+                    throw e;
                 }
-                return nodeText === text;
             });
             const mapped = await Promise.all(mappedPromises);
             return selectedArray.filter((_, i) => mapped[i]);
