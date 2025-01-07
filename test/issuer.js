@@ -66,26 +66,30 @@ export async function createIssuer(driver) {
 
     const categoryOption = await driver.findElement(By.css(
         'hlm-option#cdk-option-2'));
-    categoryOption.click();
+    await categoryOption.click();
 
     const streetField = textFields[1];
-    streetField.sendKeys(testIssuerStreet);
+    await streetField.sendKeys(testIssuerStreet);
 
     const numberFields = await driver.findElements(By.css(
         'input[type="number"]'));
 
     const streetnumberField = numberFields[0];
-    streetnumberField.sendKeys(testIssuerStreetnumber);
+    await streetnumberField.sendKeys(testIssuerStreetnumber);
 
     const postalCodeField = numberFields[1];
-    postalCodeField.sendKeys(testIssuerPostalCode);
+    await postalCodeField.sendKeys(testIssuerPostalCode);
 
     const cityField = textFields[2];
-    cityField.sendKeys(testIssuerCity);
+    await cityField.sendKeys(testIssuerCity);
+
+    const confirmCheckbox = await driver.findElement(By.css
+        ('hlm-checkbox-checkicon'));
+    await confirmCheckbox.click();
 
     const submitButton = (await driver.findElements(By.css(
         'button[type="submit"]')))[1];
-    submitButton.click();
+    await submitButton.click();
 
     await driver.wait(until.titleIs(`Issuer - ${testIssuerName} - Open Educational Badges`), defaultWait);
 }
