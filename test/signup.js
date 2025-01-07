@@ -2,6 +2,7 @@ import {By, until} from 'selenium-webdriver';
 import assert from 'assert';
 import {url, defaultWait} from '../config.js';
 import {requestToken, deleteUser, getUser} from '../util/api.js';
+import {ExtendedBy} from '../util/selection.js';
 
 const testUserEmail = 'automated@test.mail';
 const testUserFirstName = 'automated';
@@ -41,16 +42,21 @@ export async function signup(driver) {
     const passwordRepeatField = passwordFields[1];
     await passwordRepeatField.sendKeys(testUserPassword);
 
+    const checkboxes = await driver.findElements(By.tagName(
+        'hlm-checkbox-checkicon'));
+    const termsCheckbox = checkboxes[0];
+    await termsCheckbox.click();
+
     const altchaCheckbox = await driver.findElement(By.id(
         'altcha_checkbox'));
-    altchaCheckbox.click();
+    await altchaCheckbox.click();
 
     await driver.wait(until.elementLocated(By.css(
         'div[data-state="verified"]')), 200*1000);
 
-    const submitButton = (await driver.findElements(By.css(
-        'button[type="submit"]')))[1];
-    submitButton.click();
+    const submitButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('Account erstellen'));
+    await submitButton.click();
 
     await driver.wait(until.titleIs('Verification - Open Educational Badges'), defaultWait);
 }
