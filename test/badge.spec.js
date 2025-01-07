@@ -40,13 +40,14 @@ describe('Badge Test', function() {
             "profile.default_content_settings.popups": 0,
             "download.default_directory": downloadPath,
             "download.prompt_for_download": false,
-            "download.directory_upgrade": true,
+            // TODO: This breaks switchting to the html embed
+            /*"download.directory_upgrade": true,
             "download.prompt_for_download": false,
             "plugins.always_open_pdf_externally": true,
             "plugins.plugins_disabled": "Chrome PDF Viewer",
             "pdfjs.disabled": true,
             "download.extensions_to_open": "applications/pdf",
-            "safebrowsing.enabled": false
+            "safebrowsing.enabled": false*/
         });
 
         const host = process.env.SELENIUM || undefined;
@@ -58,8 +59,6 @@ describe('Badge Test', function() {
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()
-        // maximiz screen to avoid error `element not interactable`
-        await driver.manage().window().maximize();
         await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 

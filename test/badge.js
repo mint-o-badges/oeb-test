@@ -1,4 +1,8 @@
-import {By, until, Condition} from 'selenium-webdriver';
+import {
+    By,
+    until,
+    Condition
+} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url, defaultWait, extendedWait} from '../config.js';
@@ -240,8 +244,8 @@ export async function downloadPdfFromBackpack(driver) {
     const pdfExportButton = dropdownButtons[1];
     await pdfExportButton.click();
 
-    await driver.wait(until.elementLocated(By.css('embed[src^="blob:http"]')), defaultWait);
-    const htmlEmbed = await driver.findElement(By.css('embed[src^="blob:http"]'));
+    const htmlEmbed = await driver.wait(until.elementLocated(
+        By.css('embed[src^="blob:http"]')), defaultWait);
     await driver.switchTo().frame(htmlEmbed);
 
     await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')), defaultWait);
