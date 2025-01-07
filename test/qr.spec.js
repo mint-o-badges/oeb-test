@@ -45,8 +45,9 @@ describe('QR test', function() {
             .setChromeOptions(options)
             .build()
         await driver.manage().setTimeouts({ implicit: implicitWait });
+    });
 
-        // Create badge
+    it('should create a badge', async function() {
         await login(driver);
         await navigateToBadgeCreation(driver);
         await createBadge(driver);

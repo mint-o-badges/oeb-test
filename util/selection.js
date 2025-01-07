@@ -30,8 +30,7 @@ export class ExtendedBy {
             // Wait for the results of the mapping
             const mapped = await Promise.all(mappedPromises);
             // Filter the elements where the mapping yielded true
-            const res = selectedArray.filter((_, i) => mapped[i]);
-            return res;
+            return selectedArray.filter((_, i) => mapped[i]);
         });
     }
 

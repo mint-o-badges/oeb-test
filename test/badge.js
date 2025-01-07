@@ -47,8 +47,10 @@ export async function navigateToBadgeCreation(driver) {
     const card = await driver.wait(until.elementLocated(
         ExtendedBy.containingText(
             By.css('div.tw-border-purple.tw-grow'),
-            By.tagName('p'),
-            'Deine Rolle: Eigentümer:in')),
+            By.tagName('span'),
+            // Search for "Lernpfad erstellen" because only
+            // verified issuers have this button
+            'Lernpfad erstellen')),
         defaultWait,
         "Couldn't find card");
     const condition = new Condition("for issuers to have fully loaded",
@@ -59,10 +61,12 @@ export async function navigateToBadgeCreation(driver) {
     await driver.wait(condition, defaultWait,
         "Issuer loading didn't complete");
 
-    const createBadgeButton = await driver.wait(until.elementLocated(
+    await driver.wait(until.elementLocated(
         By.css("[id^='create-new-badge-btn']:not(.disabled)")),
         defaultWait);
-    createBadgeButton.click();
+    const createBadgeButton = await card.findElement(
+        By.css("[id^='create-new-badge-btn']:not(.disabled)"));
+    await createBadgeButton.click();
 
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
 }

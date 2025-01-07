@@ -22,6 +22,13 @@ export async function navigateToQrCreation(driver, name = 'automated test title'
     const qrCodeButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben'));
     await qrCodeButton.click();
+
+    const confirmButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText(
+            'QR-Code-Vergabe erstellen')), defaultWait,
+        "Couldn't find confirm button");
+    await confirmButton.click();
+
     await driver.wait(until.elementLocated(By.css(
         'oeb-input[label="Titel"]')), defaultWait);
 }
