@@ -10,7 +10,8 @@ import {
     createBadge,
     deleteBadgeOverApi,
     navigateToBackpack,
-    receiveBadge
+    receiveBadge,
+    clearDownloadDirectory
 } from './badge.js';
 import {
     navigateToQrCreation,
@@ -21,20 +22,18 @@ import {
     confirmBadgeAwarding
 } from './qr.js';
 
-const downloadDirectory = './download'
+const downloadDirectory = '/tmp'
 
 describe('QR test', function() {
     this.timeout(30000);
     let driver;
 
     before(async () => {
-        if (!fs.existsSync(downloadDirectory)){
-            fs.mkdirSync(downloadDirectory);
-        }
-        const downloadPath = path.resolve('download');
+        // Delete all PDFs from tmp directory
+        clearDownloadDirectory();
         let options = new chrome.Options();
         options.setUserPreferences({
-            "download.default_directory": downloadPath,
+            "download.default_directory": downloadDirectory,
         });
 
         const host = process.env.SELENIUM || undefined;
@@ -78,6 +77,5 @@ describe('QR test', function() {
     after(async () => {
         await deleteBadgeOverApi();
         await driver.quit();
-        fs.rmSync(downloadDirectory, { recursive: true, force: true });
     });
 });

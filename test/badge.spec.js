@@ -21,7 +21,8 @@ import {
     deleteBadgeOverApi,
     validateParticipationBadge,
     verifyBadgeOverApi,
-    validateBadge
+    validateBadge,
+    clearDownloadDirectory
 } from './badge.js';
 
 describe('Badge Test', function() {
@@ -29,25 +30,12 @@ describe('Badge Test', function() {
     let driver;
 
     before(async () => {
-        // Create download directory if it doesn't exist
-        if (!fs.existsSync(downloadDirectory)){
-            fs.mkdirSync(downloadDirectory);
-        }
+        // Delete all PDFs from tmp directory
+        clearDownloadDirectory();
         // Set download directory path 
-        const downloadPath =  path.resolve('download');
         let options = new chrome.Options();
         options.setUserPreferences({
-            "profile.default_content_settings.popups": 0,
-            "download.default_directory": downloadPath,
-            "download.prompt_for_download": false,
-            // TODO: This breaks switchting to the html embed
-            /*"download.directory_upgrade": true,
-            "download.prompt_for_download": false,
-            "plugins.always_open_pdf_externally": true,
-            "plugins.plugins_disabled": "Chrome PDF Viewer",
-            "pdfjs.disabled": true,
-            "download.extensions_to_open": "applications/pdf",
-            "safebrowsing.enabled": false*/
+            "download.default_directory": downloadDirectory,
         });
 
         const host = process.env.SELENIUM || undefined;
@@ -128,6 +116,5 @@ describe('Badge Test', function() {
 
     after(async () => {
         await driver.quit();
-        fs.rmSync(downloadDirectory, { recursive: true, force: true });
     });
 });

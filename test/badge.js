@@ -19,7 +19,7 @@ import {ExtendedBy} from '../util/selection.js';
 import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
-export const downloadDirectory = './download'
+export const downloadDirectory = '/tmp'
 
 const testBadgeTitle = 'automated test title';
 const testBadgeDescription = 'automated test description';
@@ -261,7 +261,7 @@ export async function downloadPdfFromBackpack(driver) {
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
     // TODO: Verify file content
-    fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
+    clearDownloadDirectory();
 }
 
 /**
@@ -278,7 +278,14 @@ export async function downloadPdfFromIssuer(driver) {
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
     // TODO: Verify file content
-    fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
+    clearDownloadDirectory();
+}
+
+export function clearDownloadDirectory() {
+    let regex = /[.]pdf$/
+    fs.readdirSync(downloadDirectory)
+        .filter(f => regex.test(f))
+        .map(f => fs.unlinkSync(downloadDirectory + '/' + f))
 }
 
 export async function waitForDownload(driver, regex, timeout = 5000) {
@@ -288,10 +295,17 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
             if (files.length === 0)
                 return false;
 
-            assert(files.length, 1, "Expected one downloaded file");
-            if (!regex.test(files[0]))
+            let count = 0;
+            for (const file of files) {
+                if (regex.test(file)) {
+                    count++;
+                }
+            }
+
+            if (count === 0)
                 return false;
 
+            assert(count, 1, "Expected one downloaded file");
             return true;
         });
     await driver.wait(condition, timeout,

@@ -8,15 +8,20 @@ services:
       - 5900:5900 # VNC server
       - 7900:7900 # VNC browser client
     volumes:
-      - ./:/project
-      - ./download:/Downloads
+      - ./assets:/project/assets
+      - download:/tmp
     working_dir: /project
 
   node:
     image: node:19
     volumes:
       - ./:/project
+      - download:/tmp
     working_dir: /project
     tty: true
     depends_on:
       - chrome
+    entrypoint: ["bash", "/project/entrypoint.sh"]
+
+volumes:
+  download:
