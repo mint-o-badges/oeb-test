@@ -13,7 +13,7 @@ services:
     working_dir: /project
 
   node:
-    image: node:19
+    image: node:23
     volumes:
       - ./:/project
       - download:/tmp
