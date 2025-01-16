@@ -2,7 +2,7 @@
 
 set -e
 
-npm install
+npm ci
 apt-get update
 apt-get install ghostscript graphicsmagick -y
 BROWSER=chrome SELENIUM=chrome npm run test
