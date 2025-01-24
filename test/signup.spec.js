@@ -1,4 +1,5 @@
 import {Builder, Browser} from 'selenium-webdriver';
+import {screenshot} from '../util/screenshot.js';
 import {
     navigateToSignup,
     signup,
@@ -28,6 +29,10 @@ describe('Signup Test', function() {
 
     it('should verify user details', async function() {
         await verifyUserOverApi();
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
     });
 
     after(async () => {

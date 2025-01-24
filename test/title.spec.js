@@ -1,6 +1,7 @@
 import {By, Builder, Browser} from 'selenium-webdriver';
 import assert from 'assert';
 import {url, implicitWait} from '../config.js';
+import {screenshot} from '../util/screenshot.js';
 
 describe('Title Test', function() {
     this.timeout(20000);
@@ -21,6 +22,10 @@ describe('Title Test', function() {
 
         let title = await driver.getTitle();
         assert.equal(title, 'Open Educational Badges');
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
     });
 
     after(async () => await driver.quit());

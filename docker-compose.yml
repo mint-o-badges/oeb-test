@@ -18,6 +18,7 @@ services:
     volumes:
       - ./:/project
       - download:/tmp
+      - ./screenshots/:/project/screenshots
     working_dir: /project
     tty: true
     depends_on:

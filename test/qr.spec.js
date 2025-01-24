@@ -3,7 +3,7 @@ import chrome from 'selenium-webdriver/chrome.js';
 import {login} from './login.js';
 import {url, implicitWait} from '../config.js';
 import path from 'path';
-import fs from 'fs';
+import {screenshot} from '../util/screenshot.js';
 import {
     navigateToBadgeDetails,
     navigateToBadgeCreation,
@@ -72,6 +72,10 @@ describe('QR test', function() {
     it('should receive the badge', async function() {
         await navigateToBackpack(driver);
         await receiveBadge(driver);
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
     });
 
     after(async () => {

@@ -1,6 +1,7 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import {login} from './login.js';
 import {implicitWait} from '../config.js';
+import {screenshot} from '../util/screenshot.js';
 
 describe('Login Test', function() {
     this.timeout(20000);
@@ -18,6 +19,10 @@ describe('Login Test', function() {
 
     it('should be able to log in', async function() {
         await login(driver);
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
     });
 
     after(async () => await driver.quit());

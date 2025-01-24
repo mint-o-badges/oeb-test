@@ -3,3 +3,4 @@ node_modules/
 .nvmrc
 secret.js
 *.swp
+screenshots/

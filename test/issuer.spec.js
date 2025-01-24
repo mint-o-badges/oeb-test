@@ -1,5 +1,6 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import {login} from './login.js';
+import {screenshot} from '../util/screenshot.js';
 import {
     navigateToIssuerCreation,
     createIssuer,
@@ -35,6 +36,10 @@ describe('Issuer Test', function() {
         await navigateToIssuerDetails(driver);
         await verifyIssuerDetails(driver);
         await verifyIssuerOverApi();
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
     });
 
     after(async () => {

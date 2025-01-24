@@ -2,8 +2,8 @@ import {Builder, Browser} from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import {login} from './login.js';
 import path from 'path';
-import fs from 'fs';
 import {implicitWait} from '../config.js';
+import {screenshot} from '../util/screenshot.js';
 import {
     downloadDirectory,
     navigateToBadgeCreation,
@@ -113,6 +113,10 @@ describe('Badge Test', function() {
     it('delete the competency badge', async function() {
         await deleteBadgeOverApi();
     })
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
+    });
 
     after(async () => {
         await driver.quit();
