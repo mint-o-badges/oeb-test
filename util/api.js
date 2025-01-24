@@ -17,7 +17,14 @@ export async function requestToken(username, password) {
         body: data
     });
 
-    return await response.json();
+    const accessToken = response.headers.get("set-cookie")
+        .split(";")
+        .find((cookie) => cookie.trim().startsWith("access_token="))
+        .split("=")[1];
+    const jsonResponse = await response.json();
+    jsonResponse.access_token = accessToken
+
+  return await jsonResponse;
 }
 
 export async function verifyIssuer(token, slug) {
