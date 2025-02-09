@@ -245,12 +245,13 @@ export async function downloadPdfFromBackpack(driver) {
 
     const dropdownButtons = await driver.findElements(By.css(
         'button[role="menuitem"]'));
-    const pdfExportButton = dropdownButtons[1];
+    const pdfExportButton = dropdownButtons[2];
     await pdfExportButton.click();
 
     const htmlEmbed = await driver.wait(until.elementLocated(
         By.css('embed[src^="blob:http"]')), defaultWait);
-    await driver.switchTo().frame(htmlEmbed);
+    // To avoid `No Such Frame` error
+    await driver.wait(until.ableToSwitchToFrame(htmlEmbed), defaultWait);
 
     await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')), defaultWait);
 
