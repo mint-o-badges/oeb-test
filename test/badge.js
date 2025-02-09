@@ -19,7 +19,7 @@ import {ExtendedBy} from '../util/selection.js';
 import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
-export const downloadDirectory = '/tmp'
+export const downloadDirectory = '/tmp';
 
 const testBadgeTitle = 'automated test title';
 const testBadgeDescription = 'automated test description';
@@ -256,8 +256,12 @@ export async function downloadPdfFromBackpack(driver) {
     await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')), defaultWait);
 
     await driver.switchTo().defaultContent();
-    const downloadButton = await driver.findElement(By.id(
-        'download-pdf-backpack'));
+    const downloadButton = await driver.findElement(By.id('download-pdf-backpack'));
+    // Wait for download button to be enabled
+    await driver.wait(async () => {
+        const isEnabled = await downloadButton.isEnabled();
+        return isEnabled;
+    }, defaultWait);
     await downloadButton.click();
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
