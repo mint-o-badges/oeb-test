@@ -253,10 +253,7 @@ export async function downloadPdfFromBackpack(driver) {
     await driver.switchTo().defaultContent();
     const downloadButton = await driver.findElement(By.id('download-pdf-backpack'));
     // Wait for download button to be enabled
-    await driver.wait(async () => {
-        const isEnabled = await downloadButton.isEnabled();
-        return isEnabled;
-    }, defaultWait);
+    await driver.wait(until.elementIsEnabled(downloadButton), defaultWait);
     await downloadButton.click();
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
