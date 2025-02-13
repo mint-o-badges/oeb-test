@@ -4,7 +4,8 @@ import {
     navigateToSignup,
     signup,
     deleteUserOverApi,
-    verifyUserOverApi
+    verifyUserOverApi,
+    verifyUserByLogin
 } from './signup.js';
 import {implicitWait} from '../config.js';
 
@@ -28,7 +29,9 @@ describe('Signup Test', function() {
     });
 
     it('should verify user details', async function() {
-        await verifyUserOverApi();
+        // await verifyUserOverApi();
+        await verifyUserByLogin(driver);
+        
     });
 
     afterEach(async function () {

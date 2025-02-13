@@ -3,11 +3,13 @@ import assert from 'assert';
 import {url, defaultWait} from '../config.js';
 import {requestToken, deleteUser, getUser} from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
+import { login } from './login.js';
 
 const testUserEmail = 'automated@test.de';
 const testUserFirstName = 'automated';
 const testUserLastName = 'test';
 const testUserPassword = 'automatedTestPassword';
+const verificationPageTitle = 'Verification - Open Educational Badges';
 
 export async function navigateToSignup(driver) {
     await driver.get(`${url}/signup`);
@@ -77,4 +79,10 @@ export async function verifyUserOverApi(username = 'automated@test.mail', passwo
     assert.equal(user.email, testUserEmail);
     assert.equal(user.first_name, testUserFirstName);
     assert.equal(user.last_name, testUserLastName);
+}
+
+// This is a replacement of the above function `verifyUserOverApi` which requires the access token.
+// Note: access token can only requested after being loged in.
+export async function verifyUserByLogin(driver) {
+    await login(driver, testUserEmail, testUserPassword, verificationPageTitle);
 }

@@ -4,7 +4,9 @@ import {username, password} from '../secret.js';
 import {url, defaultWait} from '../config.js';
 import {ExtendedBy} from '../util/selection.js';
 
-export async function login(driver) {
+const issuersPageTitle = 'Issuers - Open Educational Badges';
+
+export async function login(driver, userName = username, userPassword = password, pageTitle = issuersPageTitle) {
     await driver.get(`${url}/auth/login`);
 
     await driver.wait(until.titleIs(
@@ -12,17 +14,17 @@ export async function login(driver) {
 
     const emailField = await driver.findElement(By.css(
         'input[placeholder="Deine E-Mail Adresse"]'));
-    await emailField.sendKeys(username);
+    await emailField.sendKeys(userName);
 
     const passwordField = await driver.findElement(By.css(
         'input[placeholder="Dein Passwort"]'));
-    await passwordField.sendKeys(password);
+    await passwordField.sendKeys(userPassword);
 
     const loginButton = await driver.findElement(By.css(
         'oeb-button[type="submit"]'));
     loginButton.click();
 
-    await driver.wait(until.titleIs('Issuers - Open Educational Badges'), defaultWait);
+    await driver.wait(until.titleIs(pageTitle), defaultWait);
 
     await acceptTerms(driver);
 }
@@ -54,5 +56,5 @@ export async function acceptTerms(driver) {
     await submitButton.click();
 
     await driver.get(`${url}/issuer`);
-    await driver.wait(until.titleIs('Issuers - Open Educational Badges'), defaultWait);
+    await driver.wait(until.titleIs(issuersPageTitle), defaultWait);
 }
