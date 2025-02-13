@@ -4,7 +4,7 @@ import {url, defaultWait} from '../config.js';
 import {requestToken, deleteUser, getUser} from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
 
-const testUserEmail = 'automated@test.mail';
+const testUserEmail = 'automated@test.de';
 const testUserFirstName = 'automated';
 const testUserLastName = 'test';
 const testUserPassword = 'automatedTestPassword';
