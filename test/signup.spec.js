@@ -3,9 +3,9 @@ import {screenshot} from '../util/screenshot.js';
 import {
     navigateToSignup,
     signup,
-    deleteUserOverApi,
-    verifyUserOverApi,
-    verifyUserByLogin
+    verifyUserByLogin,
+    navigateToProfile,
+    deleteUserViaUI
 } from './signup.js';
 import {implicitWait} from '../config.js';
 
@@ -29,9 +29,13 @@ describe('Signup Test', function() {
     });
 
     it('should verify user details', async function() {
-        // await verifyUserOverApi();
         await verifyUserByLogin(driver);
         
+    });
+
+    it('should delete user account', async function() {
+        await navigateToProfile(driver);
+        await deleteUserViaUI(driver);
     });
 
     afterEach(async function () {
@@ -39,8 +43,6 @@ describe('Signup Test', function() {
     });
 
     after(async () => {
-        // TODO: Test deletion via UI
-        await deleteUserOverApi();
         await driver.quit()
     });
 });

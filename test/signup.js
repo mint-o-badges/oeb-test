@@ -1,7 +1,6 @@
 import {By, until} from 'selenium-webdriver';
 import assert from 'assert';
 import {url, defaultWait} from '../config.js';
-import {requestToken, deleteUser, getUser} from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
 import { login } from './login.js';
 
@@ -63,14 +62,15 @@ export async function signup(driver) {
     await driver.wait(until.titleIs('Verification - Open Educational Badges'), defaultWait);
 }
 
-export async function deleteUserOverApi(username = 'automated@test.mail', password = 'automatedTestPassword') {
+// Not sure if we still need these functions so I commented them out.
+/* export async function deleteUserOverApi(username = 'automated@test.mail', password = 'automatedTestPassword') {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
     const deletionResult = await deleteUser(apiToken);
     assert.equal(deletionResult, true, "The user deletion failed, probably because the HTTP response code wasn't 2xx");
-}
+} */
 
-export async function verifyUserOverApi(username = 'automated@test.mail', password = 'automatedTestPassword') {
+/* export async function verifyUserOverApi(username = 'automated@test.mail', password = 'automatedTestPassword') {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
     const user = await getUser(apiToken);
@@ -79,10 +79,37 @@ export async function verifyUserOverApi(username = 'automated@test.mail', passwo
     assert.equal(user.email, testUserEmail);
     assert.equal(user.first_name, testUserFirstName);
     assert.equal(user.last_name, testUserLastName);
-}
+} */
 
 // This is a replacement of the above function `verifyUserOverApi` which requires the access token.
 // Note: access token can only requested after being loged in.
 export async function verifyUserByLogin(driver) {
     await login(driver, testUserEmail, testUserPassword, verificationPageTitle);
+}
+
+export async function navigateToProfile(driver) {
+    await driver.get(`${url}/profile/profile`);
+
+    let title = await driver.getTitle();
+    assert.equal(title, 'Profile - Open Educational Badges');
+}
+
+/**
+ * This assumes that the driver already navigated to the profile page
+ */
+export async function deleteUserViaUI(driver) {
+    const menuButton = await driver.findElement(By.id(
+        'trigger2'));
+    await menuButton.click();
+
+    const dropdownButtons = await driver.findElements(By.id(
+        'menu2'));
+    const deleteButton = dropdownButtons[0];
+    await deleteButton.click();
+
+    const confirmDeleteButton = await driver.wait(until.elementLocated((By.xpath("//button[text()=' Account löschen ']"))), defaultWait)    
+    await confirmDeleteButton.click();
+
+    const deleteSuccessMessage = await driver.wait(until.elementLocated(By.xpath("//p[text()='Account erfolgreich gelöscht']")), defaultWait)
+    assert(deleteSuccessMessage, "The user account deletion failed!");
 }
