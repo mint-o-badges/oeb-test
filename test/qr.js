@@ -162,6 +162,11 @@ export async function confirmBadgeAwarding(driver) {
         'button[role="heading"]'));
     await dropdownButton.click();
 
+    // Choose the first request, which is the only one
+    const requestedBadgeCheckbox = await driver.findElement(By.css
+        ('hlm-checkbox-checkicon'));
+    await requestedBadgeCheckbox.click();
+
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge vergeben')), defaultWait);
     const confirmButton = await driver.findElement(
