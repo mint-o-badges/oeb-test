@@ -90,7 +90,7 @@ export async function verifyUserByLogin(driver) {
 export async function navigateToProfile(driver) {
     await driver.get(`${url}/profile/profile`);
 
-    let title = await driver.getTitle();
+    const title = await driver.getTitle();
     assert.equal(title, 'Profile - Open Educational Badges');
 }
 
