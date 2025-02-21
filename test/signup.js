@@ -96,7 +96,7 @@ export async function deleteUserOverApi(username = testUserEmail, password = tes
     }
     assert(apiToken, "Failed to request an API token");
     const deletionResult = await deleteUser(apiToken);
-    assert.equal(deletionResult, true, "The user deletion failed, probably because the HTTP response code wasn't 2xx");
+    await assert.equal(deletionResult, true, "The user deletion failed, probably because the HTTP response code wasn't 2xx");
 }
 
 /**
@@ -116,6 +116,7 @@ export async function deleteUserViaUI(driver) {
     const confirmDeleteButton = await driver.wait(until.elementLocated((By.xpath("//button[text()=' Account löschen ']"))), defaultWait)    
     await confirmDeleteButton.click();
 
+    // TODO: use `submitButtonWithText` instead of `xpath` after updating the UI
     const deleteSuccessMessage = await driver.wait(until.elementLocated(By.xpath("//p[text()='Account erfolgreich gelöscht']")), defaultWait)
     assert(deleteSuccessMessage, "The user account deletion failed!");
 }
