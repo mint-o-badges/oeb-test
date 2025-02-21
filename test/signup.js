@@ -74,7 +74,7 @@ export async function verifyUserOverApi(username = testUserEmail, password = tes
     assert.equal(user.last_name, testUserLastName);
 }
 
-export async function verifyUserByLogin(driver) {
+export async function loginToCreatedAccount(driver) {
     await login(driver, testUserEmail, testUserPassword, verificationPageTitle);
 }
 
@@ -90,6 +90,10 @@ export async function navigateToProfile(driver) {
  */
 export async function deleteUserOverApi(username = testUserEmail, password = testUserPassword) {
     const apiToken = await requestToken(username, password);
+    // if an error is returned, the user was successfully deleted using the UI
+    if(apiToken.error){
+        return;
+    }
     assert(apiToken, "Failed to request an API token");
     const deletionResult = await deleteUser(apiToken);
     assert.equal(deletionResult, true, "The user deletion failed, probably because the HTTP response code wasn't 2xx");
@@ -100,8 +104,8 @@ export async function deleteUserOverApi(username = testUserEmail, password = tes
  * This assumes that the driver already navigated to the profile page.
  */
 export async function deleteUserViaUI(driver) {
-    const menuButton = await driver.findElement(By.id(
-        'trigger2'));
+    const menuButton = await driver.wait(until.elementLocated((By.id(
+        'trigger2'))), defaultWait)
     await menuButton.click();
 
     const dropdownButtons = await driver.findElements(By.id(
