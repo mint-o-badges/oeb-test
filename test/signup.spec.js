@@ -1,9 +1,13 @@
 import {Builder, Browser} from 'selenium-webdriver';
+import {screenshot} from '../util/screenshot.js';
 import {
     navigateToSignup,
     signup,
+    navigateToProfile,
+    deleteUserViaUI,
+    verifyUserOverApi,
     deleteUserOverApi,
-    verifyUserOverApi
+    loginToCreatedAccount
 } from './signup.js';
 import {implicitWait} from '../config.js';
 
@@ -12,7 +16,12 @@ describe('Signup Test', function() {
     let driver;
 
     before(async () => {
-        driver = await new Builder().forBrowser(Browser.CHROME).build();
+        const host = process.env.SELENIUM || undefined;
+        const server = host ? `http://${host}:4444` : '';
+        driver = await new Builder()
+        .usingServer(server)
+            .forBrowser(Browser.CHROME)
+            .build();
         await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
@@ -25,9 +34,18 @@ describe('Signup Test', function() {
         await verifyUserOverApi();
     });
 
+    it('should delete user account using UI', async function() {
+        await loginToCreatedAccount(driver);
+        await navigateToProfile(driver);
+        await deleteUserViaUI(driver);
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
+    });
+
     after(async () => {
-        // TODO: Test deletion via UI
-        await deleteUserOverApi();
+        await deleteUserOverApi();  // Ensure user is deleted
         await driver.quit()
     });
 });

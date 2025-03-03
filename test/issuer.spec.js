@@ -1,5 +1,6 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import {login} from './login.js';
+import {screenshot} from '../util/screenshot.js';
 import {
     navigateToIssuerCreation,
     createIssuer,
@@ -15,7 +16,12 @@ describe('Issuer Test', function() {
     let driver;
 
     before(async () => {
-        driver = await new Builder().forBrowser(Browser.CHROME).build();
+        const host = process.env.SELENIUM || undefined;
+        const server = host ? `http://${host}:4444` : '';
+        driver = await new Builder()
+            .usingServer(server)
+            .forBrowser(Browser.CHROME)
+            .build();
         await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
@@ -30,6 +36,10 @@ describe('Issuer Test', function() {
         await navigateToIssuerDetails(driver);
         await verifyIssuerDetails(driver);
         await verifyIssuerOverApi();
+    });
+
+    afterEach(async function () {
+        await screenshot(driver, this.currentTest);
     });
 
     after(async () => {

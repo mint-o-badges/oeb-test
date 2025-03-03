@@ -1,4 +1,8 @@
-import {By, until, WebElementCondition} from 'selenium-webdriver';
+import {
+    By,
+    until,
+    Condition
+} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url, defaultWait, extendedWait} from '../config.js';
@@ -15,7 +19,7 @@ import {ExtendedBy} from '../util/selection.js';
 import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
-export const downloadDirectory = './download'
+export const downloadDirectory = '/tmp';
 
 const testBadgeTitle = 'automated test title';
 const testBadgeDescription = 'automated test description';
@@ -32,11 +36,37 @@ const tagName = 'automated test tag'
 export async function navigateToBadgeCreation(driver) {
     await driver.get(`${url}/issuer/issuers`);
 
-    const expectedTitle  = 'Issuers - Open Educational Badges';
+    // Sometimes the title seems to oscillate back and forth, so we
+    // wait here as well
+    const expectedTitle = 'Issuers - Open Educational Badges';
     driver.wait(until.titleIs(expectedTitle), defaultWait);
-    const createBadgeButton = await driver.wait(until.elementLocated(By.css("[id^='create-new-badge-btn']")), defaultWait);
-    await driver.wait(until.elementIsEnabled(createBadgeButton), defaultWait);
-    createBadgeButton.click();
+    // The rendering process of the issuers page is quite weird,
+    // so we wait for that to finish.
+    // For that we take the first card (and hope that it's a valid
+    // issuer) and wait until it has all three buttons
+    const card = await driver.wait(until.elementLocated(
+        ExtendedBy.containingText(
+            By.css('div.tw-border-purple.tw-grow'),
+            By.tagName('span'),
+            // Search for "Lernpfad erstellen" because only
+            // verified issuers have this button
+            'Lernpfad erstellen')),
+        defaultWait,
+        "Couldn't find card");
+    const condition = new Condition("for issuers to have fully loaded",
+        async driver => {
+            const children = await card.findElements(By.tagName('oeb-button'));
+            return children.length === 3;
+        });
+    await driver.wait(condition, defaultWait,
+        "Issuer loading didn't complete");
+
+    await driver.wait(until.elementLocated(
+        By.css("[id^='create-new-badge-btn']:not(.disabled)")),
+        defaultWait);
+    const createBadgeButton = await card.findElement(
+        By.css("[id^='create-new-badge-btn']:not(.disabled)"));
+    await createBadgeButton.click();
 
     await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
 }
@@ -74,11 +104,16 @@ export async function navigateToBadgeDetails(driver) {
 export async function navigateToBadgeAwarding(driver) {
     await navigateToBadgeDetails(driver);
 
-    await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('Badge direkt vergeben')), defaultWait);
-    const badgeAwardButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Badge direkt vergeben'));
-    badgeAwardButton.click();
+    const badgeAwardButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge direkt vergeben')),
+        defaultWait);
+    await badgeAwardButton.click();
+
+    const confirmButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge vergeben')),
+        defaultWait,
+        "Couldn't find confirm button");
+    await confirmButton.click();
 
     await driver.wait(until.titleIs(`Award Badge - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
@@ -134,23 +169,23 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // 1. Upload own image (insterted into badge frame)
     uploadImage(driver, "image_field0", testImagePath);
     // 2. Upload own image
-    setTimeout(_ => uploadImage(driver, "image_field1", testImagePath), 100);
+    await uploadImage(driver, "image_field1", testImagePath);
     // 3. Select an image from nounproject
-    setTimeout(_ => selectNounProjectImage(driver, nounProjectSearchText), 300);
+    await selectNounProjectImage(driver, nounProjectSearchText);
 
     // * Badge with skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
         // Add competencies using AI
-        setTimeout(async _ => await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText), 500);
+        await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
         // Add competencies by hand
-        setTimeout(async _ => await addCompetenciesByHand(driver), 1500);
+        await addCompetenciesByHand(driver);
     }
     
     // * Optional Badge-Details
-    setTimeout(async _ => await addOptionalDetails(driver), 3000);
+    await addOptionalDetails(driver);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
-    setTimeout(async _ => submitButton.click(), 8000);
+    await submitButton.click();
     
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
@@ -187,12 +222,6 @@ export async function awardBadge(driver, email = username) {
         'button[type="submit"].tw-relative'));
     submitButton.click();
 
-    // Disable badge editing dialog
-    await driver.wait(until.elementLocated(By.tagName('app-end-of-edit-dialog')), defaultWait);
-    const endEditingDialog = await driver.findElement(By.tagName('app-end-of-edit-dialog'));
-    const confirmDialogButton = await endEditingDialog.findElement(By.id('confirm-award-badge'));
-    await confirmDialogButton.click();
-
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
 }
 
@@ -216,23 +245,20 @@ export async function downloadPdfFromBackpack(driver) {
 
     const dropdownButtons = await driver.findElements(By.css(
         'button[role="menuitem"]'));
-    const pdfExportButton = dropdownButtons[1];
+    const pdfExportButton = dropdownButtons[2];
     await pdfExportButton.click();
-
-    await driver.wait(until.elementLocated(By.css('embed[src^="blob:http"]')), defaultWait);
-    const htmlEmbed = await driver.findElement(By.css('embed[src^="blob:http"]'));
-    await driver.switchTo().frame(htmlEmbed);
 
     await driver.wait(until.elementLocated(By.css('embed[src="about:blank"]')), defaultWait);
 
     await driver.switchTo().defaultContent();
-    const downloadButton = await driver.findElement(By.id(
-        'download-pdf-backpack'));
+    const downloadButton = await driver.findElement(By.id('download-pdf-backpack'));
+    // Wait for download button to be enabled
+    await driver.wait(until.elementIsEnabled(downloadButton), defaultWait);
     await downloadButton.click();
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
     // TODO: Verify file content
-    fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
+    clearDownloadDirectory();
 }
 
 /**
@@ -249,32 +275,38 @@ export async function downloadPdfFromIssuer(driver) {
 
     await waitForDownload(driver, new RegExp(`^${testBadgeTitle} - \\d+\\.pdf$`));
     // TODO: Verify file content
-    fs.readdirSync(downloadDirectory).forEach(f => fs.rmSync(`${downloadDirectory}/${f}`));
+    clearDownloadDirectory();
+}
+
+export function clearDownloadDirectory() {
+    let regex = /[.]pdf$/
+    fs.readdirSync(downloadDirectory)
+        .filter(f => regex.test(f))
+        .map(f => fs.unlinkSync(downloadDirectory + '/' + f))
 }
 
 export async function waitForDownload(driver, regex, timeout = 5000) {
-    let pollId;
-    const downloadPoll = resolve => {
-        const files = fs.readdirSync(downloadDirectory);
-        if (files.length === 0) {
-            pollId = setTimeout(_ => downloadPoll(resolve), 100);
-            return;
-        }
-        assert(files.length, 1, "Expected one downloaded file");
-        if (!regex.test(files[0])) {
-            pollId = setTimeout(_ => downloadPoll(resolve), 100);
-            return;
-        }
-        clearTimeout(pollId);
-        resolve();
-    };
-    const pollingPromise = new Promise(downloadPoll);
-    try {
-        await driver.wait(pollingPromise, timeout, "Download didn't finish or file content didn't match the pattern within the specified timeout");
-    } catch(error) {
-        clearTimeout(pollId);
-        throw error;
-    }
+    const condition = new Condition("for download",
+        driver => {
+            const files = fs.readdirSync(downloadDirectory);
+            if (files.length === 0)
+                return false;
+
+            let count = 0;
+            for (const file of files) {
+                if (regex.test(file)) {
+                    count++;
+                }
+            }
+
+            if (count === 0)
+                return false;
+
+            assert(count, 1, "Expected one downloaded file");
+            return true;
+        });
+    await driver.wait(condition, timeout,
+        "Download didn't finish or file content didn't match the pattern within the specified timeout");
 }
 
 /**

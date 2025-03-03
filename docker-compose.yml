@@ -1,0 +1,29 @@
+# Inspired by https://www.testmo.com/guides/github-actions-selenium/
+services:
+  chrome:
+    image: selenium/standalone-chrome
+    #platform: linux/amd64 #comment in if you are on Apple Silicon
+    shm_size: '2gb'
+    ports:
+      - 4444:4444 # Selenium service
+      - 5900:5900 # VNC server
+      - 7900:7900 # VNC browser client
+    volumes:
+      - ./assets:/project/assets
+      - download:/tmp
+    working_dir: /project
+
+  node:
+    image: node:23
+    volumes:
+      - ./:/project
+      - download:/tmp
+      - ./screenshots/:/project/screenshots
+    working_dir: /project
+    tty: true
+    depends_on:
+      - chrome
+    entrypoint: ["bash", "/project/entrypoint.sh"]
+
+volumes:
+  download:

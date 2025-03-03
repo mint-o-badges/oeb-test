@@ -1,6 +1,21 @@
 # Open Educational Badges Test
 This is a selenium project that aims to implement end-to-end tests for [Open Educational Badges](https://openbadges.education).
 
+There are two ways to run this application:
+
+## Docker
+
+You need to have `docker compose` installed. Then simply run
+```bash
+docker compose run node
+```
+You can observe the automated browser in the VNC under `localhost:7900`.
+The password is `secret` by default.
+
+**Note:** If you are on Apple Silicon, uncomment the `platform: linux/amd64` line in the `docker-compose.yml` file.
+
+## No docker
+
 To run, first set up an up-to-date npm (at the time of writing v22.8.0), e.g. by running:
 ```bash
 echo "node" > .nvmrc

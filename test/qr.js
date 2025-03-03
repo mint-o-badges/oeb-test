@@ -22,6 +22,13 @@ export async function navigateToQrCreation(driver, name = 'automated test title'
     const qrCodeButton = await driver.findElement(
         ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben'));
     await qrCodeButton.click();
+
+    const confirmButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText(
+            'QR-Code-Vergabe erstellen')), defaultWait,
+        "Couldn't find confirm button");
+    await confirmButton.click();
+
     await driver.wait(until.elementLocated(By.css(
         'oeb-input[label="Titel"]')), defaultWait);
 }
@@ -47,7 +54,7 @@ export async function generateQrCode(driver) {
     await generateQrCodeButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')), defaultWait);
+        'svg.checkmark')), defaultWait);
     
     const closeDialogButton = await driver.findElement(By.css(
         'button[brndialogclose]'));
@@ -142,7 +149,7 @@ export async function requestBadgeViaQr(driver) {
     await submitButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')), defaultWait);
+        'svg.checkmark')), defaultWait);
 }
 
 /**
@@ -155,6 +162,11 @@ export async function confirmBadgeAwarding(driver) {
         'button[role="heading"]'));
     await dropdownButton.click();
 
+    // Choose the first request, which is the only one
+    const requestedBadgeCheckbox = await driver.findElement(By.css
+        ('hlm-checkbox-checkicon'));
+    await requestedBadgeCheckbox.click();
+
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge vergeben')), defaultWait);
     const confirmButton = await driver.findElement(
@@ -164,5 +176,5 @@ export async function confirmBadgeAwarding(driver) {
     await confirmButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'hlm-icon[name="lucideCheck"]')), defaultWait);
+        'svg.checkmark')), defaultWait);
 }
