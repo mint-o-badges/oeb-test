@@ -40,31 +40,11 @@ export async function navigateToBadgeCreation(driver) {
     // wait here as well
     const expectedTitle = 'Issuers - Open Educational Badges';
     driver.wait(until.titleIs(expectedTitle), defaultWait);
-    // The rendering process of the issuers page is quite weird,
-    // so we wait for that to finish.
-    // For that we take the first card (and hope that it's a valid
-    // issuer) and wait until it has all three buttons
-    const card = await driver.wait(until.elementLocated(
-        ExtendedBy.containingText(
-            By.css('div.tw-border-purple.tw-grow'),
-            By.tagName('span'),
-            // Search for "Lernpfad erstellen" because only
-            // verified issuers have this button
-            'Lernpfad erstellen')),
-        defaultWait,
-        "Couldn't find card");
-    const condition = new Condition("for issuers to have fully loaded",
-        async driver => {
-            const children = await card.findElements(By.tagName('oeb-button'));
-            return children.length === 3;
-        });
-    await driver.wait(condition, defaultWait,
-        "Issuer loading didn't complete");
 
     await driver.wait(until.elementLocated(
         By.css("[id^='create-new-badge-btn']:not(.disabled)")),
         defaultWait);
-    const createBadgeButton = await card.findElement(
+    const createBadgeButton = await driver.findElement(
         By.css("[id^='create-new-badge-btn']:not(.disabled)"));
     await createBadgeButton.click();
 
@@ -175,6 +155,7 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
 
     // * Badge with skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
+        console.log("🚀 ~ createBadge ~ Kompetenz:")
         // Add competencies using AI
         await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
         // Add competencies by hand
