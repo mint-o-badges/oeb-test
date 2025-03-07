@@ -116,34 +116,33 @@ export async function navigateToReceivedBadge(driver) {
 /**
  * This assumes that the driver already navigated to the badge creation page
  */
-export async function createBadge(driver, badgeType = 'Teilnahme') {
-    const categoryDropdownButton = await driver.findElement(By.css(
-        'button[role="combobox"]'));
-    await categoryDropdownButton.click();
+    // Initial step: Badge type selection
+    await driver.wait(until.elementLocated(By.css(`[id^=${badgeType}]`)), defaultWait);
 
-    // Category selection 
-    await driver.wait(until.elementLocated(
-        ExtendedBy.tagWithText('hlm-option', badgeType)), defaultWait);
-    const participationOption = await driver.findElement(
-        ExtendedBy.tagWithText('hlm-option', badgeType));
-    await participationOption.click();
+    const selectedBadgeType = await driver.findElement(
+        By.css("[id^='participation']")
+    );
+    await selectedBadgeType.click();
 
-    // Description field
-    const shortDescriptionField = await driver.findElement(By.css(
-        'textarea'));
-    await shortDescriptionField.sendKeys(testBadgeDescription);
+    // Click step 2, as sometimes it goes to 3rd step directly after step 1
+    const step2 = await driver.findElement(
+        ExtendedBy.tagWithText('div', '2'));
+    await step2.click();
 
+    // Next step: Badge details
+    // Title field
+    const titleField = await driver.findElement(By.css(
+        'input[type="text"]'));
+    await titleField.sendKeys(testBadgeTitle);
     // Duration field
     const durationField = await driver.findElement(By.css(
         'input[type="number"]'));
     await durationField.clear()
     await durationField.sendKeys(testDuration);
-
-    // Title field
-    const titleField = await driver.findElement(By.css(
-        'input[type="text"]'));
-    await titleField.sendKeys(testBadgeTitle);
-
+    // Description field
+     const shortDescriptionField = await driver.findElement(By.css(
+        'textarea'));
+    await shortDescriptionField.sendKeys(testBadgeDescription);
     // Image field
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
@@ -153,16 +152,28 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
 
-    // * Badge with skills - only with competency badge type
+    // Click next button to move to the next step
+    const nextButton = await driver.findElement(
+        ExtendedBy.tagWithText('span', 'Weiter'));
+    await nextButton.click();
+
+    // Next step: Add skills - only with competency badge type
     if(badgeType == 'Kompetenz'){
-        console.log("🚀 ~ createBadge ~ Kompetenz:")
         // Add competencies using AI
         await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
         // Add competencies by hand
         await addCompetenciesByHand(driver);
+
+        // Click next button to move to the next step
+        await nextButton.click();
     }
+
+    // Next step: Add new tag
+    await addNewTag(driver, tagName);
+    // Click next button to move to the next step
+    await nextButton.click();
     
-    // * Optional Badge-Details
+    // Final step: add optional details then submit badge
     await addOptionalDetails(driver);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
