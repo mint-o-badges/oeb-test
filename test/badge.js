@@ -40,31 +40,11 @@ export async function navigateToBadgeCreation(driver) {
     // wait here as well
     const expectedTitle = 'Issuers - Open Educational Badges';
     driver.wait(until.titleIs(expectedTitle), defaultWait);
-    // The rendering process of the issuers page is quite weird,
-    // so we wait for that to finish.
-    // For that we take the first card (and hope that it's a valid
-    // issuer) and wait until it has all three buttons
-    const card = await driver.wait(until.elementLocated(
-        ExtendedBy.containingText(
-            By.css('div.tw-border-purple.tw-grow'),
-            By.tagName('span'),
-            // Search for "Lernpfad erstellen" because only
-            // verified issuers have this button
-            'Lernpfad erstellen')),
-        defaultWait,
-        "Couldn't find card");
-    const condition = new Condition("for issuers to have fully loaded",
-        async driver => {
-            const children = await card.findElements(By.tagName('oeb-button'));
-            return children.length === 3;
-        });
-    await driver.wait(condition, defaultWait,
-        "Issuer loading didn't complete");
 
     await driver.wait(until.elementLocated(
         By.css("[id^='create-new-badge-btn']:not(.disabled)")),
-        defaultWait);
-    const createBadgeButton = await card.findElement(
+        extendedWait);
+    const createBadgeButton = await driver.findElement(
         By.css("[id^='create-new-badge-btn']:not(.disabled)"));
     await createBadgeButton.click();
 
@@ -136,34 +116,34 @@ export async function navigateToReceivedBadge(driver) {
 /**
  * This assumes that the driver already navigated to the badge creation page
  */
-export async function createBadge(driver, badgeType = 'Teilnahme') {
-    const categoryDropdownButton = await driver.findElement(By.css(
-        'button[role="combobox"]'));
-    await categoryDropdownButton.click();
+export async function createBadge(driver, badgeType = 'participation') {
+    // Initial step: Badge type selection
+    await driver.wait(until.elementLocated(By.css(`[id^=${badgeType}]`)), defaultWait);
 
-    // Category selection 
-    await driver.wait(until.elementLocated(
-        ExtendedBy.tagWithText('hlm-option', badgeType)), defaultWait);
-    const participationOption = await driver.findElement(
-        ExtendedBy.tagWithText('hlm-option', badgeType));
-    await participationOption.click();
+    const selectedBadgeType = await driver.findElement(
+        By.css(`[id^=${badgeType}]`)
+    );
+    await selectedBadgeType.click();
 
-    // Description field
-    const shortDescriptionField = await driver.findElement(By.css(
-        'textarea'));
-    await shortDescriptionField.sendKeys(testBadgeDescription);
+    // Click step 2, as sometimes it goes to 3rd step directly after step 1
+    const step2 = await driver.findElement(
+        ExtendedBy.tagWithText('div', '2'));
+    await step2.click();
 
+    // Next step: Badge details
+    // Title field
+    const titleField = await driver.findElement(By.css(
+        'input[type="text"]'));
+    await titleField.sendKeys(testBadgeTitle);
     // Duration field
     const durationField = await driver.findElement(By.css(
         'input[type="number"]'));
     await durationField.clear()
     await durationField.sendKeys(testDuration);
-
-    // Title field
-    const titleField = await driver.findElement(By.css(
-        'input[type="text"]'));
-    await titleField.sendKeys(testBadgeTitle);
-
+    // Description field
+     const shortDescriptionField = await driver.findElement(By.css(
+        'textarea'));
+    await shortDescriptionField.sendKeys(testBadgeDescription);
     // Image field
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
@@ -173,15 +153,28 @@ export async function createBadge(driver, badgeType = 'Teilnahme') {
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
 
-    // * Badge with skills - only with competency badge type
-    if(badgeType == 'Kompetenz'){
+    // Click next button to move to the next step
+    const nextButton = await driver.findElement(
+        ExtendedBy.tagWithText('span', 'Weiter'));
+    await nextButton.click();
+
+    // Next step: Add skills - only with competency badge type
+    if(badgeType == 'competency'){
         // Add competencies using AI
         await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
         // Add competencies by hand
         await addCompetenciesByHand(driver);
+
+        // Click next button to move to the next step
+        await nextButton.click();
     }
+
+    // Next step: Add new tag
+    await addNewTag(driver, tagName);
+    // Click next button to move to the next step
+    await nextButton.click();
     
-    // * Optional Badge-Details
+    // Final step: add optional details then submit badge
     await addOptionalDetails(driver);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
@@ -194,9 +187,6 @@ async function addOptionalDetails(driver){
     // Open optional badge-detail section
     const optionalDetailSection = await driver.findElement(By.id('optional-details'));
     await optionalDetailSection.click();
-
-    // Add new tag
-    await addNewTag(driver, tagName);
     // Link badge to educational standards
     await linkToEduStandards(driver);
     // Badge validity
@@ -239,6 +229,8 @@ export async function receiveBadge(driver) {
  * This assumes that the driver already navigated to the received badge page
  */
 export async function downloadPdfFromBackpack(driver) {
+    await driver.wait(until.elementLocated(By.css(
+        'svg[icon="icon_more"]')), defaultWait);
     const moreSvgButton = await driver.findElement(By.css(
         'svg[icon="icon_more"]'));
     await moreSvgButton.click();

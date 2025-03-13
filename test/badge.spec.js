@@ -74,7 +74,7 @@ describe('Badge Test', function() {
     // Competency badge
     it('should create a competency badge', async function() {
         await navigateToBadgeCreation(driver);
-        await createBadge(driver, 'Kompetenz');
+        await createBadge(driver, 'competency');
     });
 
     it('should validate the competency badge', async function() {
