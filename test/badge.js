@@ -43,7 +43,7 @@ export async function navigateToBadgeCreation(driver) {
 
     await driver.wait(until.elementLocated(
         By.css("[id^='create-new-badge-btn']:not(.disabled)")),
-        defaultWait);
+        extendedWait);
     const createBadgeButton = await driver.findElement(
         By.css("[id^='create-new-badge-btn']:not(.disabled)"));
     await createBadgeButton.click();
@@ -116,11 +116,12 @@ export async function navigateToReceivedBadge(driver) {
 /**
  * This assumes that the driver already navigated to the badge creation page
  */
+export async function createBadge(driver, badgeType = 'participation') {
     // Initial step: Badge type selection
     await driver.wait(until.elementLocated(By.css(`[id^=${badgeType}]`)), defaultWait);
 
     const selectedBadgeType = await driver.findElement(
-        By.css("[id^='participation']")
+        By.css(`[id^=${badgeType}]`)
     );
     await selectedBadgeType.click();
 
@@ -158,7 +159,7 @@ export async function navigateToReceivedBadge(driver) {
     await nextButton.click();
 
     // Next step: Add skills - only with competency badge type
-    if(badgeType == 'Kompetenz'){
+    if(badgeType == 'competency'){
         // Add competencies using AI
         await addCompetenciesViaAI(driver, aiCompetenciesDescriptionText);
         // Add competencies by hand
@@ -186,9 +187,6 @@ async function addOptionalDetails(driver){
     // Open optional badge-detail section
     const optionalDetailSection = await driver.findElement(By.id('optional-details'));
     await optionalDetailSection.click();
-
-    // Add new tag
-    await addNewTag(driver, tagName);
     // Link badge to educational standards
     await linkToEduStandards(driver);
     // Badge validity
@@ -231,6 +229,8 @@ export async function receiveBadge(driver) {
  * This assumes that the driver already navigated to the received badge page
  */
 export async function downloadPdfFromBackpack(driver) {
+    await driver.wait(until.elementLocated(By.css(
+        'svg[icon="icon_more"]')), defaultWait);
     const moreSvgButton = await driver.findElement(By.css(
         'svg[icon="icon_more"]'));
     await moreSvgButton.click();
