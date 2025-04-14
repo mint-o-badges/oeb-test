@@ -89,4 +89,5 @@ export async function addCompetenciesViaAI(driver, aiCompetenciesDescriptionText
     const firstAISkillCheckbox = await driver.findElement(By.id(
         'checkboxAiSkill_0'));
     firstAISkillCheckbox.click();
+    await driver.wait(until.elementIsEnabled(firstAISkillCheckbox), defaultWait);
 }
