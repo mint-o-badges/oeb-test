@@ -34,6 +34,7 @@ describe('Badge Test', function() {
         clearDownloadDirectory();
         // Set download directory path 
         let options = new chrome.Options();
+        options.addArguments("--lang=de-DE");
         options.setUserPreferences({
             "download.default_directory": downloadDirectory,
         });

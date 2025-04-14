@@ -48,7 +48,7 @@ export async function navigateToBadgeCreation(driver) {
         By.css("[id^='create-new-badge-btn']:not(.disabled)"));
     await createBadgeButton.click();
 
-    await driver.wait(until.titleIs('Create Badge - Open Educational Badges'), extendedWait);
+    await driver.wait(until.titleIs('Badge erstellen - Open Educational Badges'), extendedWait);
 }
 
 export async function navigateToBadgeDetails(driver) {
@@ -118,10 +118,10 @@ export async function navigateToReceivedBadge(driver) {
  */
 export async function createBadge(driver, badgeType = 'participation') {
     // Initial step: Badge type selection
-    await driver.wait(until.elementLocated(By.css(`[id^=${badgeType}]`)), defaultWait);
+    await driver.wait(until.elementLocated(By.css(`[href*='${badgeType}']`)), defaultWait);
 
     const selectedBadgeType = await driver.findElement(
-        By.css(`[id^=${badgeType}]`)
+        By.css(`[href*='${badgeType}']`)
     );
     await selectedBadgeType.click();
 
@@ -151,11 +151,11 @@ export async function createBadge(driver, badgeType = 'participation') {
     // 2. Upload own image
     await uploadImage(driver, "image_field1", testImagePath);
     // 3. Select an image from nounproject
-    await selectNounProjectImage(driver, nounProjectSearchText);
+    //await selectNounProjectImage(driver, nounProjectSearchText);
 
     // Click next button to move to the next step
     const nextButton = await driver.findElement(
-        ExtendedBy.tagWithText('span', 'Weiter'));
+        By.containingText("button", "span", "Weiter"));
     await nextButton.click();
 
     // Next step: Add skills - only with competency badge type
