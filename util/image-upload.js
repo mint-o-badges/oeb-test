@@ -10,7 +10,11 @@ import { ExtendedBy } from "./selection.js";
  * @param {string} imagePath 
  */
 export async function uploadImage(driver, element_id, nthElement, imagePath) {
-    const imageField = await driver.findElement(By.xpath(`(//*[starts-with(@id, '${element_id}')])[${nthElement}]`));
+    let imageField;
+    if(nthElement === 0)
+        imageField = await driver.findElement(By.xpath(`(//*[starts-with(@id, '${element_id}')])`));
+    else
+        imageField = await driver.findElement(By.xpath(`(//*[starts-with(@id, '${element_id}')])[${nthElement}]`));
     const image = path.resolve(imagePath);
     await imageField.sendKeys(image);
     await driver.wait(

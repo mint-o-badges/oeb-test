@@ -5,6 +5,7 @@ import {url, defaultWait} from '../config.js';
 import {requestToken, findIssuer, deleteIssuer} from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
 import path from 'path';
+import { uploadImage } from '../util/image-upload.js';
 
 const testIssuerName = 'automatedTestName';
 const testIssuerImagePath = 'assets/image.png';
@@ -26,14 +27,7 @@ export async function navigateToIssuerCreation(driver) {
  * This assumes that the driver already navigated to the issuer creation page
  */
 export async function createIssuer(driver) {
-    const imageField = await driver.findElement(By.id(
-        'image_field0'));
-
-    const image = path.resolve(testIssuerImagePath);
-    await imageField.sendKeys(image);
-
-    await driver.wait(until.elementLocated(By.css(
-        'img[src^="data:image/png;base64,iVBORw0KGg"]')));
+    await uploadImage(driver, "image_field", 0, testIssuerImagePath);
 
     const textFields = await driver.findElements(By.css(
         'input[type="text"]'));
@@ -57,7 +51,7 @@ export async function createIssuer(driver) {
         ExtendedBy.tagWithText('hlm-option', username));
     await mailOption.click();
 
-    const description = await driver.findElement(By.tagName(
+    const description = await driver.findElement(By.css(
         'textarea'));
     await description.sendKeys(testIssuerDescription);
 
@@ -71,16 +65,16 @@ export async function createIssuer(driver) {
     const streetField = textFields[1];
     await streetField.sendKeys(testIssuerStreet);
 
+    const streetnumberField = textFields[2];
+    await streetnumberField.sendKeys(testIssuerStreetnumber);
+
     const numberFields = await driver.findElements(By.css(
         'input[type="number"]'));
 
-    const streetnumberField = numberFields[0];
-    await streetnumberField.sendKeys(testIssuerStreetnumber);
-
-    const postalCodeField = numberFields[1];
+    const postalCodeField = numberFields[0];
     await postalCodeField.sendKeys(testIssuerPostalCode);
 
-    const cityField = textFields[2];
+    const cityField = textFields[3];
     await cityField.sendKeys(testIssuerCity);
 
     const confirmCheckbox = await driver.findElement(By.css

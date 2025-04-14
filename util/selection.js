@@ -55,7 +55,7 @@ export class ExtendedBy {
 
     static tagWithText(tag, text, trim = true) {
         return (async (driver) => {
-            const selected = await driver.findElements(By.tagName(tag));
+            const selected = await driver.findElements(By.css(tag));
             const selectedArray = Array.from(selected);
             const mappedPromises = selectedArray.map(async node => {
                 try {
