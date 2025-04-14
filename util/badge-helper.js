@@ -83,12 +83,10 @@ export async function addCompetenciesViaAI(driver, aiCompetenciesDescriptionText
         'suggest-competencies-btn'));
     await suggestCompetenciesButton.click();
     
-    // Select first and third skills
+    // Only use first skill to always ensure we have only one resulting in a deterministic
+    // total number of competencies
     await driver.wait(until.elementLocated(By.id('checkboxAiSkill_0')), defaultWait);
     const firstAISkillCheckbox = await driver.findElement(By.id(
         'checkboxAiSkill_0'));
     firstAISkillCheckbox.click();
-    const thirdAISkillCheckbox = await driver.findElement(By.id(
-        'checkboxAiSkill_2'));
-    thirdAISkillCheckbox.click();
 }

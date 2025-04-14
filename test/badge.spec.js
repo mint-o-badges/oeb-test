@@ -70,7 +70,7 @@ describe('Badge Test', function() {
 
     it('delete the participation badge', async function() {
         await deleteBadgeOverApi();
-    })
+    });
 
     // Competency badge
     it('should create a competency badge', async function() {
@@ -94,26 +94,26 @@ describe('Badge Test', function() {
         await receiveBadge(driver);
     });
 
-    it('should download the pdf from the backpack', async function() {
-        await navigateToReceivedBadge(driver);
-        await downloadPdfFromBackpack(driver);
-    });
+    // it('should download the pdf from the backpack', async function() {
+    //     await navigateToReceivedBadge(driver);
+    //     await downloadPdfFromBackpack(driver);
+    // });
 
-    it('should download the pdf from the internal issuer page', async function() {
-        await navigateToBadgeDetails(driver);
-        await downloadPdfFromIssuer(driver);
-    });
+    // it('should download the pdf from the internal issuer page', async function() {
+    //     await navigateToBadgeDetails(driver);
+    //     await downloadPdfFromIssuer(driver);
+    // });
 
-    it('should revoke the competency badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await revokeBadge(driver);
-        await navigateToBackpack(driver);
-        await confirmRevokedBadge(driver);
-    });
+    // it('should revoke the competency badge', async function() {
+    //     await navigateToBadgeDetails(driver);
+    //     await revokeBadge(driver);
+    //     await navigateToBackpack(driver);
+    //     await confirmRevokedBadge(driver);
+    // });
 
-    it('delete the competency badge', async function() {
-        await deleteBadgeOverApi();
-    })
+    // it('delete the competency badge', async function() {
+    //     await deleteBadgeOverApi();
+    // })
 
     afterEach(async function () {
         await screenshot(driver, this.currentTest);

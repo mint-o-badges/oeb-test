@@ -147,15 +147,15 @@ export async function createBadge(driver, badgeType = 'participation') {
     // Image field
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
-    uploadImage(driver, "image_field0", testImagePath);
+    await uploadImage(driver, "image_field", 2, testImagePath);
     // 2. Upload own image
-    await uploadImage(driver, "image_field1", testImagePath);
+    await uploadImage(driver, "image_field", 1, testImagePath);
     // 3. Select an image from nounproject
-    //await selectNounProjectImage(driver, nounProjectSearchText);
+    await selectNounProjectImage(driver, nounProjectSearchText);
 
     // Click next button to move to the next step
     const nextButton = await driver.findElement(
-        By.containingText("button", "span", "Weiter"));
+        ExtendedBy.tagWithText('span', 'Weiter'));
     await nextButton.click();
 
     // Next step: Add skills - only with competency badge type
@@ -443,7 +443,7 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
 
     if(badgeType == 'Kompetenz'){
         const BadgeCompetencies = await driver.findElements(By.css('competency-accordion'))
-        assert.equal(BadgeCompetencies.length, 3);
+        assert.equal(BadgeCompetencies.length, 2);
     }
 }
 
