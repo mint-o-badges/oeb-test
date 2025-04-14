@@ -5,13 +5,15 @@
         "name": "Mocha (Test single file)",
         "type": "node",
         "request": "launch",
-        "runtimeArgs": [
-          "${workspaceRoot}/node_modules/.bin/mocha",
-          "--inspect-brk",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "outFiles": ["${workspaceFolder}/test/**/*.js"],
+        "runtimeArgs": ["--nolazy"],
+        "args": [
+          "--inspect-brk", 
           "${relativeFile}",
         ],
         "console": "integratedTerminal",
         "internalConsoleOptions": "neverOpen",
-      }
+      },
     ]
 }
