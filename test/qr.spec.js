@@ -64,15 +64,15 @@ describe('QR test', function() {
         await requestBadgeViaQr(driver);        
     });
 
-    // it('should confirm the QR code awarding', async function() {
-    //     await navigateToBadgeDetails(driver);
-    //     await confirmBadgeAwarding(driver);
-    // });
+    it('should confirm the QR code awarding', async function() {
+        await navigateToBadgeDetails(driver);
+        await confirmBadgeAwarding(driver);
+    });
 
-    // it('should receive the badge', async function() {
-    //     await navigateToBackpack(driver);
-    //     await receiveBadge(driver);
-    // });
+    it('should receive the badge', async function() {
+        await navigateToBackpack(driver);
+        await receiveBadge(driver);
+    });
 
     afterEach(async function () {
         await screenshot(driver, this.currentTest);
