@@ -48,11 +48,11 @@ export async function acceptTerms(driver) {
     }
     
     const checkbox = await termsBox.findElement(
-        By.tagName('hlm-checkbox-checkicon'));
+        By.css('hlm-checkbox-checkicon'));
     await checkbox.click();
 
     const submitButton = await termsBox.findElement(
-        By.tagName('button'));
+        By.css('button'));
     await submitButton.click();
 
     await driver.get(`${url}/issuer`);
