@@ -248,7 +248,7 @@ export async function downloadPdfFromBackpack(driver) {
     await driver.wait(until.elementIsEnabled(downloadButton), defaultWait);
     await downloadButton.click();
 
-    await waitForDownload(driver, new RegExp('^\d{4}-\d{2}-\d{2}_\S+\.pdf$'));
+    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
     // TODO: Verify file content
     clearDownloadDirectory();
 }
@@ -265,7 +265,7 @@ export async function downloadPdfFromIssuer(driver) {
     assert.equal(certificateButtons.length, 1, "Only expected one assertion and thus one certificate");
     await certificateButtons[0].click();
 
-    await waitForDownload(driver, new RegExp('^\d{4}-\d{2}-\d{2}_\S+\.pdf$'));
+    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
     // TODO: Verify file content
     clearDownloadDirectory();
 }
@@ -278,25 +278,19 @@ export function clearDownloadDirectory() {
 }
 
 export async function waitForDownload(driver, regex, timeout = 5000) {
+    const crdownloadRegExp = new RegExp(regex.source + "\.crdownload", regex.flags);
     const condition = new Condition("for download",
         driver => {
-            let count = 0;
-            while(true) {
-                const files = fs.readdirSync(downloadDirectory);
-                if (files.length === 0)
-                    return false;
-    
-                for (const file of files) {
-                    if (regex.test(file)) {
-                        count++;
-                    }
-                }
+            // Block until all downloads are finished (indicated by .crdownload files)
+            while(fs.readdirSync(downloadDirectory).some(f => 
+                crdownloadRegExp.test(f)).length > 0)
+                continue;
 
-                if(count >= 0)
-                    break;
-            }
+            const matches = fs.readdirSync(downloadDirectory)
+                .filter(f => 
+                    regex.test(f));
 
-            return true;
+            return matches.length === 1;
         });
     await driver.wait(condition, timeout,
         "Download didn't finish or file content didn't match the pattern within the specified timeout");
@@ -313,14 +307,14 @@ export async function revokeBadge(driver) {
         ExtendedBy.submitButtonWithText('zurücknehmen'));
     await revokeButton.click();
 
-    const confirmDialog = await driver.findElement(By.tagName('confirm-dialog'));
+    const confirmDialog = await driver.findElement(By.css('confirm-dialog'));
     const confirmButton = await confirmDialog.findElement(By.css(
         'button.button:not(.button-secondary)'));
     await confirmButton.click();
 
-    const issuerDatatable = await driver.findElement(By.tagName(
+    const issuerDatatable = await driver.findElement(By.css(
         'issuer-detail-datatable'));
-    const heading = await issuerDatatable.findElement(By.tagName('h3'));
+    const heading = await issuerDatatable.findElement(By.css('h3'));
     await driver.wait(until.elementTextIs(heading, '0 Badge Empfänger:innen'), defaultWait);
 }
 

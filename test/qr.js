@@ -124,23 +124,23 @@ export async function requestBadgeViaQr(driver) {
         'oeb-input[label="Vorname"]')), defaultWait);
     const vornameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Vorname"]'));
-    const vornameField = await vornameOebInput.findElement(By.tagName(
+    const vornameField = await vornameOebInput.findElement(By.css(
         'input'));
     await vornameField.sendKeys('automatedName');
 
     const nachnameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Nachname"]'));
-    const nachnameField = await nachnameOebInput.findElement(By.tagName(
+    const nachnameField = await nachnameOebInput.findElement(By.css(
         'input'));
     await nachnameField.sendKeys('automatedSurname');
 
     const emailOebInput = await driver.findElement(By.css(
         'oeb-input[label="E-Mail"]'));
-    const emailField = await emailOebInput.findElement(By.tagName(
+    const emailField = await emailOebInput.findElement(By.css(
         'input'));
     await emailField.sendKeys(username);
 
-    const ageConfirmationCheckbox = await driver.findElement(By.tagName(
+    const ageConfirmationCheckbox = await driver.findElement(By.css(
         'brn-checkbox'));
     await ageConfirmationCheckbox.click();
 
