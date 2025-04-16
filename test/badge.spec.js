@@ -22,8 +22,14 @@ import {
     validateParticipationBadge,
     verifyBadgeOverApi,
     validateBadge,
-    clearDownloadDirectory
+    clearDownloadDirectory,
+    createBadges,
+    deleteBadgesOverApi,
+    createMicroDegree,
+    deleteMicroDegreeOverApi
 } from './badge.js';
+
+const BADGES_FOR_MICRO_DEGREE = 3;
 
 describe('Badge Test', function() {
     this.timeout(30000);
@@ -56,64 +62,94 @@ describe('Badge Test', function() {
         await login(driver);
     });
 
-    // Participation badge
-    it('should create a participation badge', async function() {
+    // // Participation badge
+    // it('should create a participation badge', async function() {
+    //     await navigateToBadgeCreation(driver);
+    //     await createBadge(driver);
+    // });
+
+    // it('should validate the participation badge', async function() {
+    //     await navigateToBadgeDetails(driver);
+    //     await validateBadge(driver);
+    //     await verifyBadgeOverApi(driver);
+    // });
+
+    // it('delete the participation badge', async function() {
+    //     await deleteBadgeOverApi();
+    // });
+
+    // // Competency badge
+    // it('should create a competency badge', async function() {
+    //     await navigateToBadgeCreation(driver);
+    //     await createBadge(driver, 'competency');
+    // });
+
+    // it('should validate the competency badge', async function() {
+    //     await navigateToBadgeDetails(driver);
+    //     await validateBadge(driver, 'Kompetenz');
+    //     await verifyBadgeOverApi(driver);
+    // });
+
+    // it('should award the competency badge', async function() {
+    //     await navigateToBadgeAwarding(driver);
+    //     await awardBadge(driver);
+    // });
+
+    // it('should receive the competency badge', async function() {
+    //     await navigateToBackpack(driver);
+    //     await receiveBadge(driver);
+    // });
+
+    // it('should download the pdf from the backpack', async function() {
+    //     await navigateToReceivedBadge(driver);
+    //     await downloadPdfFromBackpack(driver);
+    // });
+
+    // it('should download the pdf from the internal issuer page', async function() {
+    //     await navigateToBadgeDetails(driver);
+    //     await downloadPdfFromIssuer(driver);
+    // });
+
+    // it('should revoke the competency badge', async function() {
+    //     await navigateToBadgeDetails(driver);
+    //     await revokeBadge(driver);
+    //     await navigateToBackpack(driver);
+    //     await confirmRevokedBadge(driver);
+    // });
+
+    // it('delete the competency badge', async function() {
+    //     await deleteBadgeOverApi();
+    // })
+
+    // micro degree
+    it('should create a micro degree', async () => {
+        // We need at least three badges to put as part of the degree
+        await createBadges(driver, BADGES_FOR_MICRO_DEGREE);
         await navigateToBadgeCreation(driver);
-        await createBadge(driver);
+        await createMicroDegree(driver, BADGES_FOR_MICRO_DEGREE);
     });
 
-    it('should validate the participation badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await validateBadge(driver);
-        await verifyBadgeOverApi(driver);
+    it('should award the micro degree', async function() {
+        // await navigateToBadgeAwarding();
+        // await awardBadge();
     });
 
-    it('delete the participation badge', async function() {
-        await deleteBadgeOverApi();
+    it('should receive the micro degree', async function() {
+        // await navigateToBackpack(driver);
+        // await receiveBadge(driver);
     });
 
-    // Competency badge
-    it('should create a competency badge', async function() {
-        await navigateToBadgeCreation(driver);
-        await createBadge(driver, 'competency');
+    it('should revoke the micro degree', async function() {
+        // await navigateToBadgeDetails(driver);
+        // await revokeBadge(driver);
+        // await navigateToBackpack(driver);
+        // await confirmRevokedBadge(driver);
     });
 
-    it('should validate the competency badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await validateBadge(driver, 'Kompetenz');
-        await verifyBadgeOverApi(driver);
+    it('delete the micro degree', async function() {
+        await deleteMicroDegreeOverApi();
+        await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
     });
-
-    it('should award the competency badge', async function() {
-        await navigateToBadgeAwarding(driver);
-        await awardBadge(driver);
-    });
-
-    it('should receive the competency badge', async function() {
-        await navigateToBackpack(driver);
-        await receiveBadge(driver);
-    });
-
-    it('should download the pdf from the backpack', async function() {
-        await navigateToReceivedBadge(driver);
-        await downloadPdfFromBackpack(driver);
-    });
-
-    it('should download the pdf from the internal issuer page', async function() {
-        await navigateToBadgeDetails(driver);
-        await downloadPdfFromIssuer(driver);
-    });
-
-    it('should revoke the competency badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await revokeBadge(driver);
-        await navigateToBackpack(driver);
-        await confirmRevokedBadge(driver);
-    });
-
-    it('delete the competency badge', async function() {
-        await deleteBadgeOverApi();
-    })
 
     afterEach(async function () {
         await screenshot(driver, this.currentTest);

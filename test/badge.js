@@ -3,6 +3,7 @@ import {
     until,
     Condition
 } from 'selenium-webdriver';
+import { Actions } from 'selenium-webdriver/lib/input.js';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url, defaultWait, extendedWait} from '../config.js';
@@ -27,8 +28,11 @@ const testDuration = '42';
 const testImagePath = 'assets/image.png';
 const testAwardName = 'automated test name';
 const nounProjectSearchText = 'test';
-const aiCompetenciesDescriptionText = 'With solid computer skills, you can automate routine tasks, analyze data more effectively, and communicate with colleagues more efficiently.'
-const tagName = 'automated test tag'
+const aiCompetenciesDescriptionText = 'With solid computer skills, you can automate routine tasks, analyze data more effectively, and communicate with colleagues more efficiently.';
+const tagName = 'automated test tag';
+const microDegreeTitle = 'automated micro degree';
+const microDegreeDescription = 'automated micro degree description';
+
 
 /**
  * This requires that there exists a verified issuer for the user associated with the configured credentials
@@ -327,10 +331,10 @@ export async function confirmRevokedBadge(driver) {
     assert.equal(receivedBadges.length, 0, "Expected to have received no badge with the specified title");
 }
 
-export async function deleteBadgeOverApi() {
+export async function deleteBadgeOverApi(name = testBadgeTitle) {
     const apiToken = await requestToken(username, password);
     assert(apiToken, "Failed to request an API token");
-    const badge = await findBadge(apiToken, testBadgeTitle);
+    const badge = await findBadge(apiToken, name);
     assert(badge, "Failed to find the badge");
     const assertions = await findAssertions(apiToken, badge.entityId);
     const revokationResult = await revokeAssertions(apiToken, assertions);
@@ -457,4 +461,103 @@ export async function verifyBadgeOverApi() {
     const studyLoad = studyLoadExtension.StudyLoad;
     // Study-load is in minutes while test-duration is in hours
     assert.equal(studyLoad/60, testDuration);
+}
+
+/**
+ * Creates {@link n} number of  badges
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ * @param {number} n Number of badges to create
+ */
+export async function createBadges(driver, n) {
+    for(let i = 0; i < n; i++) {
+        await navigateToBadgeCreation(driver);
+        await createBadge(driver);
+    }
+}
+
+/**
+ * Creates a micro degree that includes the first {@link n} badges
+ * available to the logged in user
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ * @param {number} n Number of badges to include
+ */
+export async function createMicroDegree(driver, n) {
+    // Initial step: Badge type selection
+    await driver.wait(until.elementLocated(By.css('[href*="learningpaths/create"]')), defaultWait);
+
+    const selectedBadgeType = await driver.findElement(
+        By.css('[href*="learningpaths/create"]')
+    );
+    await selectedBadgeType.click();
+
+    // Next step: Badge details
+    // Title field
+    const titleField = await driver.findElement(By.css(
+        'input[type="text"]'));
+    await titleField.sendKeys(microDegreeTitle);
+
+    // Description
+    const descriptionField = await driver.findElement(By.css(
+        'textarea'));
+    await descriptionField.sendKeys(microDegreeDescription);
+    
+    // Image field
+    // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
+    // 1. Upload own image (insterted into badge frame)
+    await uploadImage(driver, "image_field", 0, testImagePath);
+    // 2. Upload own image
+    await uploadImage(driver, "image_field", 1, testImagePath);
+    // 3. Select an image from nounproject
+    await selectNounProjectImage(driver, nounProjectSearchText);
+
+    // Click next button to move to the next step
+    const nextButton = await driver.findElement(
+        ExtendedBy.tagWithText('span', 'Weiter'));
+    await nextButton.click();
+
+    // Next step: Add badges to the micro degree
+    const badgeCheckboxes = await driver.findElements(By.css(
+        'hlm-checkbox'
+    ));
+
+    for(let i = 0; i < n; i++)
+        await badgeCheckboxes[i].click();
+
+    // Next step: Order of the badges
+    await nextButton.click();
+    const badgeCards = await driver.findElements(By.css(
+        'bg-badgecard'
+    ));
+    const dragAndDropAction = new Actions(driver)
+        .dragAndDrop(badgeCards[0], badgeCards.at(-1));
+    await dragAndDropAction.perform();
+
+    // Next step: Tag and Create
+    await nextButton.click();
+    await addNewTag(driver, tagName);   
+    
+    const submitForm = await driver.findElement(By.css('form'));
+    await submitForm.submit();
+
+    // The regular expression is for urls of the micro degree like 
+    // '/issuer/issuers/{issuerID}/learningpaths/{learningpathID}'
+    // but it disallows the path where the micro degree is created:
+    // '/issuer/issuers/{issuerID}/learningpaths/create'
+    await driver.wait(until.urlMatches(/\/issuer\/issuers\/[^\/]+\/learningpaths\/(?!create$)[^\/]+$/), extendedWait);
+}
+
+/**
+ * Deletes the micro degree using api requests without UI
+ */
+export const deleteMicroDegreeOverApi =
+    () => deleteBadgeOverApi(microDegreeTitle);
+
+/**
+ * Deletes the given number of badges via the api, essentially
+ * calling {@link deleteBadgeOverApi} multiple times.
+ * @param {number} n The number of badges to delete
+ */
+export async function deleteBadgesOverApi(n) {
+    for(let i = 0; i < n; i++)
+        await deleteBadgeOverApi();
 }
