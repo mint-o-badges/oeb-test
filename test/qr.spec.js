@@ -61,7 +61,7 @@ describe('QR test', function() {
     it('should read the QR code', async function() {
         const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`));
         await driver.get(qrCodeUrl);
-        await requestBadgeViaQr(driver);        
+        await requestBadgeViaQr(driver);
     });
 
     it('should confirm the QR code awarding', async function() {
