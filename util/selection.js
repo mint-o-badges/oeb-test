@@ -49,7 +49,7 @@ export class ExtendedBy {
      */
     static submitButtonWithText(text, textTag = 'span') {
         return ExtendedBy.containingText(
-            By.css('button[type="submit"]'), By.tagName('span'),
+            By.css('button[type="submit"]'), By.css('span'),
             text);
     }
 

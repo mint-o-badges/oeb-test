@@ -39,12 +39,12 @@ export async function navigateToQrCreation(driver, name = 'automated test title'
 export async function generateQrCode(driver) {
     const titelOebInput = await driver.findElement(By.css(
         'oeb-input[label="Titel"]'));
-    const titelField = await titelOebInput.findElement(By.tagName('input'));
+    const titelField = await titelOebInput.findElement(By.css('input'));
     await titelField.sendKeys('automated test QR title');
 
     const nameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Name Ersteller:in"]'));
-    const nameField = await nameOebInput.findElement(By.tagName('input'));
+    const nameField = await nameOebInput.findElement(By.css('input'));
     await nameField.sendKeys('automated test name');
 
     // TODO: Validity fields

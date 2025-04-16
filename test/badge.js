@@ -47,7 +47,7 @@ export async function navigateToBadgeCreation(driver) {
 
     await driver.wait(until.elementLocated(
         By.css("[id^='create-new-badge-btn']:not(.disabled)")),
-        extendedWait);
+        defaultWait);
     const createBadgeButton = await driver.findElement(
         By.css("[id^='create-new-badge-btn']:not(.disabled)"));
     await createBadgeButton.click();
@@ -122,11 +122,9 @@ export async function navigateToReceivedBadge(driver) {
  */
 export async function createBadge(driver, badgeType = 'participation') {
     // Initial step: Badge type selection
-    await driver.wait(until.elementLocated(By.css(`[href*='${badgeType}']`)), defaultWait);
-
-    const selectedBadgeType = await driver.findElement(
-        By.css(`[href*='${badgeType}']`)
-    );
+    const selectedBadgeType = await driver.wait(
+        until.elementLocated(By.css(`[href*='${badgeType}']`)), 
+        defaultWait);
     await selectedBadgeType.click();
 
     // Click step 2, as sometimes it goes to 3rd step directly after step 1
@@ -354,7 +352,7 @@ export async function validateParticipationBadge(driver) {
     const descriptionHeading = await driver.findElement(
         ExtendedBy.tagWithText('h3', 'Kurzbeschreibung'));
     const descriptionElement = await driver.findElement(
-        ExtendedBy.sibling(descriptionHeading, By.tagName('p')));
+        ExtendedBy.sibling(descriptionHeading, By.css('p')));
     const descriptionText = await descriptionElement.getText();
     assert.equal(descriptionText, testBadgeDescription);
 
@@ -364,7 +362,7 @@ export async function validateParticipationBadge(driver) {
     const categoryHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Kategorie'));
     const categoryElement = await driver.findElement(
-        ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
+        ExtendedBy.sibling(categoryHeading, By.css('dd')));
     const categoryText = await categoryElement.getText();
     assert.equal(categoryText, 'Teilnahme-Badge');
 
@@ -377,18 +375,18 @@ export async function validateParticipationBadge(driver) {
     const lastEditedHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
     const lastEditedElement = await driver.findElement(
-        ExtendedBy.sibling(lastEditedHeading, By.tagName('dd')));
+        ExtendedBy.sibling(lastEditedHeading, By.css('dd')));
     const lastEditedTime = await lastEditedElement.findElement(
-        By.tagName('time'));
+        By.css('time'));
     const lastEditedText = await lastEditedTime.getText();
     assert.equal(lastEditedText, todayString);
 
     const createdHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Erstellt am'));
     const createdElement = await driver.findElement(
-        ExtendedBy.sibling(createdHeading, By.tagName('dd')));
+        ExtendedBy.sibling(createdHeading, By.css('dd')));
     const createdTime = await createdElement.findElement(
-        By.tagName('time'));
+        By.css('time'));
     const createdText = await createdTime.getText();
     assert.equal(createdText, todayString);
 }
@@ -402,7 +400,7 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
     const descriptionHeading = await driver.findElement(
         ExtendedBy.tagWithText('h3', 'Kurzbeschreibung'));
     const descriptionElement = await driver.findElement(
-        ExtendedBy.sibling(descriptionHeading, By.tagName('p')));
+        ExtendedBy.sibling(descriptionHeading, By.css('p')));
     const descriptionText = await descriptionElement.getText();
     assert.equal(descriptionText, testBadgeDescription);
 
@@ -412,7 +410,7 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
     const categoryHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Kategorie'));
     const categoryElement = await driver.findElement(
-        ExtendedBy.sibling(categoryHeading, By.tagName('dd')));
+        ExtendedBy.sibling(categoryHeading, By.css('dd')));
     const categoryText = await categoryElement.getText();
     assert.equal(categoryText, `${badgeType}-Badge`);
 
@@ -425,18 +423,18 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
     const lastEditedHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
     const lastEditedElement = await driver.findElement(
-        ExtendedBy.sibling(lastEditedHeading, By.tagName('dd')));
+        ExtendedBy.sibling(lastEditedHeading, By.css('dd')));
     const lastEditedTime = await lastEditedElement.findElement(
-        By.tagName('time'));
+        By.css('time'));
     const lastEditedText = await lastEditedTime.getText();
     assert.equal(lastEditedText, todayString);
 
     const createdHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Erstellt am'));
     const createdElement = await driver.findElement(
-        ExtendedBy.sibling(createdHeading, By.tagName('dd')));
+        ExtendedBy.sibling(createdHeading, By.css('dd')));
     const createdTime = await createdElement.findElement(
-        By.tagName('time'));
+        By.css('time'));
     const createdText = await createdTime.getText();
     assert.equal(createdText, todayString);
 

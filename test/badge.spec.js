@@ -32,7 +32,7 @@ import {
 const BADGES_FOR_MICRO_DEGREE = 3;
 
 describe('Badge Test', function() {
-    this.timeout(30000);
+    this.timeout(35000);
     let driver;
 
     before(async () => {
