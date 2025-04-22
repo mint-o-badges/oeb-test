@@ -150,9 +150,12 @@ describe('Badge Test', function() {
     });
 
     it('should download the micro degree pdf from the backpack', async function() {
-        // TODO: Currently fails due to download not starting for an unknown reason
         await navigateToBackpack(driver);
         await navigateToReceivedMicroDegree(driver);
+        // https://github.com/mint-o-badges/badgr-ui/issues/1231
+        // A delay is required here due to a race condition in the application.
+        // If removed, the download button will be clicked but won't trigger a download.
+        await new Promise(resolve => setTimeout(resolve, 1_000));
         await downloadMicroDegree(driver);
     });
 

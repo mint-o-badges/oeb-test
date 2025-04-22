@@ -183,11 +183,6 @@ export async function createBadge(driver, badgeType = 'participation') {
         defaultWait);
     await selectedBadgeType.click();
 
-    // Click step 2, as sometimes it goes to 3rd step directly after step 1
-    const step2 = await driver.findElement(
-        ExtendedBy.tagWithText('div', '2'));
-    await step2.click();
-
     // Next step: Badge details
     // Title field
     const titleField = await driver.findElement(By.css(
@@ -326,13 +321,12 @@ export async function downloadPdfFromBackpack(driver) {
  * This assumes that the driver already navigated to the received micro degree
  */
 export async function downloadMicroDegree(driver) {
-    const downloadPdfButton = driver.findElement(
+    const downloadPdfButton = await driver.findElement(
         By.css("oeb-button[variant='secondary']")
     );
-
     await downloadPdfButton.click();
 
-    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
+    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/), defaultWait);
     // TODO: Verify file content
     clearDownloadDirectory();
 }
@@ -362,19 +356,24 @@ export function clearDownloadDirectory() {
 }
 
 export async function waitForDownload(driver, regex, timeout = 5000) {
-    const crdownloadRegExp = new RegExp(regex.source + "\.crdownload", regex.flags);
     const condition = new Condition("for download",
         driver => {
-            // Block until all downloads are finished (indicated by .crdownload files)
-            while(fs.readdirSync(downloadDirectory).some(f => 
-                crdownloadRegExp.test(f)).length > 0)
-                continue;
+            const files = fs.readdirSync(downloadDirectory);
+            if (files.length === 0)
+                return false;
 
-            const matches = fs.readdirSync(downloadDirectory)
-                .filter(f => 
-                    regex.test(f));
+            let count = 0;
+            for (const file of files) {
+                if (regex.test(file)) {
+                    count++;
+                }
+            }
 
-            return matches.length === 1;
+            if (count === 0)
+                return false;
+
+            assert(count, 1, "Expected one downloaded file");
+            return true;
         });
     await driver.wait(condition, timeout,
         "Download didn't finish or file content didn't match the pattern within the specified timeout");
@@ -555,8 +554,7 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
 
     if(badgeType == 'Kompetenz'){
         const BadgeCompetencies = await driver.findElements(By.css('competency-accordion'))
-        // sometimes due to a race condition the ai generated competency isn't properly added
-        assert.equal(BadgeCompetencies.length >= 1, true); 
+        assert.equal(BadgeCompetencies.length, 2);
     }
 }
 
