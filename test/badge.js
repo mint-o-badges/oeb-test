@@ -55,7 +55,14 @@ export async function navigateToBadgeCreation(driver) {
     await driver.wait(until.titleIs('Badge erstellen - Open Educational Badges'), extendedWait);
 }
 
-export async function navigateToBadgeDetails(driver) {
+/**
+ * Navigates to the badge details of the badge created during automation.
+ * If multiple badges are created, use {@link skip} to skip an entry and choose
+ * the next available badge instead.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ * @param {number} skip Number of badges to skip before selecting the badge to navigate to
+ */
+export async function navigateToBadgeDetails(driver, skip = 0) {
     // This ensures that the same issuer is used as for the created badge
     await navigateToBadgeCreation(driver);
 
@@ -71,22 +78,56 @@ export async function navigateToBadgeDetails(driver) {
         By.css('span.tw-text-oebblack')), defaultWait);
     const spans = Array.from(await driver.findElements(
         By.css('span.tw-text-oebblack')));
+    let toSkip = skip;
     for (const span of spans) {
         const text = await span.getText();
         if (text === testBadgeTitle) {
-            span.click();
-            break;
+            if(toSkip === 0) {
+                span.click();
+                break;
+            }
+            toSkip--;
         }
     }
 
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
 
+export async function navigateToMicroDegreeDetails(driver) {
+    // This ensures that the same issuer is used as for the created badge
+    await navigateToBadgeCreation(driver);
+
+    await driver.wait(until.elementLocated(By.css('span.breadcrumbs-x-text')), defaultWait);
+    const breadcrumbs = await driver.findElements(By.css(
+        'span.breadcrumbs-x-text'));
+    const issuerBreadcrumb = breadcrumbs[1];
+    issuerBreadcrumb.click();
+
+    await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), defaultWait);
+
+    await driver.wait(until.elementLocated(
+        By.css('hlm-tabs-list')), defaultWait);
+    const tabs = Array.from(await driver.findElements(
+        By.css('hlm-tabs-list > button')));
+    await tabs[1].click();
+
+    // For the load
+    await driver.wait(until.elementsLocated(By.css("learningpaths-datatable")));
+
+    const receivedMicroDegreeLink = await driver.findElement(
+        ExtendedBy.tagWithText("span", microDegreeTitle));
+    await receivedMicroDegreeLink.click();
+}
+
 /**
- * Expects the badge to have been created already
+ * Navigates to the badge awarding page, expects the badge to have been created already.
+ * If multiple badges are created during testing, use {@link skip} to skip
+ * over entries and choose the next badge to navigate to.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ * @param {number} skip Number of badges to skip before selecting the one to navigate to
  */
-export async function navigateToBadgeAwarding(driver) {
-    await navigateToBadgeDetails(driver);
+export async function navigateToBadgeAwarding(driver, skip = 0) {
+    await navigateToBadgeDetails(driver, skip);
 
     const badgeAwardButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge direkt vergeben')),
@@ -115,6 +156,21 @@ export async function navigateToReceivedBadge(driver) {
     receivedBadgeLink.click();
 
     await driver.wait(until.titleIs(`Backpack - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
+}
+
+export async function navigateToReceivedMicroDegree(driver) {
+    // this switches to the micro degree tab of the backpack
+    const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
+    await tabs[2].click();
+
+    // For the load
+    await driver.wait(until.elementsLocated(By.css("bg-learningpathcard")));
+
+    const receivedMicroDegreeLink = await driver.findElement(
+        ExtendedBy.tagWithText("span", microDegreeTitle));
+    await receivedMicroDegreeLink.click();
+
+    await driver.wait(until.titleIs(`LearningPath - Open Educational Badges`), defaultWait);
 }
 
 /**
@@ -228,6 +284,17 @@ export async function receiveBadge(driver) {
 }
 
 /**
+ * This assumes that the driver already navigated to the backpack page
+ */
+export async function receiveMicroDegreeBadge(driver) {
+    // This checks if the micro degree badge appears in the backpack
+    await driver.wait(until.elementLocated(By.linkText(microDegreeTitle)), defaultWait);
+    const receivedBadges = await driver.findElements(By.linkText(
+        microDegreeTitle));
+    assert.equal(receivedBadges.length, 1, "Expected to have received one micro degree badge with the specified title");
+}
+
+/**
  * This assumes that the driver already navigated to the received badge page
  */
 export async function downloadPdfFromBackpack(driver) {
@@ -249,6 +316,21 @@ export async function downloadPdfFromBackpack(driver) {
     // Wait for download button to be enabled
     await driver.wait(until.elementIsEnabled(downloadButton), defaultWait);
     await downloadButton.click();
+
+    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
+    // TODO: Verify file content
+    clearDownloadDirectory();
+}
+
+/**
+ * This assumes that the driver already navigated to the received micro degree
+ */
+export async function downloadMicroDegree(driver) {
+    const downloadPdfButton = driver.findElement(
+        By.css("oeb-button[variant='secondary']")
+    );
+
+    await downloadPdfButton.click();
 
     await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
     // TODO: Verify file content
@@ -327,6 +409,39 @@ export async function confirmRevokedBadge(driver) {
     const receivedBadges = await driver.findElements(By.linkText(
         testBadgeTitle));
     assert.equal(receivedBadges.length, 0, "Expected to have received no badge with the specified title");
+}
+
+/**
+ * Revokes a micro degree from the micro degrees details page.
+ * This assumes that the driver already navigated to the micro degree detail page.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ */
+export async function revokeMicroDegree(driver) {
+    await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('zurücknehmen')),
+        defaultWait);
+    const revokeButton = await driver.findElement(
+        ExtendedBy.submitButtonWithText('zurücknehmen'));
+    await revokeButton.click();
+
+    const confirmDialog = await driver.findElement(By.css('confirm-dialog'));
+    const confirmButton = await confirmDialog.findElement(By.css(
+        'button.button:not(.button-secondary)'));
+    await confirmButton.click();
+
+    const microDegreeGraduatesTable = await driver.findElement(By.css(
+        'learningpath-graduates-datatable'));
+
+    await driver.wait(until.elementLocated(ExtendedBy.tagWithText("h3", "0 Micro Degree-Empfänger:innen")), defaultWait);
+}
+
+/**
+ * This assumes that the driver already navigated to the backpack page
+ */
+export async function confirmRevokedMicroDegree(driver) {
+    const receivedBadges = await driver.findElements(By.linkText(
+        microDegreeTitle));
+    assert.equal(receivedBadges.length, 0, "Expected to have received no micro degree with the specified title");
 }
 
 export async function deleteBadgeOverApi(name = testBadgeTitle) {
@@ -514,12 +629,15 @@ export async function createMicroDegree(driver, n) {
     await nextButton.click();
 
     // Next step: Add badges to the micro degree
-    const badgeCheckboxes = await driver.findElements(By.css(
-        'hlm-checkbox'
-    ));
+    const selectableCards = await driver.findElements(
+        ExtendedBy.containingText(
+            By.css('bg-badgecard'),
+            By.css('a'),
+            testBadgeTitle
+        ));
 
     for(let i = 0; i < n; i++)
-        await badgeCheckboxes[i].click();
+        await selectableCards[i].findElement(By.css('hlm-checkbox')).click();
 
     // Next step: Order of the badges
     await nextButton.click();
