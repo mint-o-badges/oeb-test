@@ -45,11 +45,9 @@ export async function navigateToBadgeCreation(driver) {
     const expectedTitle = 'Issuers - Open Educational Badges';
     driver.wait(until.titleIs(expectedTitle), defaultWait);
 
-    await driver.wait(until.elementLocated(
+    const createBadgeButton = await driver.wait(until.elementLocated(
         By.css("[id^='create-new-badge-btn']:not(.disabled)")),
         defaultWait);
-    const createBadgeButton = await driver.findElement(
-        By.css("[id^='create-new-badge-btn']:not(.disabled)"));
     await createBadgeButton.click();
 
     await driver.wait(until.titleIs('Badge erstellen - Open Educational Badges'), extendedWait);
@@ -107,8 +105,8 @@ export async function navigateToMicroDegreeDetails(driver) {
 
     await driver.wait(until.elementLocated(
         By.css('hlm-tabs-list')), defaultWait);
-    const tabs = Array.from(await driver.findElements(
-        By.css('hlm-tabs-list > button')));
+    const tabs = await driver.findElements(
+        By.css('hlm-tabs-list > button'));
     await tabs[1].click();
 
     // For the load
@@ -151,8 +149,7 @@ export async function navigateToBackpack(driver) {
 
 export async function navigateToReceivedBadge(driver) {
     await navigateToBackpack(driver);
-    await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
-    const receivedBadgeLink = await driver.findElement(By.linkText(testBadgeTitle));
+    const receivedBadgeLink = await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
     receivedBadgeLink.click();
 
     await driver.wait(until.titleIs(`Backpack - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
@@ -293,10 +290,8 @@ export async function receiveMicroDegreeBadge(driver) {
  * This assumes that the driver already navigated to the received badge page
  */
 export async function downloadPdfFromBackpack(driver) {
-    await driver.wait(until.elementLocated(By.css(
+    const moreSvgButton = await driver.wait(until.elementLocated(By.css(
         'svg[icon="icon_more"]')), defaultWait);
-    const moreSvgButton = await driver.findElement(By.css(
-        'svg[icon="icon_more"]'));
     await moreSvgButton.click();
 
     const dropdownButtons = await driver.findElements(By.css(
@@ -383,11 +378,9 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function revokeBadge(driver) {
-    await driver.wait(until.elementLocated(
+    const revokeButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('zurücknehmen')),
         defaultWait);
-    const revokeButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('zurücknehmen'));
     await revokeButton.click();
 
     const confirmDialog = await driver.findElement(By.css('confirm-dialog'));
@@ -416,20 +409,15 @@ export async function confirmRevokedBadge(driver) {
  * @param {import('selenium-webdriver').ThenableWebDriver} driver 
  */
 export async function revokeMicroDegree(driver) {
-    await driver.wait(until.elementLocated(
+    const revokeButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('zurücknehmen')),
         defaultWait);
-    const revokeButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('zurücknehmen'));
     await revokeButton.click();
 
     const confirmDialog = await driver.findElement(By.css('confirm-dialog'));
     const confirmButton = await confirmDialog.findElement(By.css(
         'button.button:not(.button-secondary)'));
     await confirmButton.click();
-
-    const microDegreeGraduatesTable = await driver.findElement(By.css(
-        'learningpath-graduates-datatable'));
 
     await driver.wait(until.elementLocated(ExtendedBy.tagWithText("h3", "0 Micro Degree-Empfänger:innen")), defaultWait);
 }
