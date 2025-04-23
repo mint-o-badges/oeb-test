@@ -34,10 +34,18 @@ import {
     revokeMicroDegree
 } from './badge.js';
 
+/** Global timeout for all tests if not specified otherwise */
+const GLOBAL_TIMEOUT_MS = 30_000;
+
+/** Number of badges to create for micro degree related tests */
 const BADGES_FOR_MICRO_DEGREE = 3;
 
+/** Extra timeout granted per badge for micro degree tests */
+const EXTRA_TIMEOUT_PER_BADGE_MS = 10_000;
+
+
 describe('Badge Test', function() {
-    this.timeout(30000);
+    this.timeout(GLOBAL_TIMEOUT_MS);
     let driver;
 
     before(async () => {
@@ -132,7 +140,7 @@ describe('Badge Test', function() {
         await navigateToBadgeCreation(driver);
         await createMicroDegree(driver, BADGES_FOR_MICRO_DEGREE);
     })
-    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * 10_000); // Allow larger timeout since a number of badges have to be created
+    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since a number of badges have to be created
 
     it('should award the micro degree', async function() {
         // users get micro degrees automatically by receiving all badges
@@ -142,7 +150,7 @@ describe('Badge Test', function() {
             await awardBadge(driver);
         }
     })
-    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * 10_000); // Allow larger timeout since awarding badges takes a while
+    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since awarding badges takes a while
 
     it('should receive the micro degree', async function() {
         await navigateToBackpack(driver);
@@ -176,7 +184,7 @@ describe('Badge Test', function() {
         await navigateToBackpack(driver);
         await confirmRevokedMicroDegree(driver);
     })
-    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * 10_000); // Allow larger timeout since there is a number of badges to revoke
+    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since there is a number of badges to revoke
 
     it('delete the micro degree', async function() {
         await deleteMicroDegreeOverApi();
