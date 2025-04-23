@@ -15,7 +15,7 @@ export async function uploadImage(driver, element_id, nthElement, imagePath) {
     if(nthElement === 0)
         imageField = await driver.findElement(By.css(`[id^='${element_id}']`));
     else
-        imageField = (await driver.findElements(By.css(`[id^='${element_id}']`)))[nthElement - 1];
+        imageField = (await driver.findElements(By.css(`[id^='${element_id}']`)))[nthElement];
     const image = path.resolve(imagePath);
     await imageField.sendKeys(image);
     await driver.wait(

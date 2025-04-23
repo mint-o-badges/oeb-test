@@ -200,9 +200,9 @@ export async function createBadge(driver, badgeType = 'participation') {
     // Image field
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
-    await uploadImage(driver, "image_field", 2, testImagePath);
-    // 2. Upload own image
     await uploadImage(driver, "image_field", 1, testImagePath);
+    // 2. Upload own image
+    await uploadImage(driver, "image_field", 0, testImagePath);
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
 
@@ -615,9 +615,9 @@ export async function createMicroDegree(driver, n) {
     // Image field
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
-    await uploadImage(driver, "image_field", 0, testImagePath);
-    // 2. Upload own image
     await uploadImage(driver, "image_field", 1, testImagePath);
+    // 2. Upload own image
+    await uploadImage(driver, "image_field", 0, testImagePath);
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
 
