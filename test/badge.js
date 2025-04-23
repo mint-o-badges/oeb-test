@@ -582,11 +582,7 @@ export async function createBadges(driver, n) {
  */
 export async function createMicroDegree(driver, n) {
     // Initial step: Badge type selection
-    await driver.wait(until.elementLocated(By.css('[href*="learningpaths/create"]')), defaultWait);
-
-    const selectedBadgeType = await driver.findElement(
-        By.css('[href*="learningpaths/create"]')
-    );
+    const selectedBadgeType = await driver.wait(until.elementLocated(By.css('[href*="learningpaths/create"]')), defaultWait);
     await selectedBadgeType.click();
 
     // Next step: Badge details
