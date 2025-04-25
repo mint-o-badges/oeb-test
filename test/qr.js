@@ -39,12 +39,12 @@ export async function navigateToQrCreation(driver, name = 'automated test title'
 export async function generateQrCode(driver) {
     const titelOebInput = await driver.findElement(By.css(
         'oeb-input[label="Titel"]'));
-    const titelField = await titelOebInput.findElement(By.tagName('input'));
+    const titelField = await titelOebInput.findElement(By.css('input'));
     await titelField.sendKeys('automated test QR title');
 
     const nameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Name Ersteller:in"]'));
-    const nameField = await nameOebInput.findElement(By.tagName('input'));
+    const nameField = await nameOebInput.findElement(By.css('input'));
     await nameField.sendKeys('automated test name');
 
     // TODO: Validity fields
@@ -124,23 +124,23 @@ export async function requestBadgeViaQr(driver) {
         'oeb-input[label="Vorname"]')), defaultWait);
     const vornameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Vorname"]'));
-    const vornameField = await vornameOebInput.findElement(By.tagName(
+    const vornameField = await vornameOebInput.findElement(By.css(
         'input'));
     await vornameField.sendKeys('automatedName');
 
     const nachnameOebInput = await driver.findElement(By.css(
         'oeb-input[label="Nachname"]'));
-    const nachnameField = await nachnameOebInput.findElement(By.tagName(
+    const nachnameField = await nachnameOebInput.findElement(By.css(
         'input'));
     await nachnameField.sendKeys('automatedSurname');
 
     const emailOebInput = await driver.findElement(By.css(
         'oeb-input[label="E-Mail"]'));
-    const emailField = await emailOebInput.findElement(By.tagName(
+    const emailField = await emailOebInput.findElement(By.css(
         'input'));
     await emailField.sendKeys(username);
 
-    const ageConfirmationCheckbox = await driver.findElement(By.tagName(
+    const ageConfirmationCheckbox = await driver.findElement(By.css(
         'brn-checkbox'));
     await ageConfirmationCheckbox.click();
 

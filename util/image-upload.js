@@ -1,9 +1,21 @@
 import { By, until } from "selenium-webdriver";
 import { defaultWait } from "../config.js";
 import path from "path";
+import { ExtendedBy } from "./selection.js";
 
-export async function uploadImage(driver, element_id, imagePath) {
-    const imageField = await driver.findElement(By.id(element_id));
+/**
+ * Uploads the image at {@link imagePath} to the {@link n}th element whose id starts with {@link element_id}
+ * @param {any} driver 
+ * @param {string} element_id Id of the element to upload the image to
+ * @param {number} nthElement Number of the element with the given id
+ * @param {string} imagePath Path to the image file to upload
+ */
+export async function uploadImage(driver, element_id, nthElement, imagePath) {
+    let imageField;
+    if(nthElement === 0)
+        imageField = await driver.findElement(By.css(`[id^='${element_id}']`));
+    else
+        imageField = (await driver.findElements(By.css(`[id^='${element_id}']`)))[nthElement];
     const image = path.resolve(imagePath);
     await imageField.sendKeys(image);
     await driver.wait(
@@ -16,18 +28,12 @@ export async function uploadImage(driver, element_id, imagePath) {
 
 export async function selectNounProjectImage(driver, searchText) {
     // Open noun-project dialog
-    // Try 5 times to avoid stale reference errors
-    for (let i = 0; i < 5; i++) {
-        try {
-            const nounProject_option = await driver.wait(
-                until.elementLocated(By.id("nounProject_span")),
-                defaultWait
-            );
-            await nounProject_option.click();
-            break;
-        } catch(e) {
-        }
-    }
+    const nounProject_option = await driver.wait(
+        until.elementLocated(ExtendedBy.tagWithText("button", "anderes Icon suchen")),
+        defaultWait
+    );
+    await nounProject_option.click();
+
     // Search for an image
     const searchIconField = await driver.wait(
         until.elementLocated(By.id("forminput")),
