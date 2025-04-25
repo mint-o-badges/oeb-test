@@ -17,7 +17,7 @@ export class ExtendedBy {
                         const childrenArray = Array.from(children);
                         // Find if one or more children match the text.
                         // Since this is done asnyc, first map them
-                        const mappedPromises = childrenArray.map(async node => {
+                        const innerMappedPromises = childrenArray.map(async node => {
                             let nodeText = await node.getText();
                             if (trim) {
                                 nodeText = nodeText.trim();
@@ -26,7 +26,7 @@ export class ExtendedBy {
                             return nodeText == text;
                         });
                         // Wait for the results of the mapping
-                        const mapped = await Promise.all(mappedPromises);
+                        const mapped = await Promise.all(innerMappedPromises);
                         // Check if at least one element matched
                         return mapped.some(_ => _);
                     });
@@ -73,6 +73,17 @@ export class ExtendedBy {
             });
             const mapped = await Promise.all(mappedPromises);
             return selectedArray.filter((_, i) => mapped[i]);
+        });
+    }
+
+    static withParent(parentBy, childBy) {
+        return (async (driver) => {
+            const parentNodes = await driver.findElements(parentBy);
+            const parentArray = Array.from(parentNodes);
+            const childrenPromises = parentArray.map(async node => await node.findElements(childBy));
+            const childrenNotFlat = await Promise.all(childrenPromises);
+            const children = childrenNotFlat.flat();
+            return children;
         });
     }
 

@@ -46,7 +46,7 @@ export async function navigateToBadgeCreation(driver) {
     driver.wait(until.titleIs(expectedTitle), defaultWait);
 
     const createBadgeButton = await driver.wait(until.elementLocated(
-        By.css("[id^='create-new-badge-btn']:not(.disabled)")),
+        ExtendedBy.withParent(By.css("oeb-button:not(.disabled)"), By.css("button[id^='create-new-badge-btn']"))),
         defaultWait);
     await createBadgeButton.click();
 
