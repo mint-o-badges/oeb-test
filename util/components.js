@@ -18,7 +18,7 @@ export async function setOEBInputValueByCSS(driver, cssSelector, value) {
     await oebInputChild.sendKeys(value);
 }
 
-export async function waitUntilInteractable(element) {
+export async function clickUntilInteractable(element) {
     while (true) {
         try {
             await element.click();

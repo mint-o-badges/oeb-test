@@ -3,6 +3,7 @@ import chrome from 'selenium-webdriver/chrome.js';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {ExtendedBy} from '../util/selection.js';
+import {clickUntilInteractable} from '../util/components.js';
 import {
     downloadDirectory,
     navigateToBadgeDetails,
@@ -14,8 +15,8 @@ import jsQR from 'jsqr';
 import {fromPath} from 'pdf2pic';
 import sharp from 'sharp';
 
-export async function navigateToQrCreation(driver, name = 'automated test title') {
-    await navigateToBadgeDetails(driver, name);
+export async function navigateToQrCreation(driver) {
+    await navigateToBadgeDetails(driver);
 
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge über QR-Code vergeben')), defaultWait);
@@ -66,7 +67,8 @@ export async function generateQrCode(driver) {
  */
 export async function downloadQrCode(driver, title = 'automated test QR title') {
     const downloadQrButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Download QR-Code'));
+        // TODO: Also test PNG download
+        ExtendedBy.submitButtonWithText('Download QR-Code-Plakat'));
     await downloadQrButton.click();
 
     await waitForDownload(driver, new RegExp(`^${title}\\.pdf$`));
@@ -165,7 +167,7 @@ export async function confirmBadgeAwarding(driver) {
     // Choose the first request, which is the only one
     const requestedBadgeCheckbox = await driver.findElement(By.css
         ('hlm-checkbox-checkicon'));
-    await requestedBadgeCheckbox.click();
+    await clickUntilInteractable(requestedBadgeCheckbox);
 
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge vergeben')), defaultWait);

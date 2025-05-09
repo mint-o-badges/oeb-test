@@ -16,7 +16,7 @@ import {
     findAssertions,
     revokeAssertions
 } from '../util/api.js';
-import {waitUntilInteractable} from '../util/components.js';
+import {clickUntilInteractable} from '../util/components.js';
 import {ExtendedBy} from '../util/selection.js';
 import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
@@ -185,7 +185,7 @@ export async function createBadge(driver, badgeType = 'participation') {
     // Title field
     const titleField = await driver.findElement(By.css(
         'input[type="text"]'));
-    await waitUntilInteractable(titleField);
+    await clickUntilInteractable(titleField);
     await titleField.sendKeys(testBadgeTitle);
     // Duration field
     const durationField = await driver.findElement(By.css(
