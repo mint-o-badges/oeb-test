@@ -1,46 +1,52 @@
 import {By, WebElement} from 'selenium-webdriver';
 
+async function avoidStale(f) {
+    // Try 5 times to avoid stale reference errors
+    for (let i = 0; i < 5; i++) {
+        try {
+            return await f();
+        } catch(e) {
+            if (e.name === 'StaleElementReferenceError')
+                continue;
+            throw e;
+        }
+        break;
+    }
+}
+
 export class ExtendedBy {
     static containingText(selector, childSelector, text, trim = true) {
         return (async (driver) => {
-            // Try 5 times to avoid stale reference errors
-            for (let i = 0; i < 5; i++) {
-                try {
-                    // Find elements from outer selector
-                    const selected = await driver.findElements(selector);
-                    const selectedArray = Array.from(selected);
-                    // Filter the elements.
-                    // Since the filtering is done async, first map them
-                    const mappedPromises = await selectedArray.map(async node => {
-                        // Find the children from the child selector
-                        const children = await node.findElements(childSelector);
-                        const childrenArray = Array.from(children);
-                        // Find if one or more children match the text.
-                        // Since this is done asnyc, first map them
-                        const innerMappedPromises = childrenArray.map(async node => {
-                            let nodeText = await node.getText();
-                            if (trim) {
-                                nodeText = nodeText.trim();
-                                text = text.trim();
-                            }
-                            return nodeText == text;
-                        });
-                        // Wait for the results of the mapping
-                        const mapped = await Promise.all(innerMappedPromises);
-                        // Check if at least one element matched
-                        return mapped.some(_ => _);
+            return await avoidStale(async () => {
+                // Find elements from outer selector
+                const selected = await driver.findElements(selector);
+                const selectedArray = Array.from(selected);
+                // Filter the elements.
+                // Since the filtering is done async, first map them
+                const mappedPromises = await selectedArray.map(async node => {
+                    // Find the children from the child selector
+                    const children = await node.findElements(childSelector);
+                    const childrenArray = Array.from(children);
+                    // Find if one or more children match the text.
+                    // Since this is done asnyc, first map them
+                    const innerMappedPromises = childrenArray.map(async node => {
+                        let nodeText = await node.getText();
+                        if (trim) {
+                            nodeText = nodeText.trim();
+                            text = text.trim();
+                        }
+                        return nodeText == text;
                     });
                     // Wait for the results of the mapping
-                    const mapped = await Promise.all(mappedPromises);
-                    // Filter the elements where the mapping yielded true
-                    return selectedArray.filter((_, i) => mapped[i]);
-                } catch(e) {
-                    if (e.name === 'StaleElementReferenceError')
-                        continue;
-                    throw e;
-                }
-                break;
-            }
+                    const mapped = await Promise.all(innerMappedPromises);
+                    // Check if at least one element matched
+                    return mapped.some(_ => _);
+                });
+                // Wait for the results of the mapping
+                const mapped = await Promise.all(mappedPromises);
+                // Filter the elements where the mapping yielded true
+                return selectedArray.filter((_, i) => mapped[i]);
+            });
         });
     }
 
@@ -55,35 +61,33 @@ export class ExtendedBy {
 
     static tagWithText(tag, text, trim = true) {
         return (async (driver) => {
-            const selected = await driver.findElements(By.css(tag));
-            const selectedArray = Array.from(selected);
-            const mappedPromises = selectedArray.map(async node => {
-                try {
+            return await avoidStale(async () => {
+                const selected = await driver.findElements(By.css(tag));
+                const selectedArray = Array.from(selected);
+                const mappedPromises = selectedArray.map(async node => {
                     let nodeText = await node.getText();
                     if (trim) {
                         nodeText = nodeText.trim();
                         text = text.trim();
                     }
                     return nodeText === text;
-                } catch(e) {
-                    if (e.name === 'StaleElementReferenceError')
-                        return false;
-                    throw e;
-                }
+                });
+                const mapped = await Promise.all(mappedPromises);
+                return selectedArray.filter((_, i) => mapped[i]);
             });
-            const mapped = await Promise.all(mappedPromises);
-            return selectedArray.filter((_, i) => mapped[i]);
         });
     }
 
     static withParent(parentBy, childBy) {
         return (async (driver) => {
-            const parentNodes = await driver.findElements(parentBy);
-            const parentArray = Array.from(parentNodes);
-            const childrenPromises = parentArray.map(async node => await node.findElements(childBy));
-            const childrenNotFlat = await Promise.all(childrenPromises);
-            const children = childrenNotFlat.flat();
-            return children;
+            return await avoidStale(async () => {
+                const parentNodes = await driver.findElements(parentBy);
+                const parentArray = Array.from(parentNodes);
+                const childrenPromises = parentArray.map(async node => await node.findElements(childBy));
+                const childrenNotFlat = await Promise.all(childrenPromises);
+                const children = childrenNotFlat.flat();
+                return children;
+            });
         });
     }
 
