@@ -1,6 +1,5 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import {login} from './login.js';
-import {implicitWait} from '../config.js';
 import {screenshot} from '../util/screenshot.js';
 
 describe('Login Test', function() {
@@ -14,7 +13,6 @@ describe('Login Test', function() {
             .usingServer(server)
             .forBrowser(Browser.CHROME)
             .build();
-        await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
     it('should be able to log in', async function() {
