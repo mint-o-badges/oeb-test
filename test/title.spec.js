@@ -1,6 +1,6 @@
 import {By, Builder, Browser} from 'selenium-webdriver';
 import assert from 'assert';
-import {url, implicitWait} from '../config.js';
+import {url} from '../config.js';
 import {screenshot} from '../util/screenshot.js';
 
 describe('Title Test', function() {
@@ -14,7 +14,6 @@ describe('Title Test', function() {
             .usingServer(server)
             .forBrowser(Browser.CHROME)
             .build();
-        await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
     it('should match the expected title', async function() {

@@ -2,7 +2,6 @@ import {Builder, Browser} from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import {login} from './login.js';
 import path from 'path';
-import {implicitWait} from '../config.js';
 import {screenshot} from '../util/screenshot.js';
 import {
     downloadDirectory,
@@ -66,7 +65,6 @@ describe('Badge Test', function() {
             .forBrowser(Browser.CHROME)
             .setChromeOptions(options)
             .build()
-        await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
     // This requires that there exists a verified issuer for the user associated with the configured credentials

@@ -9,7 +9,6 @@ import {
     verifyIssuerDetails,
     verifyIssuerOverApi
 } from './issuer.js';
-import {implicitWait} from '../config.js';
 
 describe('Issuer Test', function() {
     this.timeout(20000);
@@ -22,7 +21,6 @@ describe('Issuer Test', function() {
             .usingServer(server)
             .forBrowser(Browser.CHROME)
             .build();
-        await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
 
