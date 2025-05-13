@@ -18,15 +18,22 @@ export async function setOEBInputValueByCSS(driver, cssSelector, value) {
     await oebInputChild.sendKeys(value);
 }
 
-export async function clickUntilInteractable(element) {
-    while (true) {
+export async function clickUntilInteractable(elementCreator) {
+    for (let i = 0; i < 100; i++) {
         try {
+            const element = await elementCreator();
             await element.click();
+            return element;
         } catch(e) {
-            if (e.name === 'ElementNotInteractableError')
+            if (e.name === 'ElementNotInteractableError') {
+                await new Promise(res => setTimeout(res, 100));
                 continue;
+            }
             throw e;
         }
-        break;
     }
+    // After 100 tries, throw the error
+    const element = await elementCreator();
+    await element.click();
+    return element;
 }

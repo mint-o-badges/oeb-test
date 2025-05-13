@@ -1,6 +1,6 @@
 import {By, WebElement} from 'selenium-webdriver';
 
-async function avoidStale(f) {
+export async function avoidStale(f) {
     // Try 5 times to avoid stale reference errors
     for (let i = 0; i < 5; i++) {
         try {
