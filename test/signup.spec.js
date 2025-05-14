@@ -9,7 +9,6 @@ import {
     deleteUserOverApi,
     loginToCreatedAccount
 } from './signup.js';
-import {implicitWait} from '../config.js';
 
 describe('Signup Test', function() {
     this.timeout(20000);
@@ -22,7 +21,6 @@ describe('Signup Test', function() {
         .usingServer(server)
             .forBrowser(Browser.CHROME)
             .build();
-        await driver.manage().setTimeouts({ implicit: implicitWait });
     });
 
     it('should be able to sign up', async function() {

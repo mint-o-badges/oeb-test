@@ -16,8 +16,14 @@ import {
     findAssertions,
     revokeAssertions
 } from '../util/api.js';
-import {ExtendedBy} from '../util/selection.js';
-import {addNewTag, linkToEduStandards, setBdgeValidaty, addCompetenciesByHand, addCompetenciesViaAI} from '../util/badge-helper.js';
+import {clickUntilInteractable} from '../util/components.js';
+import {ExtendedBy, avoidStale} from '../util/selection.js';
+import {
+    addNewTag,
+    setBadgeValidity,
+    addCompetenciesByHand,
+    addCompetenciesViaAI
+} from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
 export const downloadDirectory = '/tmp';
@@ -45,10 +51,12 @@ export async function navigateToBadgeCreation(driver) {
     const expectedTitle = 'Issuers - Open Educational Badges';
     driver.wait(until.titleIs(expectedTitle), defaultWait);
 
-    const createBadgeButton = await driver.wait(until.elementLocated(
-        By.css("[id^='create-new-badge-btn']:not(.disabled)")),
-        defaultWait);
-    await createBadgeButton.click();
+    await avoidStale(async () => {
+        const createBadgeButton = await driver.wait(until.elementLocated(
+            ExtendedBy.withParent(By.css("oeb-button:not(.disabled)"), By.css("button[id^='create-new-badge-btn']"))),
+            defaultWait);
+        await createBadgeButton.click();
+    });
 
     await driver.wait(until.titleIs('Badge erstellen - Open Educational Badges'), extendedWait);
 }
@@ -182,8 +190,8 @@ export async function createBadge(driver, badgeType = 'participation') {
 
     // Next step: Badge details
     // Title field
-    const titleField = await driver.findElement(By.css(
-        'input[type="text"]'));
+    const titleField = await clickUntilInteractable(async () =>
+        await driver.findElement(By.css('input[type="text"]')));
     await titleField.sendKeys(testBadgeTitle);
     // Duration field
     const durationField = await driver.findElement(By.css(
@@ -225,24 +233,13 @@ export async function createBadge(driver, badgeType = 'participation') {
     await nextButton.click();
     
     // Final step: add optional details then submit badge
-    await addOptionalDetails(driver);
+    await setBadgeValidity(driver);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
     await submitButton.click();
     
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
-
-async function addOptionalDetails(driver){
-    // Open optional badge-detail section
-    const optionalDetailSection = await driver.findElement(By.id('optional-details'));
-    await optionalDetailSection.click();
-    // Link badge to educational standards
-    await linkToEduStandards(driver);
-    // Badge validity
-    await setBdgeValidaty(driver);
-}
-
 
 /**
  * This assumes that the driver already navigated to the badge awarding page
@@ -305,7 +302,8 @@ export async function downloadPdfFromBackpack(driver) {
     const downloadButton = await driver.findElement(By.id('download-pdf-backpack'));
     // Wait for download button to be enabled
     await driver.wait(until.elementIsEnabled(downloadButton), defaultWait);
-    await downloadButton.click();
+    await clickUntilInteractable(async () =>
+        await driver.findElement(By.id('download-pdf-backpack')));
 
     await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
     // TODO: Verify file content

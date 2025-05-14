@@ -12,43 +12,17 @@ export async function addNewTag(driver, tagName ){
     await tagField.sendKeys(Key.RETURN);
 }
 
-export async function linkToEduStandards(driver ){
-    const linkStandardsSection = await driver.findElement(By.id(
-      'link-standards-btn'));
-    await linkStandardsSection.click(); 
-    setOEBInputValueByCSS(driver, "Name", "link Name");
-    setOEBInputValueByCSS(driver, "URL", "http://test.de");
-    setOEBInputValueById(driver, "alignment_description_0", "link Desc");
-
-    // educational standards more options
-    // open section
-    const LinkMoreOptionsSection = await driver.findElement(By.id(
-      'link-more-options-btn'));
-    await LinkMoreOptionsSection.click(); 
-    // Add Frame
-    const frameField = await driver.findElement(By.id('forminput2'));
-    await frameField.sendKeys("Frame");
-    // Add code
-    const frameCodeField = await driver.findElement(By.id('url'));
-    await driver.actions()
-        .scroll(0, 0, 0, 0, frameCodeField)
-        .perform()
-    await frameCodeField.sendKeys(12345);
-}
-
-export async function setBdgeValidaty(driver){
-    // open section
-    const badgeValiditySection = await driver.findElement(By.id(
-      'badge-validity-btn'));
-    await badgeValiditySection.click(); 
+export async function setBadgeValidity(driver){
     // Set duration number
     setOEBInputValueById(driver, "duration-number", 2);
     // Set duration type
-    const DurationDropdownButton = await driver.findElement(By.id(
+    const durationDropdownRegion = await driver.findElement(By.id(
         'duration-type'));
-    await DurationDropdownButton.click(); 
-    const MonthOption = driver.findElement(By.xpath("//*[text()='Monate']"))        
-    await MonthOption.click(); 
+    const durationDropdownButton = await durationDropdownRegion.findElement(
+        By.css('button'));
+    await durationDropdownButton.click(); 
+    const monthOption = await driver.findElement(ExtendedBy.tagWithText('hlm-option', 'Monate'))        
+    await monthOption.click(); 
 }
 
 export async function addCompetenciesByHand(driver){
