@@ -492,8 +492,8 @@ export async function validateParticipationBadge(driver) {
 }
 
 export async function validateBadge(driver, badgeType = 'Teilnahme') {
-    const titleElement = await driver.findElement(By.css(
-        'h1.tw-text-purple'));
+    const titleElement = await driver.wait(until.elementLocated(By.css(
+        'h1.tw-text-purple')));
     const titleText = await titleElement.getText();
     assert.equal(titleText, testBadgeTitle);
 

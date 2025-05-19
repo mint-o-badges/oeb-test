@@ -52,8 +52,10 @@ describe('Badge Test', function() {
         clearDownloadDirectory();
         // Set download directory path 
         let options = new chrome.Options();
+        options.addArguments("--lang=de");
         options.setUserPreferences({
             "download.default_directory": downloadDirectory,
+            "intl.accept_languages": "de"
         });
 
         const host = process.env.SELENIUM || undefined;
@@ -184,8 +186,11 @@ describe('Badge Test', function() {
     })
     .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since there is a number of badges to revoke
 
-    it('delete the micro degree', async function() {
+    it('should delete the micro degree', async function() {
         await deleteMicroDegreeOverApi();
+    });
+
+    it('should delete the badges for the micro degree', async function () {
         await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
     });
 

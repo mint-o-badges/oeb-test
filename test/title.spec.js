@@ -1,4 +1,5 @@
 import {By, Builder, Browser} from 'selenium-webdriver';
+import chrome from 'selenium-webdriver/chrome.js';
 import assert from 'assert';
 import {url} from '../config.js';
 import {screenshot} from '../util/screenshot.js';
@@ -10,9 +11,16 @@ describe('Title Test', function() {
     before(async () => {
         const host = process.env.SELENIUM || undefined;
         const server = host ? `http://${host}:4444` : '';
+
+        let options = new chrome.Options();
+        options.addArguments("--lang=de");
+        options.setUserPreferences({
+            "intl.accept_languages": "de"
+        });
         driver = await new Builder()
             .usingServer(server)
             .forBrowser(Browser.CHROME)
+            .setChromeOptions(options)
             .build();
     });
 

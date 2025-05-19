@@ -32,8 +32,10 @@ describe('QR test', function() {
         // Delete all PDFs from tmp directory
         clearDownloadDirectory();
         let options = new chrome.Options();
+        options.addArguments("--lang=de");
         options.setUserPreferences({
             "download.default_directory": downloadDirectory,
+            "intl.accept_languages": "de"
         });
 
         const host = process.env.SELENIUM || undefined;
