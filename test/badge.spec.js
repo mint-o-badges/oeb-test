@@ -186,11 +186,13 @@ describe('Badge Test', function() {
     })
     .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since there is a number of badges to revoke
 
-    it('delete the micro degree', async function() {
+    it('should delete the micro degree', async function() {
         await deleteMicroDegreeOverApi();
-        await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
     });
 
+    it('should delete the badges for the micro degree', async function () {
+        await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
+    });
 
     afterEach(async function () {
         await screenshot(driver, this.currentTest);
