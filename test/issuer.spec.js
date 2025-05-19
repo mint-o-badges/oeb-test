@@ -1,6 +1,7 @@
 import {Builder, Browser} from 'selenium-webdriver';
 import {login} from './login.js';
 import {screenshot} from '../util/screenshot.js';
+import chrome from 'selenium-webdriver/chrome.js';
 import {
     navigateToIssuerCreation,
     createIssuer,
@@ -17,9 +18,12 @@ describe('Issuer Test', function() {
     before(async () => {
         const host = process.env.SELENIUM || undefined;
         const server = host ? `http://${host}:4444` : '';
+        let options = new chrome.Options();
+        options.addArguments("--lang=de");
         driver = await new Builder()
             .usingServer(server)
             .forBrowser(Browser.CHROME)
+            .setChromeOptions(options)
             .build();
     });
 
