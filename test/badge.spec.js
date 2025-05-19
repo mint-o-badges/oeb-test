@@ -55,6 +55,7 @@ describe('Badge Test', function() {
         options.addArguments("--lang=de");
         options.setUserPreferences({
             "download.default_directory": downloadDirectory,
+            "intl.accept_languages": "de"
         });
 
         const host = process.env.SELENIUM || undefined;
@@ -189,6 +190,7 @@ describe('Badge Test', function() {
         await deleteMicroDegreeOverApi();
         await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
     });
+
 
     afterEach(async function () {
         await screenshot(driver, this.currentTest);

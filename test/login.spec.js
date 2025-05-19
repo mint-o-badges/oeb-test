@@ -13,6 +13,9 @@ describe('Login Test', function() {
 
         let options = new chrome.Options();
         options.addArguments("--lang=de");
+        options.setUserPreferences({
+            "intl.accept_languages": "de"
+        });
         driver = await new Builder()
             .usingServer(server)
             .forBrowser(Browser.CHROME)
