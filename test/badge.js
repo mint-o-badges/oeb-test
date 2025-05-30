@@ -266,8 +266,22 @@ export async function awardBadge(driver, email = username) {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveBadge(driver) {
-    await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
-    const receivedBadges = await driver.findElements(By.linkText(
+    // Try three times, since receiving the badge can take some time
+    let receivedBadges;
+    for (let i = 0; i < 3; i++) {
+        try {
+            await driver.wait(until.elementLocated(By.linkText(
+                testBadgeTitle)), 1000);
+        } catch(e) {
+            if (e.name === 'NoSuchElementError' ||
+                e.name === 'TimeoutError') {
+                driver.navigate().refresh();
+                continue;
+            }
+            throw e;
+        }
+    }
+    receivedBadges = await driver.findElements(By.linkText(
         testBadgeTitle));
     assert.equal(receivedBadges.length, 1, "Expected to have received one badge with the specified title");
 }
