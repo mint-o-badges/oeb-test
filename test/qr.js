@@ -31,27 +31,25 @@ export async function navigateToQrCreation(driver) {
     await confirmButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'oeb-input[label="Titel"]')), defaultWait);
+        'input[placeholder="Badge Vergabe Juni 2024"]')), defaultWait);
 }
 
 /**
  * This assumes that the driver already navigated to the QR creation
  */
 export async function generateQrCode(driver) {
-    const titelOebInput = await driver.findElement(By.css(
-        'oeb-input[label="Titel"]'));
-    const titelField = await titelOebInput.findElement(By.css('input'));
+    const titelField = await driver.findElement(By.css(
+        'input[placeholder="Badge Vergabe Juni 2024"]'));
     await titelField.sendKeys('automated test QR title');
 
-    const nameOebInput = await driver.findElement(By.css(
-        'oeb-input[label="Name Ersteller:in"]'));
-    const nameField = await nameOebInput.findElement(By.css('input'));
+    const nameField = await driver.findElement(By.css(
+        'input[placeholder="Mein Vorname und Nachname"]'));
     await nameField.sendKeys('automated test name');
 
     // TODO: Validity fields
 
     const generateQrCodeButton = await driver.findElement(By.css(
-        'oeb-button[text="QR-Code generieren"]'));
+        'oeb-button[type="submit"]'));
     await generateQrCodeButton.click();
 
     await driver.wait(until.elementLocated(By.css(
@@ -123,21 +121,23 @@ async function convertPdfToImg(pdfFilename, imageFilename,
 
 export async function requestBadgeViaQr(driver) {
     await driver.wait(until.elementLocated(By.css(
-        'oeb-input[label="Vorname"]')), defaultWait);
-    const vornameOebInput = await driver.findElement(By.css(
-        'oeb-input[label="Vorname"]'));
+        'oeb-input[fieldtype="text"]')), defaultWait);
+    const textInputs = await driver.findElements(By.css(
+        'oeb-input[fieldtype="text"]'));
+    assert.equal(textInputs.length, 2);
+
+    const vornameOebInput = textInputs[0];
     const vornameField = await vornameOebInput.findElement(By.css(
         'input'));
     await vornameField.sendKeys('automatedName');
 
-    const nachnameOebInput = await driver.findElement(By.css(
-        'oeb-input[label="Nachname"]'));
+    const nachnameOebInput = textInputs[1];
     const nachnameField = await nachnameOebInput.findElement(By.css(
         'input'));
     await nachnameField.sendKeys('automatedSurname');
 
     const emailOebInput = await driver.findElement(By.css(
-        'oeb-input[label="E-Mail"]'));
+        'oeb-input[fieldtype="email"]'));
     const emailField = await emailOebInput.findElement(By.css(
         'input'));
     await emailField.sendKeys(username);
@@ -176,6 +176,6 @@ export async function confirmBadgeAwarding(driver) {
     await driver.wait(until.elementIsVisible(confirmButton), defaultWait);
     await confirmButton.click();
 
-    await driver.wait(until.elementLocated(By.css(
-        'svg.checkmark')), defaultWait);
+    await driver.wait(until.elementLocated(ExtendedBy.tagWithText(
+        "p", "Fast geschafft! Deine Badges werden gerade vergeben – das kann ein paar Minuten dauern. Schau gleich auf der Badge-Detail-Seite nach, ob alles geklappt hat.")), defaultWait);
 }
