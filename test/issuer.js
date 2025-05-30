@@ -58,8 +58,8 @@ export async function createIssuer(driver) {
     const categoryDropdownButton = dropdownButtons[1];
     await categoryDropdownButton.click();
 
-    const categoryOption = await driver.findElement(By.css(
-        'hlm-option#brn-option-2'));
+    const categoryOption = await driver.wait(until.elementLocated(
+        By.css('hlm-option')), defaultWait);
     await categoryOption.click();
 
     const streetField = textFields[1];
