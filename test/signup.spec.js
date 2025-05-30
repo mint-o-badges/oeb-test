@@ -46,12 +46,15 @@ describe('Signup Test', function() {
         await deleteUserViaUI(driver);
     });
 
+    it('should ensure user is deleted over API', async function () {
+        await deleteUserOverApi();
+    });
+
     afterEach(async function () {
         await screenshot(driver, this.currentTest);
     });
 
     after(async () => {
-        await deleteUserOverApi();  // Ensure user is deleted
         await driver.quit()
     });
 });

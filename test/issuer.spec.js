@@ -43,12 +43,15 @@ describe('Issuer Test', function() {
         await verifyIssuerOverApi();
     });
 
+    it('should delete the issuer', async function () {
+        await deleteIssuerOverApi();
+    });
+
     afterEach(async function () {
         await screenshot(driver, this.currentTest);
     });
 
     after(async () => {
-        await deleteIssuerOverApi();
         await driver.quit();
     });
 });
