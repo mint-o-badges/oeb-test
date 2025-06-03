@@ -75,12 +75,15 @@ describe('QR test', function() {
         await receiveBadge(driver);
     });
 
+    it('should delete the badge', async function() {
+        await deleteBadgeOverApi();
+    });
+
     afterEach(async function () {
         await screenshot(driver, this.currentTest);
     });
 
     after(async () => {
-        await deleteBadgeOverApi();
         await driver.quit();
     });
 });
