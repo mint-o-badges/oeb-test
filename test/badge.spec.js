@@ -86,7 +86,7 @@ describe('Badge Test', function() {
         await verifyBadgeOverApi(driver);
     });
 
-    it('delete the participation badge', async function() {
+    it('should delete the participation badge', async function() {
         await deleteBadgeOverApi();
     });
 
