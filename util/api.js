@@ -52,7 +52,13 @@ async function request(path, method, body, token) {
         });
 
     if (!response.ok) {
-        const body = await response.json();
+        let body;
+        try {
+            body = await response.text();
+        } catch(e) {
+            console.error(`Getting request text failed with error: '${e}'`);
+            body = response;
+        }
         console.error(`Request to '${path}' failed with status: ${response.status}`);
         console.error(`Response body: ${body}`);
     }
