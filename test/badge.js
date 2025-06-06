@@ -522,15 +522,6 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
     const divElements = await driver.findElements(By.css('div.tag'));
     assert.equal(divElements.length, 1);
 
-    const badgeStandardText = await driver.findElement(
-      ExtendedBy.tagWithText("dt", "Badge-Standard")
-    );
-    const badgeStandardVersion = await driver.findElement(
-      ExtendedBy.sibling(badgeStandardText, By.css("dd"))
-    );
-    const badgeStandardVersionText = await badgeStandardVersion.getText();
-    assert.equal(badgeStandardVersionText, currentBadgeStandardVersion);
-
     const categoryHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Kategorie'));
     const categoryElement = await driver.findElement(
@@ -681,3 +672,51 @@ export async function deleteBadgesOverApi(n) {
     for(let i = 0; i < n; i++)
         await deleteBadgeOverApi();
 }
+
+/**
+ * Checks if the badge is conform with the currently implemented
+ * open badges version and downloads the badges JSON file
+ * to check its conformity.
+ * This assumes that the driver already navigated to the badge detail page
+ * of an awarded badge.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+export const validateBadgeVersion = async (driver) => {
+  const badgeStandardText = await driver.findElement(
+      ExtendedBy.tagWithText("dt", "Badge-Standard")
+    );
+  const badgeStandardVersion = await driver.findElement(
+    ExtendedBy.sibling(badgeStandardText, By.css("dd"))
+  );
+  const badgeStandardVersionText = await badgeStandardVersion.getText();
+  assert.equal(badgeStandardVersionText, currentBadgeStandardVersion);
+
+  const overflowMenu = await driver.findElement(
+    By.css('button:has(svg[icon="icon_more"])')
+  );
+  await overflowMenu.click();
+
+  const downloadButton = await driver.findElement(
+    ExtendedBy.tagWithText('button', `Download JSON-Datei (${currentBadgeStandardVersion})`)
+  );
+  await downloadButton.click();
+
+  await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.json$/));
+
+  const now = new Date();
+  const badgeJsonName =
+    `${now.getFullYear()}-` +
+    `${('0' + (now.getMonth()+1)).slice(-2)}-` +
+    `${('0' + (now.getDate())).slice(-2)}-` +
+    `${testBadgeTitle.replace(' ', '_')}.json`;
+  const file = fs.readFileSync(`${downloadDirectory}/${badgeJsonName}`, { encoding: 'utf-8' });
+  const badgeAsJson = JSON.parse(file);
+  assert.equal(typeof badgeAsJson['@context'] === "string", false);
+  // The existence of the /credentials/ part in the context urls are
+  // unique for v3
+  assert.equal(badgeAsJson['@context'].reduce((prev, curr) => {
+    return prev || curr.indexOf('/credentials/') >= 0
+  }, false), true);
+
+  await clearDownloadDirectory();
+};
