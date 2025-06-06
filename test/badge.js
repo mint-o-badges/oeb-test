@@ -199,7 +199,7 @@ export async function createBadge(driver, badgeType = 'participation') {
     await durationField.clear()
     await durationField.sendKeys(testDuration);
     // Description field
-     const shortDescriptionField = await driver.findElement(By.css(
+    const shortDescriptionField = await driver.findElement(By.css(
         'textarea'));
     await shortDescriptionField.sendKeys(testBadgeDescription);
     // Image field
@@ -391,7 +391,7 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
  */
 export async function revokeBadge(driver) {
     const revokeButton = await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('zurücknehmen')),
+        ExtendedBy.submitButtonWithText('Zurücknehmen')),
         defaultWait);
     await revokeButton.click();
 
