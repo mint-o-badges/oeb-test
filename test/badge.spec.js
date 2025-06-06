@@ -76,132 +76,142 @@ describe('Badge Test', function() {
     });
 
     // Participation badge
-    it('should create a participation badge', async function() {
-        await navigateToBadgeCreation(driver);
-        await createBadge(driver);
+    describe('Participation badge', () => {
+        it('should create a participation badge', async function() {
+            await navigateToBadgeCreation(driver);
+            await createBadge(driver);
+        });
+
+        it('should validate the participation badge', async function() {
+            await navigateToBadgeDetails(driver);
+            await validateBadge(driver);
+            await verifyBadgeOverApi(driver);
+        });
+
+        it('delete the participation badge', async function() {
+            await deleteBadgeOverApi();
+        });
+
+        afterEach(screenshot(driver, this.currentTest));
     });
 
-    it('should validate the participation badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await validateBadge(driver);
-        await verifyBadgeOverApi(driver);
-    });
+    describe('Competency badge', () => {
+        it('should create a competency badge', async function() {
+            await navigateToBadgeCreation(driver);
+            await createBadge(driver, 'competency');
+        });
 
-    it('delete the participation badge', async function() {
-        await deleteBadgeOverApi();
-    });
+        it('should validate the competency badge', async function() {
+            await navigateToBadgeDetails(driver);
+            await validateBadge(driver, 'Kompetenz');
+            await verifyBadgeOverApi(driver);
+        });
 
-    // Competency badge
-    it('should create a competency badge', async function() {
-        await navigateToBadgeCreation(driver);
-        await createBadge(driver, 'competency');
-    });
-
-    it('should validate the competency badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await validateBadge(driver, 'Kompetenz');
-        await verifyBadgeOverApi(driver);
-    });
-
-    it('should award the competency badge', async function() {
-        await navigateToBadgeAwarding(driver);
-        await awardBadge(driver);
-    });
-
-    it('should receive the competency badge', async function() {
-        await navigateToBackpack(driver);
-        await receiveBadge(driver);
-    });
-
-    it('should ensure the received badge is of the latest open badges standard', async () => {
-        await navigateToReceivedBadge(driver);
-        await validateBadgeVersion(driver);
-    });
-
-    it('should download the pdf from the backpack', async function() {
-        await navigateToReceivedBadge(driver);
-        await downloadPdfFromBackpack(driver);
-    });
-
-    it('should download the pdf from the internal issuer page', async function() {
-        await navigateToBadgeDetails(driver);
-        await downloadPdfFromIssuer(driver);
-    });
-
-    it('should revoke the competency badge', async function() {
-        await navigateToBadgeDetails(driver);
-        await revokeBadge(driver);
-        await navigateToBackpack(driver);
-        await confirmRevokedBadge(driver);
-    });
-
-    it('delete the competency badge', async function() {
-        await deleteBadgeOverApi();
-    });
-
-    // micro degree
-    it('should create a micro degree', async () => {
-        // We need at least three badges to put as part of the degree
-        await createBadges(driver, BADGES_FOR_MICRO_DEGREE);
-        await navigateToBadgeCreation(driver);
-        await createMicroDegree(driver, BADGES_FOR_MICRO_DEGREE);
-    })
-    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since a number of badges have to be created
-
-    it('should award the micro degree', async function() {
-        // users get micro degrees automatically by receiving all badges
-        // contained in the degree itself
-        for(let i = 0; i < BADGES_FOR_MICRO_DEGREE; i++) {
-            await navigateToBadgeAwarding(driver, i);
+        it('should award the competency badge', async function() {
+            await navigateToBadgeAwarding(driver);
             await awardBadge(driver);
-        }
-    })
-    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since awarding badges takes a while
+        });
 
-    it('should receive the micro degree', async function() {
-        await navigateToBackpack(driver);
-        await receiveMicroDegreeBadge(driver);
-    });
+        it('should receive the competency badge', async function() {
+            await navigateToBackpack(driver);
+            await receiveBadge(driver);
+        });
 
-    it('should download the micro degree pdf from the backpack', async function() {
-        await navigateToBackpack(driver);
-        await navigateToReceivedMicroDegree(driver);
-        // https://github.com/mint-o-badges/badgr-ui/issues/1231
-        // A delay is required here due to a race condition in the application.
-        // If removed, the download button will be clicked but won't trigger a download.
-        await new Promise(resolve => setTimeout(resolve, 1_000));
-        await downloadMicroDegree(driver);
-    });
+        it('should ensure the received badge is of the latest open badges standard', async () => {
+            await navigateToReceivedBadge(driver);
+            await validateBadgeVersion(driver);
+        });
 
-    it('should download the micro degree pdf from the internal issuer page', async function() {
-        await navigateToMicroDegreeDetails(driver);
-        await downloadPdfFromIssuer(driver);
-    });
+        it('should download the pdf from the backpack', async function() {
+            await navigateToReceivedBadge(driver);
+            await downloadPdfFromBackpack(driver);
+        });
 
-    it('should revoke the micro degree', async function() {
-        for(let i = 0; i < BADGES_FOR_MICRO_DEGREE; i++)
-        {
-            await navigateToBadgeDetails(driver, i);
+        it('should download the pdf from the internal issuer page', async function() {
+            await navigateToBadgeDetails(driver);
+            await downloadPdfFromIssuer(driver);
+        });
+
+        it('should revoke the competency badge', async function() {
+            await navigateToBadgeDetails(driver);
             await revokeBadge(driver);
-        }
-        await navigateToMicroDegreeDetails(driver);
-        await revokeMicroDegree(driver);
+            await navigateToBackpack(driver);
+            await confirmRevokedBadge(driver);
+        });
 
-        await navigateToBackpack(driver);
-        await confirmRevokedMicroDegree(driver);
-    })
-    .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since there is a number of badges to revoke
+        it('delete the competency badge', async function() {
+            await deleteBadgeOverApi();
+        });
 
-    it('should delete the micro degree', async function() {
-        await deleteMicroDegreeOverApi();
+        afterEach(screenshot(driver, this.currentTest));
     });
 
-    it('should delete the badges for the micro degree', async function () {
-        await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
+    describe('micro degree', () => {
+        it('should create a micro degree', async () => {
+            // We need at least three badges to put as part of the degree
+            await createBadges(driver, BADGES_FOR_MICRO_DEGREE);
+            await navigateToBadgeCreation(driver);
+            await createMicroDegree(driver, BADGES_FOR_MICRO_DEGREE);
+        })
+        .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since a number of badges have to be created
+
+        it('should award the micro degree', async function() {
+            // users get micro degrees automatically by receiving all badges
+            // contained in the degree itself
+            for(let i = 0; i < BADGES_FOR_MICRO_DEGREE; i++) {
+                await navigateToBadgeAwarding(driver, i);
+                await awardBadge(driver);
+            }
+        })
+        .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since awarding badges takes a while
+
+        it('should receive the micro degree', async function() {
+            await navigateToBackpack(driver);
+            await receiveMicroDegreeBadge(driver);
+        });
+
+        it('should download the micro degree pdf from the backpack', async function() {
+            await navigateToBackpack(driver);
+            await navigateToReceivedMicroDegree(driver);
+            // https://github.com/mint-o-badges/badgr-ui/issues/1231
+            // A delay is required here due to a race condition in the application.
+            // If removed, the download button will be clicked but won't trigger a download.
+            await new Promise(resolve => setTimeout(resolve, 1_000));
+            await downloadMicroDegree(driver);
+        });
+
+        it('should download the micro degree pdf from the internal issuer page', async function() {
+            await navigateToMicroDegreeDetails(driver);
+            await downloadPdfFromIssuer(driver);
+        });
+
+        it('should revoke the micro degree', async function() {
+            for(let i = 0; i < BADGES_FOR_MICRO_DEGREE; i++)
+            {
+                await navigateToBadgeDetails(driver, i);
+                await revokeBadge(driver);
+            }
+            await navigateToMicroDegreeDetails(driver);
+            await revokeMicroDegree(driver);
+
+            await navigateToBackpack(driver);
+            await confirmRevokedMicroDegree(driver);
+        })
+        .timeout(this.timeout() + BADGES_FOR_MICRO_DEGREE * EXTRA_TIMEOUT_PER_BADGE_MS); // Allow larger timeout since there is a number of badges to revoke
+
+        it('should delete the micro degree', async function() {
+            await deleteMicroDegreeOverApi();
+        });
+
+        it('should delete the badges for the micro degree', async function () {
+            await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
+        });
+
+        afterEach(screenshot(driver, this.currentTest));
     });
 
-    afterEach(async function () {
-        await screenshot(driver, this.currentTest);
+    describe('badge upload', () => {
+        afterEach(screenshot(driver, this.currentTest));
     });
 
     after(async () => {
