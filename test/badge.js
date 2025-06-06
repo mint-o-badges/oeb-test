@@ -38,6 +38,7 @@ const aiCompetenciesDescriptionText = 'With solid computer skills, you can autom
 const tagName = 'automated test tag';
 const microDegreeTitle = 'automated micro degree';
 const microDegreeDescription = 'automated micro degree description';
+const currentBadgeStandardVersion = '3.0'
 
 
 /**
@@ -520,6 +521,15 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
 
     const divElements = await driver.findElements(By.css('div.tag'));
     assert.equal(divElements.length, 1);
+
+    const badgeStandardText = await driver.findElement(
+      ExtendedBy.tagWithText("dt", "Badge-Standard")
+    );
+    const badgeStandardVersion = await driver.findElement(
+      ExtendedBy.sibling(badgeStandardText, By.css("dd"))
+    );
+    const badgeStandardVersionText = await badgeStandardVersion.getText();
+    assert.equal(badgeStandardVersionText, currentBadgeStandardVersion);
 
     const categoryHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Kategorie'));
