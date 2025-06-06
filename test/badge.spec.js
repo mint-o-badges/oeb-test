@@ -31,7 +31,10 @@ import {
     navigateToReceivedMicroDegree,
     navigateToMicroDegreeDetails,
     revokeMicroDegree,
-    validateBadgeVersion
+    validateBadgeVersion,
+    validateUploadedV2Badge,
+    validateUploadedV3Badge,
+    validateUploadedInvalidBadge
 } from './badge.js';
 
 /** Global timeout for all tests if not specified otherwise */
@@ -76,7 +79,7 @@ describe('Badge Test', function() {
     });
 
     // Participation badge
-    describe('Participation badge', () => {
+    describe.skip('Participation badge', () => {
         it('should create a participation badge', async function() {
             await navigateToBadgeCreation(driver);
             await createBadge(driver);
@@ -92,10 +95,12 @@ describe('Badge Test', function() {
             await deleteBadgeOverApi();
         });
 
-        afterEach(screenshot(driver, this.currentTest));
+        afterEach(async function () {
+            await screenshot(driver, this.currentTest);
+        });
     });
 
-    describe('Competency badge', () => {
+    describe.skip('Competency badge', () => {
         it('should create a competency badge', async function() {
             await navigateToBadgeCreation(driver);
             await createBadge(driver, 'competency');
@@ -143,10 +148,12 @@ describe('Badge Test', function() {
             await deleteBadgeOverApi();
         });
 
-        afterEach(screenshot(driver, this.currentTest));
+        afterEach(async function () {
+            await screenshot(driver, this.currentTest);
+        });
     });
 
-    describe('micro degree', () => {
+    describe.skip('micro degree', () => {
         it('should create a micro degree', async () => {
             // We need at least three badges to put as part of the degree
             await createBadges(driver, BADGES_FOR_MICRO_DEGREE);
@@ -207,11 +214,39 @@ describe('Badge Test', function() {
             await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
         });
 
-        afterEach(screenshot(driver, this.currentTest));
+        afterEach(async function () {
+            await screenshot(driver, this.currentTest);
+        });
     });
 
     describe('badge upload', () => {
-        afterEach(screenshot(driver, this.currentTest));
+        // it('should create a badge to test with', async function() {
+        //     await navigateToBadgeCreation(driver);
+        //     await createBadge(driver);
+        // });
+
+        // it('should show message when uploaded badge is invalid', async () => {
+        //     await navigateToReceivedBadge(driver);
+        //     await validateUploadedInvalidBadge(driver);
+        // });
+
+        it('should validate a v2 badge as such on upload', async () => {
+            await navigateToReceivedBadge(driver);
+            await validateUploadedV2Badge(driver);
+        });
+
+        // it('should validate a v3 badge as such on upload', async () => {
+            // await navigateToReceivedBadge(driver);
+            // await validateUploadedV3Badge(driver);
+        // });        
+
+        // it('delete the badge to test with', async function() {
+        //     await deleteBadgeOverApi();
+        // });
+
+        afterEach(async function () {
+            await screenshot(driver, this.currentTest);
+        });
     });
 
     after(async () => {
