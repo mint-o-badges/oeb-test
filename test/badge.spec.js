@@ -30,7 +30,8 @@ import {
     downloadMicroDegree,
     navigateToReceivedMicroDegree,
     navigateToMicroDegreeDetails,
-    revokeMicroDegree
+    revokeMicroDegree,
+    validateBadgeVersion
 } from './badge.js';
 
 /** Global timeout for all tests if not specified otherwise */
@@ -110,6 +111,11 @@ describe('Badge Test', function() {
     it('should receive the competency badge', async function() {
         await navigateToBackpack(driver);
         await receiveBadge(driver);
+    });
+
+    it('should ensure the received badge is of the latest open badges standard', async () => {
+        await navigateToReceivedBadge(driver);
+        await validateBadgeVersion(driver);
     });
 
     it('should download the pdf from the backpack', async function() {
