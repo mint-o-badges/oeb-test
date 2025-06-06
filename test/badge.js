@@ -422,7 +422,7 @@ export async function confirmRevokedBadge(driver) {
  */
 export async function revokeMicroDegree(driver) {
     const revokeButton = await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('zurücknehmen')),
+        ExtendedBy.submitButtonWithText('Zurücknehmen')),
         defaultWait);
     await revokeButton.click();
 
