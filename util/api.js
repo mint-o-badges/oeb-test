@@ -29,6 +29,43 @@ export async function requestToken(username, password) {
     return await response.json();
 }
 
+async function request(path, method, body, token) {
+    let response;
+    if (body && body.length)
+        response = await fetch(path, {
+            method: method,
+            body: body,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.access_token}`
+            }
+        });
+    else
+        response = await fetch(path, {
+            method: method,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.access_token}`
+            }
+        });
+
+    if (!response.ok) {
+        let body;
+        try {
+            body = await response.text();
+        } catch(e) {
+            console.error(`Getting request text failed with error: '${e}'`);
+            body = response;
+        }
+        console.error(`Request to '${path}' failed with status: ${response.status}`);
+        console.error(`Response body: ${body}`);
+    }
+    
+    return response;
+}
+
 export async function verifyIssuer(token, slug) {
     const issuer = await getIssuer(token, slug);
     // TODO: This doesn't suffice (yet), since the verified option is ignored in the backend
@@ -38,43 +75,21 @@ export async function verifyIssuer(token, slug) {
     delete issuer.image;
 
     const path = `${backendUrl}/v1/issuer/issuers/${slug}`;
-    const response = await fetch(path, {
-        method: 'PUT',
-        body: JSON.stringify(issuer),
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
+    const response = await request(path, 'PUT', JSON.stringify(issuer), token);
 
     return await response.ok;
 }
 
 export async function getIssuer(token, slug) {
     const path = `${backendUrl}/v1/issuer/issuers/${slug}`;
-    const response = await fetch(path, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
+    const response = await request(path, 'GET', '', token);
 
     return await response.json();
 }
 
 export async function findIssuer(token, name) {
     const path = `${backendUrl}/v1/issuer/issuers`;
-    const response = await fetch(path, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
+    const response = await request(path, 'GET', '', token);
 
     const json = await response.json();
     if (!Array.isArray(json))
@@ -84,17 +99,7 @@ export async function findIssuer(token, name) {
 
 export async function deleteIssuer(token, slug) {
     const path = `${backendUrl}/v1/issuer/issuers/${slug}`;
-    const response = await fetch(path, {
-        method: 'DELETE',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
-
-    if (!response.ok)
-        console.log("Deleting the issuer failed. Response:", response);
+    const response = await request(path, 'DELETE', '', token);
 
     return response.ok;
 }
@@ -104,17 +109,7 @@ export async function deleteIssuer(token, slug) {
  */
 export async function deleteUser(token) {
     const path = `${backendUrl}/v1/user/profile`;
-    const response = await fetch(path, {
-        method: 'DELETE',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
-
-    if (!response.ok)
-        console.log("Deleting the user failed. Response:", response);
+    const response = await request(path, 'DELETE', '', token);
 
     return response.ok;
 }
@@ -124,17 +119,7 @@ export async function deleteUser(token) {
  */
 export async function getUser(token) {
     const path = `${backendUrl}/v1/user/profile`;
-    const response = await fetch(path, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
-
-    if (!response.ok)
-        console.log("Getting the user failed. Response:", response);
+    const response = await request(path, 'GET', '', token);
 
     const json = await response.json();
     return json;
@@ -142,14 +127,7 @@ export async function getUser(token) {
 
 export async function findBadge(token, name) {
     const path = `${backendUrl}/v2/badgeclasses`;
-    const response = await fetch(path, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
+    const response = await request(path, 'GET', '', token);
 
     const json = await response.json();
     const result = json.result;
@@ -160,14 +138,7 @@ export async function findBadge(token, name) {
 
 export async function findAssertions(token, badgeId) {
     const path = `${backendUrl}/v2/badgeclasses/${badgeId}/assertions?include_revoked=false`;
-    const response = await fetch(path, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
+    const response = await request(path, 'GET', '', token);
 
     const json = await response.json();
     return json.result;
@@ -183,29 +154,14 @@ export async function revokeAssertion(token, assertionId) {
     const body = {
         "revocation_reason": "automated deletion"
     }
-    const response = await fetch(path, {
-        method: 'DELETE',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        },
-        body: JSON.stringify(body)
-    });
+    const response = await request(path, 'DELETE', JSON.stringify(body), token);
 
     return response.ok;
 }
 
 export async function deleteBadge(token, entityId) {
     const path = `${backendUrl}/v2/badgeclasses/${entityId}`;
-    const response = await fetch(path, {
-        method: 'DELETE',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.access_token}`
-        }
-    });
+    const response = await request(path, 'DELETE', '', token);
 
     return response.ok;
 }
