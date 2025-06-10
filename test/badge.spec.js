@@ -46,10 +46,9 @@ const BADGES_FOR_MICRO_DEGREE = 3;
 /** Extra timeout granted per badge for micro degree tests */
 const EXTRA_TIMEOUT_PER_BADGE_MS = 10_000;
 
-
+let driver;
 describe('Badge Test', function() {
-    this.timeout(GLOBAL_TIMEOUT_MS);
-    let driver;
+    this.timeout(GLOBAL_TIMEOUT_MS);    
 
     before(async () => {
         // Delete all PDFs from tmp directory
@@ -93,10 +92,6 @@ describe('Badge Test', function() {
 
         it('delete the participation badge', async function() {
             await deleteBadgeOverApi();
-        });
-
-        afterEach(async function () {
-            await screenshot(driver, this.currentTest);
         });
     });
 
@@ -146,10 +141,6 @@ describe('Badge Test', function() {
 
         it('delete the competency badge', async function() {
             await deleteBadgeOverApi();
-        });
-
-        afterEach(async function () {
-            await screenshot(driver, this.currentTest);
         });
     });
 
@@ -213,39 +204,33 @@ describe('Badge Test', function() {
         it('should delete the badges for the micro degree', async function () {
             await deleteBadgesOverApi(BADGES_FOR_MICRO_DEGREE);
         });
-
-        afterEach(async function () {
-            await screenshot(driver, this.currentTest);
-        });
     });
 
     describe('badge upload', () => {
-        // it('should create a badge to test with', async function() {
-        //     await navigateToBadgeCreation(driver);
-        //     await createBadge(driver);
-        // });
+        it('should create a badge to test with', async function() {
+            await navigateToBadgeCreation(driver);
+            await createBadge(driver);
+            await navigateToBadgeAwarding(driver);
+            await awardBadge(driver);
+        });
 
-        // it('should show message when uploaded badge is invalid', async () => {
-        //     await navigateToReceivedBadge(driver);
-        //     await validateUploadedInvalidBadge(driver);
-        // });
+        it('should show message when uploaded badge is invalid', async () => {
+            await navigateToReceivedBadge(driver);
+            await validateUploadedInvalidBadge(driver);
+        });
 
         it('should validate a v2 badge as such on upload', async () => {
             await navigateToReceivedBadge(driver);
             await validateUploadedV2Badge(driver);
         });
 
-        // it('should validate a v3 badge as such on upload', async () => {
-            // await navigateToReceivedBadge(driver);
-            // await validateUploadedV3Badge(driver);
-        // });        
+        it('should validate a v3 badge as such on upload', async () => {
+            await navigateToReceivedBadge(driver);
+            await validateUploadedV3Badge(driver);
+        });
 
-        // it('delete the badge to test with', async function() {
-        //     await deleteBadgeOverApi();
-        // });
-
-        afterEach(async function () {
-            await screenshot(driver, this.currentTest);
+        it('delete the badge to test with', async function() {
+            await deleteBadgeOverApi();
         });
     });
 
@@ -253,3 +238,7 @@ describe('Badge Test', function() {
         await driver.quit();
     });
 });
+
+afterEach(async function () {
+    await screenshot(driver, this.currentTest);
+});   

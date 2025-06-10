@@ -788,9 +788,12 @@ export const validateUploadedV2Badge = async (driver) => {
     const v2Url = badge['id'].replace('3_0', '2_0');
     const badgeV2Response = await fetch(v2Url);
     const badgeV2JsonString = await badgeV2Response.text();
-    console.log(badgeV2JsonString);
 
     await navigateToBackpack(driver);
+
+    const badgesBefore = Number(await (await driver.findElement(
+        By.css('div:has(div > ng-icon[name="lucideHexagon"]) > p')
+    )).getAttribute('ng-reflect-end-val'));
 
     const uploadButton = await driver.wait(until.elementLocated(
       ExtendedBy.submitButtonWithText('Badge hochladen')
@@ -812,7 +815,10 @@ export const validateUploadedV2Badge = async (driver) => {
     );
     await sendBadgeForUploadButton.click();
 
-    await navigateToBackpack(driver);
+    // Wait until dialog disappears and the backpack updated itself
+    await driver.wait(until.elementLocated(
+        By.css(`div:has(div > ng-icon[name="lucideHexagon"]) > p[ng-reflect-end-val='${badgesBefore + 1}']`)
+    ));
 
     const importedBadge = await driver.wait(until.elementLocated(
       By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
@@ -830,7 +836,7 @@ export const validateUploadedV2Badge = async (driver) => {
     await deleteFromBackpackButton.click();
 
     const confirmDeleteButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'OK')
+      ExtendedBy.tagWithText('button', 'Badge entfernen')
     );
     await confirmDeleteButton.click();
 };
@@ -884,7 +890,7 @@ export const validateUploadedV3Badge = async (driver) => {
     await deleteFromBackpackButton.click();
 
     const confirmDeleteButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'OK')
+      ExtendedBy.tagWithText('button', 'Badge entfernen')
     );
     await confirmDeleteButton.click();
 };
