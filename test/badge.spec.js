@@ -78,7 +78,7 @@ describe('Badge Test', function() {
     });
 
     // Participation badge
-    describe.skip('Participation badge', () => {
+    describe('Participation badge', () => {
         it('should create a participation badge', async function() {
             await navigateToBadgeCreation(driver);
             await createBadge(driver);
@@ -95,7 +95,7 @@ describe('Badge Test', function() {
         });
     });
 
-    describe.skip('Competency badge', () => {
+    describe('Competency badge', () => {
         it('should create a competency badge', async function() {
             await navigateToBadgeCreation(driver);
             await createBadge(driver, 'competency');
@@ -144,7 +144,7 @@ describe('Badge Test', function() {
         });
     });
 
-    describe.skip('micro degree', () => {
+    describe('micro degree', () => {
         it('should create a micro degree', async () => {
             // We need at least three badges to put as part of the degree
             await createBadges(driver, BADGES_FOR_MICRO_DEGREE);
