@@ -94,7 +94,8 @@ describe('Badge Test', function() {
     it('should create a competency badge', async function() {
         await navigateToBadgeCreation(driver);
         await createBadge(driver, 'competency');
-    });
+    })
+    .timeout(this.timeout() * 2); // Allow larger timeout since the AI tool can take a while
 
     it('should validate the competency badge', async function() {
         await navigateToBadgeDetails(driver);

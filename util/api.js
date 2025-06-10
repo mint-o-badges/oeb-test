@@ -39,7 +39,8 @@ async function request(path, method, body, token) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token.access_token}`
-            }
+            },
+            signal: AbortSignal.timeout(30 * 1000)
         });
     else
         response = await fetch(path, {
@@ -48,7 +49,8 @@ async function request(path, method, body, token) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token.access_token}`
-            }
+            },
+            signal: AbortSignal.timeout(30 * 1000)
         });
 
     if (!response.ok) {
