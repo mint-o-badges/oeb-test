@@ -1,5 +1,5 @@
 import {By, until, Key} from "selenium-webdriver";
-import {defaultWait} from '../config.js';
+import {defaultWait, extendedWait} from '../config.js';
 import {ExtendedBy} from './selection.js';
 import {setOEBInputValueById, setOEBInputValueByCSS } from './components.js';
 

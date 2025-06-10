@@ -15,7 +15,8 @@ export async function avoidStale(f) {
 }
 
 export class ExtendedBy {
-    static containingText(selector, childSelector, text, trim = true) {
+    static containingText(selector, childSelector, text,
+        trim = true, caseSensitive = true) {
         return (async (driver) => {
             return await avoidStale(async () => {
                 // Find elements from outer selector
@@ -31,9 +32,13 @@ export class ExtendedBy {
                     // Since this is done asnyc, first map them
                     const innerMappedPromises = childrenArray.map(async node => {
                         let nodeText = await node.getText();
-                        if (trim) {
+                        if (trim && nodeText) {
                             nodeText = nodeText.trim();
                             text = text.trim();
+                        }
+                        if (!caseSensitive && nodeText) {
+                            nodeText = nodeText.toLowerCase();
+                            text = text.toLowerCase();
                         }
                         return nodeText == text;
                     });
@@ -54,10 +59,10 @@ export class ExtendedBy {
      * This assumes that the text is contained by a span by default
      */
     static submitButtonWithText(
-        text, caseSensitive = true, textTag = 'span') {
+        text, trim = true, caseSensitive = true, textTag = 'span') {
         return ExtendedBy.containingText(
             By.css('button[type="submit"]'), By.css('span'),
-            text);
+            text, trim, caseSensitive);
     }
 
     static tagWithText(
@@ -71,6 +76,10 @@ export class ExtendedBy {
                     if (trim && nodeText) {
                         nodeText = nodeText.trim();
                         text = text.trim();
+                    }
+                    if (!caseSensitive && nodeText) {
+                        nodeText = nodeText.toLowerCase();
+                        text = text.toLowerCase();
                     }
                     return nodeText === text;
                 });
