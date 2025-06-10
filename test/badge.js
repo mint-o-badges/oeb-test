@@ -391,7 +391,7 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
  */
 export async function revokeBadge(driver) {
     const revokeButton = await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('zurücknehmen', false)),
+        ExtendedBy.submitButtonWithText('zurücknehmen', true, false)),
         defaultWait);
     await revokeButton.click();
 
@@ -422,7 +422,7 @@ export async function confirmRevokedBadge(driver) {
  */
 export async function revokeMicroDegree(driver) {
     const revokeButton = await driver.wait(until.elementLocated(
-        ExtendedBy.submitButtonWithText('zurücknehmen', false)),
+        ExtendedBy.submitButtonWithText('zurücknehmen', true, false)),
         defaultWait);
     await revokeButton.click();
 
