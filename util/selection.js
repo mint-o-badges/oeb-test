@@ -66,7 +66,7 @@ export class ExtendedBy {
                 const selectedArray = Array.from(selected);
                 const mappedPromises = selectedArray.map(async node => {
                     let nodeText = await node.getText();
-                    if (trim) {
+                    if (trim && nodeText) {
                         nodeText = nodeText.trim();
                         text = text.trim();
                     }

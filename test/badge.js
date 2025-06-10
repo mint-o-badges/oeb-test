@@ -609,10 +609,13 @@ export async function createMicroDegree(driver, n) {
     await descriptionField.sendKeys(microDegreeDescription);
     
     // Image field
+    // I have NO IDEA why, but for some reason this is required
+    // here for the image upload to work on my machine
+    await new Promise(r => setTimeout(r, 1000));
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
-    // 1. Upload own image (insterted into badge frame)
+    // 1. Upload own image
     await uploadImage(driver, "image_field", 1, testImagePath);
-    // 2. Upload own image
+    // 2. Upload own image (insterted into badge frame)
     await uploadImage(driver, "image_field", 0, testImagePath);
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
