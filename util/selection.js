@@ -53,13 +53,15 @@ export class ExtendedBy {
     /**
      * This assumes that the text is contained by a span by default
      */
-    static submitButtonWithText(text, textTag = 'span') {
+    static submitButtonWithText(
+        text, caseSensitive = true, textTag = 'span') {
         return ExtendedBy.containingText(
             By.css('button[type="submit"]'), By.css('span'),
             text);
     }
 
-    static tagWithText(tag, text, trim = true) {
+    static tagWithText(
+        tag, text, trim = true, caseSensitive = true) {
         return (async (driver) => {
             return await avoidStale(async () => {
                 const selected = await driver.findElements(By.css(tag));
