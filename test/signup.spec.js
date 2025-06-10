@@ -51,7 +51,11 @@ describe('Signup Test', function() {
     });
 
     afterEach(async function () {
-        await screenshot(driver, this.currentTest);
+        try {
+            await screenshot(driver, this.currentTest);
+        } catch(e) {
+            console.error(`Screenshotting failed: ${e}`);
+        }
     });
 
     after(async () => {

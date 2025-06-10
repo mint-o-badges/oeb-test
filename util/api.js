@@ -145,8 +145,12 @@ export async function findAssertions(token, badgeId) {
 }
 
 export async function revokeAssertions(token, assertions) {
-    const results = assertions.map(assertion => revokeAssertion(token, assertion.entityId));
-    return results.every(res => res);
+    let finalResult = true;
+    for (const assertion of assertions) {
+        const result = await revokeAssertion(token, assertion.entityId);
+        finalResult = finalResult && result;
+    }
+    return finalResult;
 }
 
 export async function revokeAssertion(token, assertionId) {
