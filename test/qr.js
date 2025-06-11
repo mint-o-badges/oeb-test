@@ -158,24 +158,20 @@ export async function requestBadgeViaQr(driver) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function confirmBadgeAwarding(driver) {
-    await driver.wait(until.elementLocated(By.css(
-        'button[role="heading"]')), defaultWait);
-    const dropdownButton = await driver.findElement(By.css(
-        'button[role="heading"]'));
+    const dropdownButton = await driver.wait(until.elementLocated(
+        By.css('button[role="heading"]')), defaultWait);
     await dropdownButton.click();
 
     // Choose the first request, which is the only one
     await clickUntilInteractable(async () =>
         await driver.findElement(By.css('hlm-checkbox-checkicon')));
 
-    await driver.wait(until.elementLocated(
+    const confirmButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge vergeben')), defaultWait);
-    const confirmButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Badge vergeben'));
 
     await driver.wait(until.elementIsVisible(confirmButton), defaultWait);
     await confirmButton.click();
 
     await driver.wait(until.elementLocated(ExtendedBy.tagWithText(
-        "p", "Fast geschafft! Deine Badges werden gerade vergeben – das kann ein paar Minuten dauern. Schau gleich auf der Badge-Detail-Seite nach, ob alles geklappt hat.")), defaultWait);
+        "span", `Der Badge wurde erfolgreich an ${username} vergeben`)), defaultWait);
 }
