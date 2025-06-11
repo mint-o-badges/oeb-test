@@ -133,7 +133,19 @@ export async function findBadge(token, name) {
     const result = json.result;
     if (!Array.isArray(result))
         return null;
-    return result.find(obj => obj.name == name)
+    return result.find(obj => obj.name === name);
+}
+
+export async function findBadges(token, name, startsWith=false) {
+    const path = `${backendUrl}/v2/badgeclasses`;
+    const response = await request(path, 'GET', '', token);
+
+    const json = await response.json();
+    const result = json.result;
+    if (!Array.isArray(result))
+        return [];
+    return result.filter(obj => obj.name === name ||
+        (startsWith && obj.name && obj.name.startsWith(name)));
 }
 
 export async function findAssertions(token, badgeId) {
