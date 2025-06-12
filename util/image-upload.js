@@ -11,11 +11,8 @@ import { ExtendedBy } from "./selection.js";
  * @param {string} imagePath Path to the image file to upload
  */
 export async function uploadImage(driver, element_id, nthElement, imagePath) {
-    let imageField;
-    if(nthElement === 0)
-        imageField = await driver.findElement(By.css(`[id^='${element_id}']`));
-    else
-        imageField = (await driver.findElements(By.css(`[id^='${element_id}']`)))[nthElement];
+    const fields = Array.from(await driver.findElements(By.css(`[id^='${element_id}']`)));
+    const imageField = fields[nthElement];
     const image = path.resolve(imagePath);
     await imageField.sendKeys(image);
     await driver.wait(
