@@ -1,7 +1,7 @@
 /**
  * In this file utility functions for interacting with the API are provided
  */
-import {backendUrl} from '../config.js';
+import {backendUrl, extendedWait} from '../config.js';
 
 export async function requestToken(username, password) {
     const data = new FormData();
@@ -39,7 +39,8 @@ async function request(path, method, body, token) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token.access_token}`
-            }
+            },
+            signal: AbortSignal.timeout(extendedWait)
         });
     else
         response = await fetch(path, {
@@ -48,7 +49,8 @@ async function request(path, method, body, token) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token.access_token}`
-            }
+            },
+            signal: AbortSignal.timeout(extendedWait)
         });
 
     if (!response.ok) {

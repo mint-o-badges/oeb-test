@@ -1,5 +1,5 @@
 import {By, until, Key} from "selenium-webdriver";
-import {defaultWait} from '../config.js';
+import {defaultWait, extendedWait} from '../config.js';
 import {ExtendedBy} from './selection.js';
 import {setOEBInputValueById, setOEBInputValueByCSS } from './components.js';
 
@@ -59,7 +59,7 @@ export async function addCompetenciesViaAI(driver, aiCompetenciesDescriptionText
     
     // Only use first skill to always ensure we have only one resulting in a deterministic
     // total number of competencies
-    await driver.wait(until.elementLocated(By.id('checkboxAiSkill_0')), defaultWait);
+    await driver.wait(until.elementLocated(By.id('checkboxAiSkill_0')), extendedWait);
     const firstAISkillCheckbox = await driver.findElement(By.id(
         'checkboxAiSkill_0'));
     firstAISkillCheckbox.click();
