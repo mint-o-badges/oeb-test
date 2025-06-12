@@ -752,9 +752,9 @@ export const validateUploadedInvalidBadge = async (driver) => {
 
     await navigateToBackpack(driver);
 
-    const uploadButton = await driver.findElement(
-      ExtendedBy.submitButtonWithText('Badge hochladen')
-    );
+    const uploadButton = await driver.wait(until.elementLocated(
+      By.css('oeb-button[icon="lucideUpload"]')
+    ));
     await uploadButton.click();
 
     const jsonButton = await driver.wait(until.elementLocated(
@@ -763,7 +763,7 @@ export const validateUploadedInvalidBadge = async (driver) => {
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
-      By.css('textarea#json_eingeben')
+      By.css('textarea[name="json_eingeben"]')
     );
     await jsonTextarea.sendKeys(badgeStringToUpload);
 
@@ -794,9 +794,9 @@ export const validateUploadedV2Badge = async (driver) => {
 
     await navigateToBackpack(driver);
 
-    const badgesBefore = Number(await (await driver.findElement(
+    const badgesBefore = Number(await (await driver.wait(until.elementLocated(
         By.css('div:has(div > ng-icon[name="lucideHexagon"]) > p')
-    )).getAttribute('ng-reflect-end-val'));
+    ))).getAttribute('ng-reflect-end-val'));
 
     const uploadButton = await driver.wait(until.elementLocated(
       ExtendedBy.submitButtonWithText('Badge hochladen')
@@ -809,7 +809,7 @@ export const validateUploadedV2Badge = async (driver) => {
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
-      By.css('textarea#json_eingeben')
+      By.css('textarea[name="json_eingeben"]')
     );
     await jsonTextarea.sendKeys(badgeV2JsonString);
 
@@ -866,7 +866,7 @@ export const validateUploadedV3Badge = async (driver) => {
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
-      By.css('textarea#json_eingeben')
+      By.css('textarea[name="json_eingeben"]')
     );
     await jsonTextarea.sendKeys(file);
 
