@@ -747,8 +747,22 @@ export async function validateUploadedInvalidBadge(driver) {
 
     await navigateToBackpack(driver);
 
+    await uploadBadgeJson(badgeStringToUpload);
+
+    await driver.wait(until.elementLocated(
+      By.css('oeb-dialog div ng-icon[name="lucideCircleX"]')
+    ));
+};
+
+/**
+ * Assumes to be on the backpack page, uploads a JSON as string
+ * to import a badge to the backpack
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ * @param {string} badgeJson JSON string to use for badge importing
+ */
+async function uploadBadgeJson(driver, badgeJson) {
     const uploadButton = await driver.wait(until.elementLocated(
-      By.css('oeb-button[icon="lucideUpload"]')
+      ExtendedBy.submitButtonWithText('Badge hochladen')
     ), defaultWait);
     await uploadButton.click();
 
@@ -760,17 +774,40 @@ export async function validateUploadedInvalidBadge(driver) {
     const jsonTextarea = await driver.findElement(
       By.css('textarea[name="json_eingeben"]')
     );
-    await jsonTextarea.sendKeys(badgeStringToUpload);
+    await jsonTextarea.sendKeys(badgeJson);
 
     const sendBadgeForUploadButton = await driver.findElement(
       ExtendedBy.submitButtonWithText('Badge hinzufügen')
     );
     await sendBadgeForUploadButton.click();
+}
 
-    await driver.wait(until.elementLocated(
-      By.css('oeb-dialog div ng-icon[name="lucideCircleX"]')
-    ));
-};
+/**
+ * Deletes the first imported badge from the backpack, assumes to be
+ * on the backpack page.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+async function deleteImportedBadgeFromBackpack(driver) {
+    const importedBadge = await driver.wait(until.elementLocated(
+      By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
+    ), defaultWait);
+    await importedBadge.click();
+
+    const overflowMenu = await driver.wait(until.elementLocated(
+      By.css('button:has(svg[icon="icon_more"])')
+    ), defaultWait);
+    await overflowMenu.click();
+
+    const deleteFromBackpackButton = await driver.findElement(
+      ExtendedBy.tagWithText('button', 'Badge aus Rucksack löschen')
+    );
+    await deleteFromBackpackButton.click();
+
+    const confirmDeleteButton = await driver.findElement(
+      ExtendedBy.tagWithText('button', 'Badge entfernen')
+    );
+    await confirmDeleteButton.click();
+}
 
 /**
  * Uploads a v2 badge to the backpack and checks if it gets added properly.
@@ -795,50 +832,14 @@ export async function validateUploadedV2Badge(driver) {
     const badgeCountAttribute = await badgeCountElement.getAttribute('ng-reflect-end-val');
     const badgesBefore = Number(badgeCountAttribute);
 
-    const uploadButton = await driver.wait(until.elementLocated(
-      ExtendedBy.submitButtonWithText('Badge hochladen')
-    ), defaultWait);
-    await uploadButton.click();
-
-    const jsonButton = await driver.wait(until.elementLocated(
-      By.css('form hlm-tabs-list button:nth-child(3)')
-    ), defaultWait);
-    await jsonButton.click();
-
-    const jsonTextarea = await driver.findElement(
-      By.css('textarea[name="json_eingeben"]')
-    );
-    await jsonTextarea.sendKeys(badgeV2JsonString);
-
-    const sendBadgeForUploadButton = await driver.findElement(
-      ExtendedBy.submitButtonWithText('Badge hinzufügen')
-    );
-    await sendBadgeForUploadButton.click();
+    await uploadBadgeJson(badgeV2JsonString);    
 
     // Wait until dialog disappears and the backpack updated itself
     await driver.wait(until.elementLocated(
         By.css(`div:has(div > ng-icon[name="lucideHexagon"]) > p[ng-reflect-end-val='${badgesBefore + 1}']`)
     ), defaultWait);
 
-    const importedBadge = await driver.wait(until.elementLocated(
-      By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
-    ), defaultWait);
-    await importedBadge.click();
-
-    const overflowMenu = await driver.wait(until.elementLocated(
-      By.css('button:has(svg[icon="icon_more"])')
-    ), defaultWait);
-    await overflowMenu.click();
-
-    const deleteFromBackpackButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'Badge aus Rucksack löschen')
-    );
-    await deleteFromBackpackButton.click();
-
-    const confirmDeleteButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'Badge entfernen')
-    );
-    await confirmDeleteButton.click();
+    await deleteImportedBadgeFromBackpack(driver);
 };
 
 /**
@@ -852,45 +853,18 @@ export async function validateUploadedV3Badge(driver) {
     await clearDownloadDirectory();
     await navigateToBackpack(driver);
 
-    const uploadButton = await driver.wait(until.elementLocated(
-      ExtendedBy.submitButtonWithText('Badge hochladen')
+    const badgeCountElement = await driver.wait(until.elementLocated(
+        By.css('div:has(div > ng-icon[name="lucideHexagon"]) > p')
     ), defaultWait);
-    await uploadButton.click();
+    const badgeCountAttribute = await badgeCountElement.getAttribute('ng-reflect-end-val');
+    const badgesBefore = Number(badgeCountAttribute);
 
-    const jsonButton = await driver.wait(until.elementLocated(
-      By.css('form hlm-tabs-list button:nth-child(3)')
+    await uploadBadgeJson(file);
+
+    // Wait until dialog disappears and the backpack updated itself
+    await driver.wait(until.elementLocated(
+        By.css(`div:has(div > ng-icon[name="lucideHexagon"]) > p[ng-reflect-end-val='${badgesBefore + 1}']`)
     ), defaultWait);
-    await jsonButton.click();
 
-    const jsonTextarea = await driver.findElement(
-      By.css('textarea[name="json_eingeben"]')
-    );
-    await jsonTextarea.sendKeys(file);
-
-    const sendBadgeForUploadButton = await driver.findElement(
-      ExtendedBy.submitButtonWithText('Badge hinzufügen')
-    );
-    await sendBadgeForUploadButton.click();
-
-    await navigateToBackpack(driver);
-
-    const importedBadge = await driver.wait(until.elementLocated(
-      By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
-    ), defaultWait);
-    await importedBadge.click();
-
-    const overflowMenu = await driver.wait(until.elementLocated(
-      By.css('button:has(svg[icon="icon_more"])')
-    ), defaultWait);
-    await overflowMenu.click();
-
-    const deleteFromBackpackButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'Badge aus Rucksack löschen')
-    );
-    await deleteFromBackpackButton.click();
-
-    const confirmDeleteButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'Badge entfernen')
-    );
-    await confirmDeleteButton.click();
+    await deleteImportedBadgeFromBackpack(driver);
 };
