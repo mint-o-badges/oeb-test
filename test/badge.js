@@ -681,7 +681,7 @@ export async function deleteBadgesOverApi(n) {
  * @returns The content of the json file as string
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
-const downloadBadgeJson = async (driver, badgeName) => {
+async function downloadBadgeJson(driver, badgeName) {
   const overflowMenu = await driver.findElement(
     By.css('button:has(svg[icon="icon_more"])')
   );
@@ -712,7 +712,7 @@ const downloadBadgeJson = async (driver, badgeName) => {
  * of an awarded badge.
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
-export const validateBadgeVersion = async (driver) => {
+export async function validateBadgeVersion(driver) {
   const badgeStandardText = await driver.findElement(
       ExtendedBy.tagWithText("dt", "Badge-Standard")
     );
@@ -741,7 +741,7 @@ export const validateBadgeVersion = async (driver) => {
  * that will be reuploaded in a modified way.
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
-export const validateUploadedInvalidBadge = async (driver) => {
+export async function validateUploadedInvalidBadge(driver) {
     const file = await downloadBadgeJson(driver, testBadgeTitle);
     const badge = JSON.parse(file);
     await clearDownloadDirectory();
@@ -783,7 +783,7 @@ export const validateUploadedInvalidBadge = async (driver) => {
  * that will be reuploaded in a modified way.
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
-export const validateUploadedV2Badge = async (driver) => {
+export async function validateUploadedV2Badge(driver) {
     const file = await downloadBadgeJson(driver, testBadgeTitle);
     await clearDownloadDirectory();
 
@@ -850,7 +850,7 @@ export const validateUploadedV2Badge = async (driver) => {
  * that will be reuploaded in a modified way.
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
-export const validateUploadedV3Badge = async (driver) => {
+export async function validateUploadedV3Badge(driver) {
     const file = await downloadBadgeJson(driver, testBadgeTitle);
     await clearDownloadDirectory();
     await navigateToBackpack(driver);
