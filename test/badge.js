@@ -692,16 +692,14 @@ async function downloadBadgeJson(driver, badgeName) {
   );
   await downloadButton.click();
 
-  await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.json$/));
-
-  const now = new Date();
-  const badgeJsonName =
-    `${now.getFullYear()}-` +
-    `${('0' + (now.getMonth()+1)).slice(-2)}-` +
-    `${('0' + (now.getDate())).slice(-2)}-` +
-    `${badgeName.replace(' ', '_')}.json`;
-  const file = fs.readFileSync(`${downloadDirectory}/${badgeJsonName}`, { encoding: 'utf-8' });
-  return file;
+  // RegExp for a file like 2025-06-16-some_text.json
+  const badgeJsonRegex = new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_]+\.json$/);
+  await waitForDownload(driver, badgeJsonRegex);
+  
+  const files = fs.readFileSync(downloadDirectory);
+  const file = files.filter(f => badgeJsonRegex.test(f))
+  const fileContent = Buffer.from(file).toString('utf-8');
+  return fileContent;
 };
 
 /**
