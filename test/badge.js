@@ -749,12 +749,12 @@ export async function validateUploadedInvalidBadge(driver) {
 
     const uploadButton = await driver.wait(until.elementLocated(
       By.css('oeb-button[icon="lucideUpload"]')
-    ));
+    ), defaultWait);
     await uploadButton.click();
 
     const jsonButton = await driver.wait(until.elementLocated(
-      By.css('form hlm-tabs-list button:nth-child(3)'))
-    );
+      By.css('form hlm-tabs-list button:nth-child(3)')
+    ), defaultWait);
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
@@ -791,16 +791,16 @@ export async function validateUploadedV2Badge(driver) {
 
     const badgesBefore = Number(await (await driver.wait(until.elementLocated(
         By.css('div:has(div > ng-icon[name="lucideHexagon"]) > p')
-    ))).getAttribute('ng-reflect-end-val'));
+    ), defaultWait)).getAttribute('ng-reflect-end-val'));
 
     const uploadButton = await driver.wait(until.elementLocated(
       ExtendedBy.submitButtonWithText('Badge hochladen')
-    ));
+    ), defaultWait);
     await uploadButton.click();
 
     const jsonButton = await driver.wait(until.elementLocated(
-      By.css('form hlm-tabs-list button:nth-child(3)'))
-    );
+      By.css('form hlm-tabs-list button:nth-child(3)')
+    ), defaultWait);
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
@@ -816,16 +816,16 @@ export async function validateUploadedV2Badge(driver) {
     // Wait until dialog disappears and the backpack updated itself
     await driver.wait(until.elementLocated(
         By.css(`div:has(div > ng-icon[name="lucideHexagon"]) > p[ng-reflect-end-val='${badgesBefore + 1}']`)
-    ));
+    ), defaultWait);
 
     const importedBadge = await driver.wait(until.elementLocated(
       By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
-    ));
+    ), defaultWait);
     await importedBadge.click();
 
     const overflowMenu = await driver.wait(until.elementLocated(
       By.css('button:has(svg[icon="icon_more"])')
-    ));
+    ), defaultWait);
     await overflowMenu.click();
 
     const deleteFromBackpackButton = await driver.findElement(
@@ -852,12 +852,12 @@ export async function validateUploadedV3Badge(driver) {
 
     const uploadButton = await driver.wait(until.elementLocated(
       ExtendedBy.submitButtonWithText('Badge hochladen')
-    ));
+    ), defaultWait);
     await uploadButton.click();
 
     const jsonButton = await driver.wait(until.elementLocated(
-      By.css('form hlm-tabs-list button:nth-child(3)'))
-    );
+      By.css('form hlm-tabs-list button:nth-child(3)')
+    ), defaultWait);
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
@@ -874,12 +874,12 @@ export async function validateUploadedV3Badge(driver) {
 
     const importedBadge = await driver.wait(until.elementLocated(
       By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
-    ));
+    ), defaultWait);
     await importedBadge.click();
 
     const overflowMenu = await driver.wait(until.elementLocated(
       By.css('button:has(svg[icon="icon_more"])')
-    ));
+    ), defaultWait);
     await overflowMenu.click();
 
     const deleteFromBackpackButton = await driver.findElement(
