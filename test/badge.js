@@ -723,13 +723,10 @@ export async function validateBadgeVersion(driver) {
   const file = await downloadBadgeJson(driver, testBadgeTitle);
   
   const badgeAsJson = JSON.parse(file);
-  assert.equal(typeof badgeAsJson['@context'] === "string", false);
+  assert.notStrictEqual(typeof badgeAsJson['@context'], "string");
   // The existence of the /credentials/ part in the context urls are
-  // unique for v3
-  assert.equal(badgeAsJson['@context'].reduce((prev, curr) => {
-    return prev || curr.indexOf('/credentials/') >= 0
-  }, false), true);
-
+  // unique for v3. If it exists in any url, it is v3 (which it should be here)
+  assert(badgeAsJson['@context'].some(i => i.indexOf('/credentials') >= 0));
   await clearDownloadDirectory();
 };
 
