@@ -789,9 +789,11 @@ export async function validateUploadedV2Badge(driver) {
 
     await navigateToBackpack(driver);
 
-    const badgesBefore = Number(await (await driver.wait(until.elementLocated(
+    const badgeCountElement = await driver.wait(until.elementLocated(
         By.css('div:has(div > ng-icon[name="lucideHexagon"]) > p')
-    ), defaultWait)).getAttribute('ng-reflect-end-val'));
+    ), defaultWait);
+    const badgeCountAttribute = await badgeCountElement.getAttribute('ng-reflect-end-val');
+    const badgesBefore = Number(badgeCountAttribute);
 
     const uploadButton = await driver.wait(until.elementLocated(
       ExtendedBy.submitButtonWithText('Badge hochladen')
