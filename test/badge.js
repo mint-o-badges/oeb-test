@@ -789,11 +789,14 @@ async function uploadBadgeJson(driver, badgeJson) {
  * @param {import('selenium-webdriver').ThenableWebDriver} driver 
  */
 async function dismissNotificationToast(driver) {
-    const notificationDismissButton = await driver.findElement(
+    const notificationDismissButton = await driver.findElements(
         By.css('button.notification-x-close')
-    ).then(undefined, _ => null);
-    if(notificationDismissButton !== null)
-        await notificationDismissButton.click();
+    );
+    if(notificationDismissButton.length > 0) {
+        // There can only ever be one toast at a time
+        assert(notificationDismissButton.length === 1);
+        await notificationDismissButton[0].click();
+    }
 }
 
 /**
