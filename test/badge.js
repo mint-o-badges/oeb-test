@@ -38,6 +38,7 @@ const aiCompetenciesDescriptionText = 'With solid computer skills, you can autom
 const tagName = 'automated test tag';
 const microDegreeTitle = 'automated micro degree';
 const microDegreeDescription = 'automated micro degree description';
+const currentBadgeStandardVersion = '3.0'
 
 
 /**
@@ -356,7 +357,7 @@ export async function downloadPdfFromIssuer(driver) {
 }
 
 export function clearDownloadDirectory() {
-    let regex = /[.]pdf$/
+    let regex = /\.(pdf|json)$/i;
     fs.readdirSync(downloadDirectory)
         .filter(f => regex.test(f))
         .map(f => fs.unlinkSync(downloadDirectory + '/' + f))
@@ -674,3 +675,215 @@ export async function deleteBadgesOverApi(n) {
     for(let i = 0; i < n; i++)
         await deleteBadgeOverApi();
 }
+
+/**
+ * Downloads the JSON file of a badge from the awarded badge details page.
+ * @returns The content of the json file as string
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+async function downloadBadgeJson(driver) {
+  const overflowMenu = await driver.findElement(
+    By.css('button:has(svg[icon="icon_more"])')
+  );
+  await overflowMenu.click();
+
+  const downloadButton = await driver.findElement(
+    ExtendedBy.tagWithText('button', `Download JSON-Datei (${currentBadgeStandardVersion})`)
+  );
+  await downloadButton.click();
+
+  // RegExp for a file like 2025-06-16-some_text.json
+  const badgeJsonRegex = new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.json$/);
+  await waitForDownload(driver, badgeJsonRegex, defaultWait);
+  
+  const files = fs.readdirSync(downloadDirectory);
+  const file = files.filter(f => badgeJsonRegex.test(f))
+  const fileContent = fs.readFileSync(`${downloadDirectory}/${file}`, { encoding: 'utf-8'});
+  return fileContent;
+};
+
+/**
+ * Checks if the badge is conform with the currently implemented
+ * open badges version and downloads the badges JSON file
+ * to check its conformity.
+ * This assumes that the driver already navigated to the badge detail page
+ * of an awarded badge.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+export async function validateBadgeVersion(driver) {
+  const badgeStandardText = await driver.findElement(
+      ExtendedBy.tagWithText("dt", "Badge-Standard")
+    );
+  const badgeStandardVersion = await driver.findElement(
+    ExtendedBy.sibling(badgeStandardText, By.css("dd"))
+  );
+  const badgeStandardVersionText = await badgeStandardVersion.getText();
+  assert.equal(badgeStandardVersionText, currentBadgeStandardVersion);
+
+  const file = await downloadBadgeJson(driver);
+  
+  const badgeAsJson = JSON.parse(file);
+  assert.notStrictEqual(typeof badgeAsJson['@context'], "string");
+  // The existence of the /credentials/ part in the context urls are
+  // unique for v3. If it exists in any url, it is v3 (which it should be here)
+  assert(badgeAsJson['@context'].some(i => i.indexOf('/credentials') >= 0));
+  await clearDownloadDirectory();
+};
+
+/**
+ * Uploads an invalid badge to the backpack and checks if an error is shown.
+ * This assumes that the driver already navigated to an awarded badge
+ * that will be reuploaded in a modified way.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+export async function validateUploadedInvalidBadge(driver) {
+    const file = await downloadBadgeJson(driver);
+    const badge = JSON.parse(file);
+    await clearDownloadDirectory();
+
+    // We got a valid badge from the system, lets break it
+    badge['@context'] = [];
+    const badgeStringToUpload = JSON.stringify(badge);
+
+    await navigateToBackpack(driver);
+
+    await uploadBadgeJson(driver, badgeStringToUpload);
+
+    await driver.wait(until.elementLocated(
+      By.css('oeb-dialog div ng-icon[name="lucideCircleX"]')
+    ));
+};
+
+/**
+ * Assumes to be on the backpack page, uploads a JSON as string
+ * to import a badge to the backpack
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ * @param {string} badgeJson JSON string to use for badge importing
+ */
+async function uploadBadgeJson(driver, badgeJson) {
+    const uploadButton = await driver.wait(until.elementLocated(
+      ExtendedBy.submitButtonWithText('Badge hochladen')
+    ), defaultWait);
+    await uploadButton.click();
+
+    const jsonButton = await driver.wait(until.elementLocated(
+      By.css('form hlm-tabs-list button:nth-child(3)')
+    ), defaultWait);
+    await jsonButton.click();
+
+    const jsonTextarea = await driver.findElement(
+      By.css('textarea[name="json_eingeben"]')
+    );
+    await jsonTextarea.sendKeys(badgeJson);
+
+    const sendBadgeForUploadButton = await driver.findElement(
+      ExtendedBy.submitButtonWithText('Badge hinzufügen')
+    );
+    await sendBadgeForUploadButton.click();
+}
+
+/**
+ * Dismisses notification toast if there is one
+ * because it might block the link on the badge card
+ * which leads to a selenium error (ElementClickInterceptedException)
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver 
+ */
+async function dismissNotificationToast(driver) {
+    const notificationDismissButton = await driver.findElements(
+        By.css('button.notification-x-close')
+    );
+    if(notificationDismissButton.length > 0) {
+        // There can only ever be one toast at a time
+        assert(notificationDismissButton.length === 1);
+        await notificationDismissButton[0].click();
+    }
+}
+
+/**
+ * Deletes the first imported badge from the backpack, assumes to be
+ * on the backpack page.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+async function deleteImportedBadgeFromBackpack(driver) {
+    const importedBadge = await driver.wait(until.elementLocated(
+      By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
+    ), defaultWait);
+    await importedBadge.click();
+
+    const overflowMenu = await driver.wait(until.elementLocated(
+      By.css('button:has(svg[icon="icon_more"])')
+    ), defaultWait);
+    await overflowMenu.click();
+
+    const deleteFromBackpackButton = await driver.findElement(
+      ExtendedBy.tagWithText('button', 'Badge aus Rucksack löschen')
+    );
+    await deleteFromBackpackButton.click();
+
+    const confirmDeleteButton = await driver.findElement(
+      ExtendedBy.tagWithText('button', 'Badge entfernen')
+    );
+    await confirmDeleteButton.click();
+}
+
+/**
+ * Uploads a v2 badge to the backpack and checks if it gets added properly.
+ * This assumes that the driver already navigated to an awarded badge
+ * that will be reuploaded in a modified way.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+export async function validateUploadedV2Badge(driver) {
+    const file = await downloadBadgeJson(driver);
+    await clearDownloadDirectory();
+
+    const badge = JSON.parse(file);
+    const v2Url = badge['id'].replace('3_0', '2_0');
+    const badgeV2Response = await fetch(v2Url);
+    const badgeV2JsonString = await badgeV2Response.text();
+
+    await navigateToBackpack(driver);
+
+    await driver.wait(until.elementLocated(
+        By.css('bg-badgecard')
+    ), defaultWait);
+    const badgeCards = await driver.findElements(By.css('bg-badgecard'));
+    const badgesBefore = badgeCards.length;
+
+    await uploadBadgeJson(driver, badgeV2JsonString);    
+
+    // Wait until dialog disappears and the backpack updated itself
+    await driver.wait(until.elementLocated(
+        ExtendedBy.tagWithText(`div:has(div > ng-icon[name="lucideHexagon"]) > p`, `${badgesBefore + 1}`)
+    ), defaultWait);
+
+    await dismissNotificationToast(driver);
+    await deleteImportedBadgeFromBackpack(driver);
+};
+
+/**
+ * Uploads a v3 badge to the backpack and checks if it gets added properly.
+ * This assumes that the driver already navigated to an awarded badge
+ * that will be reuploaded in a modified way.
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ */
+export async function validateUploadedV3Badge(driver) {
+    const file = await downloadBadgeJson(driver, testBadgeTitle);
+    await clearDownloadDirectory();
+    await navigateToBackpack(driver);
+
+    await driver.wait(until.elementLocated(
+        By.css('bg-badgecard')
+    ), defaultWait);
+    const badgeCards = await driver.findElements(By.css('bg-badgecard'));
+    const badgesBefore = badgeCards.length;
+
+    await uploadBadgeJson(driver, file);
+
+    // Wait until dialog disappears and the backpack updated itself
+    await driver.wait(until.elementLocated(
+        ExtendedBy.tagWithText(`div:has(div > ng-icon[name="lucideHexagon"]) > p`, `${badgesBefore + 1}`)
+    ), defaultWait);
+
+    await dismissNotificationToast(driver);
+    await deleteImportedBadgeFromBackpack(driver);
+};
