@@ -158,6 +158,11 @@ export async function navigateToBackpack(driver) {
 
 export async function navigateToReceivedBadge(driver) {
     await navigateToBackpack(driver);
+
+    // move to the badges tab
+    const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
+    await tabs[1].click();
+
     const receivedBadgeLink = await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
     receivedBadgeLink.click();
 
@@ -167,7 +172,7 @@ export async function navigateToReceivedBadge(driver) {
 export async function navigateToReceivedMicroDegree(driver) {
     // this switches to the micro degree tab of the backpack
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
-    await tabs[2].click();
+    await tabs[3].click();
 
     // For the load
     await driver.wait(until.elementsLocated(By.css("bg-learningpathcard")));
@@ -267,6 +272,10 @@ export async function awardBadge(driver, email = username) {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveBadge(driver) {
+    // move to the badges tab
+    const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
+    await tabs[1].click();
+
     // Try three times, since receiving the badge can take some time
     let receivedBadges;
     for (let i = 0; i < 3; i++) {
@@ -291,6 +300,10 @@ export async function receiveBadge(driver) {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveMicroDegreeBadge(driver) {
+    // move to the badges tab
+    const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
+    await tabs[1].click();
+
     // This checks if the micro degree badge appears in the backpack
     await driver.wait(until.elementLocated(By.linkText(microDegreeTitle)), defaultWait);
     const receivedBadges = await driver.findElements(By.linkText(
