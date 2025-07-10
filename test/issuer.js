@@ -81,8 +81,8 @@ export async function createIssuer(driver) {
         ('hlm-checkbox-checkicon'));
     await confirmCheckbox.click();
 
-    const submitButton = (await driver.findElements(By.css(
-        'button[type="submit"]')))[1];
+    const submitButton = (await driver.findElement(By.css(
+        'button[type="submit"]')));
     await submitButton.click();
 
     await driver.wait(until.titleIs(`Issuer - ${testIssuerName} - Open Educational Badges`), defaultWait);
