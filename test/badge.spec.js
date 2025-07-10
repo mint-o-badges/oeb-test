@@ -235,15 +235,16 @@ describe('Badge Test', function() {
         });
     });
 
+    afterEach(async function () {
+        try {
+            await screenshot(driver, this.currentTest);
+        } catch(e) {
+            console.error(`Screenshotting failed: ${e}`);
+        }
+    });   
+
     after(async () => {
         await driver.quit();
     });
 });
 
-afterEach(async function () {
-    try {
-        await screenshot(driver, this.currentTest);
-    } catch(e) {
-        console.error(`Screenshotting failed: ${e}`);
-    }
-});   
