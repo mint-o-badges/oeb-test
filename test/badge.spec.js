@@ -90,7 +90,7 @@ describe('Badge Test', function() {
             await verifyBadgeOverApi(driver);
         });
 
-        it('delete the participation badge', async function() {
+        it('should delete the participation badge', async function() {
             await deleteBadgeOverApi();
         });
     });
@@ -140,7 +140,7 @@ describe('Badge Test', function() {
             await confirmRevokedBadge(driver);
         });
 
-        it('delete the competency badge', async function() {
+        it('should delete the competency badge', async function() {
             await deleteBadgeOverApi();
         });
     });
@@ -230,7 +230,7 @@ describe('Badge Test', function() {
             await validateUploadedV3Badge(driver);
         });
 
-        it('delete the badge to test with', async function() {
+        it('should delete the badge to test with', async function() {
             await deleteBadgeOverApi();
         });
     });
@@ -247,4 +247,3 @@ describe('Badge Test', function() {
         await driver.quit();
     });
 });
-
