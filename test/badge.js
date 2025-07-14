@@ -661,7 +661,12 @@ export async function createMicroDegree(driver, n) {
 
     // Next step: Tag and Create
     await nextButton.click();
-    await addNewTag(driver, tagName);   
+    await addNewTag(driver, tagName); 
+    
+    // activate Micro Degree
+    const activationCheckbox = await driver.findElement(By.css('hlm-checkbox'))
+    activationCheckbox.click()
+    
     
     const submitForm = await driver.findElement(By.css('form'));
     await submitForm.submit();
