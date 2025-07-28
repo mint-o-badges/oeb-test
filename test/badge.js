@@ -351,7 +351,7 @@ export async function downloadMicroDegree(driver) {
     );
     await downloadPdfButton.click();
 
-    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/), defaultWait);
+    await waitForDownload(driver, new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.pdf$/));
     // TODO: Verify file content
     clearDownloadDirectory();
 }
@@ -380,7 +380,7 @@ export function clearDownloadDirectory() {
         .map(f => fs.unlinkSync(downloadDirectory + '/' + f))
 }
 
-export async function waitForDownload(driver, regex, timeout = 5000) {
+export async function waitForDownload(driver, regex) {
     const condition = new Condition("for download",
         driver => {
             const files = fs.readdirSync(downloadDirectory);
@@ -400,8 +400,8 @@ export async function waitForDownload(driver, regex, timeout = 5000) {
             assert(count, 1, "Expected one downloaded file");
             return true;
         });
-    await driver.wait(condition, timeout,
-        "Download didn't finish or file content didn't match the pattern within the specified timeout");
+    await driver.wait(condition, defaultWait,
+        "Download didn't finish or file content didn't match the pattern within the timeout");
 }
 
 /**

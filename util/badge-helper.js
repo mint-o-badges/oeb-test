@@ -76,6 +76,6 @@ export async function waitForTabs(driver, count) {
                 By.css("hlm-tabs-list > button"));
             return tabs.length >= count;
         });
-    await driver.wait(condition, timeout,
+    await driver.wait(condition, defaultWait,
         `Waiting for ${count} tabs timed out`);
 }
