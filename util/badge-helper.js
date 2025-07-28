@@ -65,3 +65,17 @@ export async function addCompetenciesViaAI(driver, aiCompetenciesDescriptionText
     firstAISkillCheckbox.click();
     await driver.wait(until.elementIsEnabled(firstAISkillCheckbox), defaultWait);
 }
+
+/**
+ * Waits for (at least) count tabs (i.e. buttons in hlm-tabs-list)
+ */
+export async function waitForTabs(driver, count) {
+    const condition = new Condition("multiple tabs",
+        driver => {
+            const tabs = await driver.findElements(
+                By.css("hlm-tabs-list > button"));
+            return tabs.length >= count;
+        });
+    await driver.wait(condition, timeout,
+        `Waiting for ${count} tabs timed out`);
+}

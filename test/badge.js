@@ -22,7 +22,8 @@ import {
     addNewTag,
     setBadgeValidity,
     addCompetenciesByHand,
-    addCompetenciesViaAI
+    addCompetenciesViaAI,
+    waitForTabs
 } from '../util/badge-helper.js';
 import {uploadImage, selectNounProjectImage} from '../util/image-upload.js';
 
@@ -112,8 +113,7 @@ export async function navigateToMicroDegreeDetails(driver) {
 
     await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), defaultWait);
 
-    await driver.wait(until.elementLocated(
-        By.css('hlm-tabs-list')), defaultWait);
+    await waitForTabs(driver, 2);
     const tabs = await driver.findElements(
         By.css('hlm-tabs-list > button'));
     await tabs[1].click();
@@ -160,6 +160,7 @@ export async function navigateToReceivedBadge(driver) {
     await navigateToBackpack(driver);
 
     // move to the badges tab
+    await waitForTabs(driver, 5);
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[1].click();
 
@@ -171,6 +172,7 @@ export async function navigateToReceivedBadge(driver) {
 
 export async function navigateToReceivedMicroDegree(driver) {
     // this switches to the micro degree tab of the backpack
+    await waitForTabs(driver, 5);
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[3].click();
 
@@ -273,14 +275,7 @@ export async function awardBadge(driver, email = username) {
  */
 export async function receiveBadge(driver) {
     // move to the badges tab
-    const condition = new Condition("multiple tabs",
-        driver => {
-            const tabs = await driver.findElements(
-                By.css("hlm-tabs-list > button"));
-            return tabs.length >= 2;
-        });
-    await driver.wait(condition, timeout,
-        "Waiting for multiple tabs timed out");
+    await waitForTabs(driver, 5);
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[1].click();
 
@@ -308,9 +303,8 @@ export async function receiveBadge(driver) {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveMicroDegreeBadge(driver) {
-    await driver.wait(until.elementLocated(By.css("hlm-tabs-list")), defaultWait);
-
     // move to the badges tab
+    await waitForTabs(driver, 5);
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[1].click();
 
@@ -794,6 +788,7 @@ async function uploadBadgeJson(driver, badgeJson) {
     ), defaultWait);
     await uploadButton.click();
 
+    await waitForTabs(driver, 5);
     const jsonButton = await driver.wait(until.elementLocated(
       By.css('form hlm-tabs-list button:nth-child(3)')
     ), defaultWait);
