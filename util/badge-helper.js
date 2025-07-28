@@ -1,4 +1,4 @@
-import {By, until, Key} from "selenium-webdriver";
+import {By, until, Key, Condition} from "selenium-webdriver";
 import {defaultWait, extendedWait} from '../config.js';
 import {ExtendedBy} from './selection.js';
 import {setOEBInputValueById, setOEBInputValueByCSS } from './components.js';
@@ -71,7 +71,7 @@ export async function addCompetenciesViaAI(driver, aiCompetenciesDescriptionText
  */
 export async function waitForTabs(driver, count) {
     const condition = new Condition("multiple tabs",
-        driver => {
+        async (driver) => {
             const tabs = await driver.findElements(
                 By.css("hlm-tabs-list > button"));
             return tabs.length >= count;
