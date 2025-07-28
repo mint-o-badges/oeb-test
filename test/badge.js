@@ -51,7 +51,7 @@ export async function navigateToBadgeCreation(driver) {
     // Sometimes the title seems to oscillate back and forth, so we
     // wait here as well
     const expectedTitle = 'Issuers - Open Educational Badges';
-    driver.wait(until.titleIs(expectedTitle), defaultWait);
+    await driver.wait(until.titleIs(expectedTitle), defaultWait);
 
     await avoidStale(async () => {
         const createBadgeButton = await driver.wait(until.elementLocated(
@@ -153,7 +153,7 @@ export async function navigateToBadgeAwarding(driver, skip = 0) {
 export async function navigateToBackpack(driver) {
     await driver.get(`${url}/recipient/badges`);
 
-    driver.wait(until.titleIs('Backpack - Open Educational Badges'), defaultWait);
+    await driver.wait(until.titleIs('Backpack - Open Educational Badges'), defaultWait);
 }
 
 export async function navigateToReceivedBadge(driver) {
@@ -165,7 +165,7 @@ export async function navigateToReceivedBadge(driver) {
     await tabs[1].click();
 
     const receivedBadgeLink = await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
-    receivedBadgeLink.click();
+    await receivedBadgeLink.click();
 
     await driver.wait(until.titleIs(`Backpack - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
@@ -288,7 +288,7 @@ export async function receiveBadge(driver) {
         } catch(e) {
             if (e.name === 'NoSuchElementError' ||
                 e.name === 'TimeoutError') {
-                driver.navigate().refresh();
+                await driver.navigate().refresh();
                 continue;
             }
             throw e;
