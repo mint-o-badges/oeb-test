@@ -273,6 +273,14 @@ export async function awardBadge(driver, email = username) {
  */
 export async function receiveBadge(driver) {
     // move to the badges tab
+    const condition = new Condition("multiple tabs",
+        driver => {
+            const tabs = await driver.findElements(
+                By.css("hlm-tabs-list > button"));
+            return tabs.length >= 2;
+        });
+    await driver.wait(condition, timeout,
+        "Waiting for multiple tabs timed out");
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[1].click();
 
