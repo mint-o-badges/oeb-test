@@ -164,8 +164,11 @@ export async function navigateToReceivedBadge(driver) {
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[1].click();
 
-    const receivedBadgeLink = await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
-    await receivedBadgeLink.click();
+    await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
+    const receivedBadgeLinks = await driver.findElements(By.linkText(testBadgeTitle));
+    assert.equal(receivedBadgeLinks.length, 1,
+        "Expected to find only one badge matching the title in my backpack");
+    await receivedBadgeLinks[0].click();
 
     await driver.wait(until.titleIs(`Backpack - ${testBadgeTitle} - Open Educational Badges`), defaultWait);
 }
@@ -239,13 +242,13 @@ export async function createBadge(driver, badgeType = 'participation') {
     await addNewTag(driver, tagName);
     // Click next button to move to the next step
     await nextButton.click();
-    
+
     // Final step: add optional details then submit badge
     await setBadgeValidity(driver);
 
     const submitButton = await driver.findElement(By.id('create-badge-btn'));
     await submitButton.click();
-    
+
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
 
@@ -625,7 +628,7 @@ export async function createMicroDegree(driver, n) {
     const descriptionField = await driver.findElement(By.css(
         'textarea'));
     await descriptionField.sendKeys(microDegreeDescription);
-    
+
     // Image field
     // I have NO IDEA why, but for some reason this is required
     // here for the image upload to work on my machine
@@ -666,12 +669,12 @@ export async function createMicroDegree(driver, n) {
     // Next step: Tag and Create
     await nextButton.click();
     await addNewTag(driver, tagName); 
-    
+
     // activate Micro Degree
     const activationCheckbox = await driver.findElement(By.css('hlm-checkbox'))
     activationCheckbox.click()
-    
-    
+
+
     const submitForm = await driver.findElement(By.css('form'));
     await submitForm.submit();
 
@@ -704,24 +707,24 @@ export async function deleteBadgesOverApi(n) {
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
 async function downloadBadgeJson(driver) {
-  const overflowMenu = await driver.findElement(
-    By.css('button:has(svg[icon="icon_more"])')
-  );
-  await overflowMenu.click();
+    const overflowMenu = await driver.findElement(
+        By.css('button:has(svg[icon="icon_more"])')
+    );
+    await overflowMenu.click();
 
-  const downloadButton = await driver.findElement(
-    ExtendedBy.tagWithText('button', `Download JSON-Datei (${currentBadgeStandardVersion})`)
-  );
-  await downloadButton.click();
+    const downloadButton = await driver.findElement(
+        ExtendedBy.tagWithText('button', `Download JSON-Datei (${currentBadgeStandardVersion})`)
+    );
+    await downloadButton.click();
 
-  // RegExp for a file like 2025-06-16-some_text.json
-  const badgeJsonRegex = new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.json$/);
-  await waitForDownload(driver, badgeJsonRegex, defaultWait);
-  
-  const files = fs.readdirSync(downloadDirectory);
-  const file = files.filter(f => badgeJsonRegex.test(f))
-  const fileContent = fs.readFileSync(`${downloadDirectory}/${file}`, { encoding: 'utf-8'});
-  return fileContent;
+    // RegExp for a file like 2025-06-16-some_text.json
+    const badgeJsonRegex = new RegExp(/^\d{4}-\d{2}-\d{2}-[a-zA-Z0-9_ ]+\.json$/);
+    await waitForDownload(driver, badgeJsonRegex, defaultWait);
+
+    const files = fs.readdirSync(downloadDirectory);
+    const file = files.filter(f => badgeJsonRegex.test(f))
+    const fileContent = fs.readFileSync(`${downloadDirectory}/${file}`, { encoding: 'utf-8'});
+    return fileContent;
 };
 
 /**
@@ -733,23 +736,23 @@ async function downloadBadgeJson(driver) {
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
 export async function validateBadgeVersion(driver) {
-  const badgeStandardText = await driver.findElement(
-      ExtendedBy.tagWithText("dt", "Badge-Standard")
+    const badgeStandardText = await driver.wait(until.elementLocated(
+        ExtendedBy.tagWithText("dt", "Badge-Standard")
+    ));
+    const badgeStandardVersion = await driver.findElement(
+        ExtendedBy.sibling(badgeStandardText, By.css("dd"))
     );
-  const badgeStandardVersion = await driver.findElement(
-    ExtendedBy.sibling(badgeStandardText, By.css("dd"))
-  );
-  const badgeStandardVersionText = await badgeStandardVersion.getText();
-  assert.equal(badgeStandardVersionText, currentBadgeStandardVersion);
+    const badgeStandardVersionText = await badgeStandardVersion.getText();
+    assert.equal(badgeStandardVersionText, currentBadgeStandardVersion);
 
-  const file = await downloadBadgeJson(driver);
-  
-  const badgeAsJson = JSON.parse(file);
-  assert.notStrictEqual(typeof badgeAsJson['@context'], "string");
-  // The existence of the /credentials/ part in the context urls are
-  // unique for v3. If it exists in any url, it is v3 (which it should be here)
-  assert(badgeAsJson['@context'].some(i => i.indexOf('/credentials') >= 0));
-  await clearDownloadDirectory();
+    const file = await downloadBadgeJson(driver);
+
+    const badgeAsJson = JSON.parse(file);
+    assert.notStrictEqual(typeof badgeAsJson['@context'], "string");
+    // The existence of the /credentials/ part in the context urls are
+    // unique for v3. If it exists in any url, it is v3 (which it should be here)
+    assert(badgeAsJson['@context'].some(i => i.indexOf('/credentials') >= 0));
+    await clearDownloadDirectory();
 };
 
 /**
@@ -772,7 +775,7 @@ export async function validateUploadedInvalidBadge(driver) {
     await uploadBadgeJson(driver, badgeStringToUpload);
 
     await driver.wait(until.elementLocated(
-      By.css('oeb-dialog div ng-icon[name="lucideCircleX"]')
+        By.css('oeb-dialog div ng-icon[name="lucideCircleX"]')
     ));
 };
 
@@ -784,23 +787,23 @@ export async function validateUploadedInvalidBadge(driver) {
  */
 async function uploadBadgeJson(driver, badgeJson) {
     const uploadButton = await driver.wait(until.elementLocated(
-      ExtendedBy.submitButtonWithText('Badge hochladen')
+        ExtendedBy.submitButtonWithText('Badge hochladen')
     ), defaultWait);
     await uploadButton.click();
 
     await waitForTabs(driver, 5);
     const jsonButton = await driver.wait(until.elementLocated(
-      By.css('form hlm-tabs-list button:nth-child(3)')
+        By.css('form hlm-tabs-list button:nth-child(3)')
     ), defaultWait);
     await jsonButton.click();
 
     const jsonTextarea = await driver.findElement(
-      By.css('textarea[name="json_eingeben"]')
+        By.css('textarea[name="json_eingeben"]')
     );
     await jsonTextarea.sendKeys(badgeJson);
 
     const sendBadgeForUploadButton = await driver.findElement(
-      ExtendedBy.submitButtonWithText('Badge hinzufügen')
+        ExtendedBy.submitButtonWithText('Badge hinzufügen')
     );
     await sendBadgeForUploadButton.click();
 }
@@ -829,22 +832,22 @@ async function dismissNotificationToast(driver) {
  */
 async function deleteImportedBadgeFromBackpack(driver) {
     const importedBadge = await driver.wait(until.elementLocated(
-      By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
+        By.css(`bg-badgecard:has(div.tw-absolute.tw-top-0) a[title='${testBadgeTitle}']`)
     ), defaultWait);
     await importedBadge.click();
 
     const overflowMenu = await driver.wait(until.elementLocated(
-      By.css('button:has(svg[icon="icon_more"])')
+        By.css('button:has(svg[icon="icon_more"])')
     ), defaultWait);
     await overflowMenu.click();
 
     const deleteFromBackpackButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'Badge aus Rucksack löschen')
+        ExtendedBy.tagWithText('button', 'Badge aus Rucksack löschen')
     );
     await deleteFromBackpackButton.click();
 
     const confirmDeleteButton = await driver.findElement(
-      ExtendedBy.tagWithText('button', 'Badge entfernen')
+        ExtendedBy.tagWithText('button', 'Badge entfernen')
     );
     await confirmDeleteButton.click();
 }
