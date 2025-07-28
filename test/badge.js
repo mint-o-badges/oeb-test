@@ -165,7 +165,8 @@ export async function navigateToReceivedBadge(driver) {
     await tabs[1].click();
 
     await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
-    const receivedBadgeLinks = await driver.findElements(By.linkText(testBadgeTitle));
+    const receivedBadgeLinks = await driver.findElements(
+        ExtendedBy.tagWithText("a", testBadgeTitle));
     assert.equal(receivedBadgeLinks.length, 1,
         "Expected to find only one badge matching the title in my backpack");
     await receivedBadgeLinks[0].click();
