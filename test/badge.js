@@ -165,6 +165,8 @@ export async function navigateToReceivedBadge(driver) {
     await tabs[1].click();
 
     await driver.wait(until.elementLocated(By.linkText(testBadgeTitle)), defaultWait);
+    // For some reason, selenium navigates to the wrong badge sometimes
+    // if I use By.linkText here
     const receivedBadgeLinks = await driver.findElements(
         ExtendedBy.tagWithText("a", testBadgeTitle));
     assert.equal(receivedBadgeLinks.length, 1,
@@ -708,9 +710,9 @@ export async function deleteBadgesOverApi(n) {
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  */
 async function downloadBadgeJson(driver) {
-    const overflowMenu = await driver.findElement(
+    const overflowMenu = await driver.wait(until.elementLocated(
         By.css('button:has(svg[icon="icon_more"])')
-    );
+    ));
     await overflowMenu.click();
 
     const downloadButton = await driver.findElement(
