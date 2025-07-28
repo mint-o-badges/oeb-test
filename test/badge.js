@@ -300,7 +300,7 @@ export async function receiveBadge(driver) {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function receiveMicroDegreeBadge(driver) {
-    await driver.wait(until.elementLocated(By.css("hlm-tabs-list")));
+    await driver.wait(until.elementLocated(By.css("hlm-tabs-list")), defaultWait);
 
     // move to the badges tab
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
