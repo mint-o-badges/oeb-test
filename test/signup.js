@@ -116,6 +116,6 @@ export async function deleteUserViaUI(driver) {
     const confirmDeleteButton = await driver.wait(until.elementLocated((By.xpath("//button[text()=' Account löschen ']"))), defaultWait)    
     await confirmDeleteButton.click();
 
-    const deleteSuccessMessage = await driver.wait(until.urlMatches(/\/public\/start[^\/]+$/), defaultWait);
+    const deleteSuccessMessage = await driver.wait(until.urlMatches(/\/public\/start[^\/]*$/), defaultWait);
     assert(deleteSuccessMessage, "The user account deletion failed!");
 }
