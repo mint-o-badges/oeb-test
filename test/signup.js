@@ -8,7 +8,7 @@ import { login } from './login.js';
 const testUserEmail = 'automated@test.de';
 const testUserFirstName = 'automated';
 const testUserLastName = 'test';
-const testUserPassword = 'automatedTestPassword';
+const testUserPassword = 'automatedTestPassword1!';
 const verificationPageTitle = 'Verification - Open Educational Badges';
 
 export async function navigateToSignup(driver) {
