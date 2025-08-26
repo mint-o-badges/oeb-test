@@ -83,9 +83,9 @@ export async function navigateToBadgeDetails(driver, skip = 0) {
     await driver.wait(until.titleMatches(/Issuer - .* - Open Educational Badges/), defaultWait);
 
     await driver.wait(until.elementLocated(
-        By.css('span.tw-text-oebblack')), defaultWait);
+        By.css('td:first-child p')), defaultWait);
     const spans = Array.from(await driver.findElements(
-        By.css('span.tw-text-oebblack')));
+        By.css('td:first-child p')));
     let toSkip = skip;
     for (const span of spans) {
         const text = await span.getText();
