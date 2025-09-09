@@ -419,6 +419,11 @@ export async function waitForDownload(driver, regex) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function revokeBadge(driver) {
+    await waitForTabs(driver, 2);
+    const tabs = await driver.findElements(
+        By.css('hlm-tabs-list > button'));
+    await tabs[1].click(); // move to recipients tabs
+
     const revokeButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('zurücknehmen', true, false)),
         defaultWait);
