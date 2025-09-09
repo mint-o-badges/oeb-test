@@ -366,6 +366,11 @@ export async function downloadMicroDegree(driver) {
  * This assumes that the driver already navigated to badge detail page
  */
 export async function downloadPdfFromIssuer(driver) {
+    await waitForTabs(driver, 2);
+    const tabs = await driver.findElements(
+        By.css('hlm-tabs-list > button'));
+    await tabs[1].click(); // move to recipients tabs
+
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('PDF-Zertifikat')),
         defaultWait);
