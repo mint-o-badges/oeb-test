@@ -45,7 +45,7 @@ export async function signup(driver) {
     await passwordRepeatField.sendKeys(testUserPassword);
 
     const checkboxes = await driver.findElements(By.css(
-        'hlm-checkbox-checkicon'));
+        'hlm-checkbox-check'));
     const termsCheckbox = checkboxes[0];
     await termsCheckbox.click();
 

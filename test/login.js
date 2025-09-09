@@ -48,7 +48,7 @@ export async function acceptTerms(driver) {
     }
     
     const checkbox = await termsBox.findElement(
-        By.css('hlm-checkbox-checkicon'));
+        By.css('hlm-checkbox-check'));
     await checkbox.click();
 
     const submitButton = await termsBox.findElement(
