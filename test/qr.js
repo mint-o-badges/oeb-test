@@ -143,7 +143,7 @@ export async function requestBadgeViaQr(driver) {
     await emailField.sendKeys(username);
 
     const ageConfirmationCheckbox = await driver.findElement(By.css(
-        'brn-checkbox'));
+        'hlm-checkbox'));
     await ageConfirmationCheckbox.click();
 
     const submitButton = await driver.findElement(By.css(
@@ -164,7 +164,7 @@ export async function confirmBadgeAwarding(driver) {
 
     // Choose the first request, which is the only one
     await clickUntilInteractable(async () =>
-        await driver.findElement(By.css('hlm-checkbox-checkicon')));
+        await driver.findElement(By.css('hlm-checkbox')));
 
     const confirmButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('Badge vergeben')), defaultWait);

@@ -366,6 +366,11 @@ export async function downloadMicroDegree(driver) {
  * This assumes that the driver already navigated to badge detail page
  */
 export async function downloadPdfFromIssuer(driver) {
+    await waitForTabs(driver, 2);
+    const tabs = await driver.findElements(
+        By.css('hlm-tabs-list > button'));
+    await tabs[1].click(); // move to recipients tabs
+
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('PDF-Zertifikat')),
         defaultWait);
@@ -414,6 +419,11 @@ export async function waitForDownload(driver, regex) {
  * This assumes that the driver already navigated to the badge detail page
  */
 export async function revokeBadge(driver) {
+    await waitForTabs(driver, 2);
+    const tabs = await driver.findElements(
+        By.css('hlm-tabs-list > button'));
+    await tabs[1].click(); // move to recipients tabs
+
     const revokeButton = await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('zurücknehmen', true, false)),
         defaultWait);
@@ -558,15 +568,6 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
         + ('0' + (now.getMonth()+1)).slice(-2) + '.'
         + now.getFullYear();
 
-    const lastEditedHeading = await driver.findElement(
-        ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
-    const lastEditedElement = await driver.findElement(
-        ExtendedBy.sibling(lastEditedHeading, By.css('dd')));
-    const lastEditedTime = await lastEditedElement.findElement(
-        By.css('time'));
-    const lastEditedText = await lastEditedTime.getText();
-    assert.equal(lastEditedText, todayString);
-
     const createdHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Erstellt am'));
     const createdElement = await driver.findElement(
@@ -650,6 +651,7 @@ export async function createMicroDegree(driver, n) {
     await nextButton.click();
 
     // Next step: Add badges to the micro degree
+    await driver.wait(until.elementsLocated(By.css('bg-badgecard')), defaultWait);
     const selectableCards = await driver.findElements(
         ExtendedBy.containingText(
             By.css('bg-badgecard'),

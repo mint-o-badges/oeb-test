@@ -78,7 +78,7 @@ export async function createIssuer(driver) {
     await cityField.sendKeys(testIssuerCity);
 
     const confirmCheckbox = await driver.findElement(By.css
-        ('hlm-checkbox-checkicon'));
+        ('hlm-checkbox'));
     await confirmCheckbox.click();
 
     const submitButton = (await driver.findElement(By.css(
