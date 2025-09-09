@@ -651,6 +651,7 @@ export async function createMicroDegree(driver, n) {
     await nextButton.click();
 
     // Next step: Add badges to the micro degree
+    await driver.wait(until.elementsLocated(By.css('bg-badgecard')), defaultWait);
     const selectableCards = await driver.findElements(
         ExtendedBy.containingText(
             By.css('bg-badgecard'),
