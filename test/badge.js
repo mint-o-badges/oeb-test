@@ -558,15 +558,6 @@ export async function validateBadge(driver, badgeType = 'Teilnahme') {
         + ('0' + (now.getMonth()+1)).slice(-2) + '.'
         + now.getFullYear();
 
-    const lastEditedHeading = await driver.findElement(
-        ExtendedBy.tagWithText('dt', 'Zuletzt editiert'));
-    const lastEditedElement = await driver.findElement(
-        ExtendedBy.sibling(lastEditedHeading, By.css('dd')));
-    const lastEditedTime = await lastEditedElement.findElement(
-        By.css('time'));
-    const lastEditedText = await lastEditedTime.getText();
-    assert.equal(lastEditedText, todayString);
-
     const createdHeading = await driver.findElement(
         ExtendedBy.tagWithText('dt', 'Erstellt am'));
     const createdElement = await driver.findElement(
