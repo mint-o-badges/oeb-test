@@ -114,6 +114,7 @@ export async function navigateToIssuerDetails(driver) {
  * This assumes that the driver already navigated to the issuer details
  */
 export async function verifyIssuerDetails(driver) {
+    await driver.wait(until.elementLocated(ExtendedBy.tagWithText('p', testIssuerDescription)), defaultWait);
     const descriptionElements = await driver.findElements(
         ExtendedBy.tagWithText('p', testIssuerDescription));
     assert.equal(descriptionElements.length, 1,
