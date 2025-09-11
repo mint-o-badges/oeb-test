@@ -181,7 +181,7 @@ describe('Badge Test', function() {
 
         it('should download the micro degree pdf from the internal issuer page', async function() {
             await navigateToMicroDegreeDetails(driver);
-            await downloadPdfFromIssuer(driver);
+            await downloadPdfFromIssuer(driver, true);
         });
 
         it('should revoke the micro degree', async function() {
