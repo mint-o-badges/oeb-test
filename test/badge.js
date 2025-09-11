@@ -16,7 +16,7 @@ import {
     findAssertions,
     revokeAssertions
 } from '../util/api.js';
-import {clickUntilInteractable} from '../util/components.js';
+import {clickUntilInteractable, scrollIntoView} from '../util/components.js';
 import {ExtendedBy, avoidStale} from '../util/selection.js';
 import {
     addNewTag,
@@ -122,7 +122,7 @@ export async function navigateToMicroDegreeDetails(driver) {
     await driver.wait(until.elementsLocated(By.css("learningpaths-datatable")));
 
     const receivedMicroDegreeLink = await driver.findElement(
-        ExtendedBy.tagWithText("span", microDegreeTitle));
+        ExtendedBy.tagWithText("p", microDegreeTitle));
     await receivedMicroDegreeLink.click();
 }
 
@@ -217,11 +217,16 @@ export async function createBadge(driver, badgeType = 'participation') {
         'textarea'));
     await shortDescriptionField.sendKeys(testBadgeDescription);
     // Image field
+    // Timeouts between image uploads ensure that the server has time to respond
+    // as the images are partially being generated on the server
+    await new Promise(r => setTimeout(r, 1000));
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image (insterted into badge frame)
-    await uploadImage(driver, "image_field", 1, testImagePath);
-    // 2. Upload own image
     await uploadImage(driver, "image_field", 0, testImagePath);
+    await new Promise(r => setTimeout(r, 1000));
+    // 2. Upload own image
+    await uploadImage(driver, "image_field", 1, testImagePath);
+    await new Promise(r => setTimeout(r, 1000));
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
 
@@ -312,11 +317,16 @@ export async function receiveMicroDegreeBadge(driver) {
     // move to the badges tab
     await waitForTabs(driver, 5);
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
-    await tabs[1].click();
+    await tabs[3].click();
 
     // This checks if the micro degree badge appears in the backpack
-    await driver.wait(until.elementLocated(By.linkText(microDegreeTitle)), defaultWait);
-    const receivedBadges = await driver.findElements(By.linkText(
+    await driver.wait(until.elementLocated(ExtendedBy.containingText(
+        By.css('bg-learningpathcard'),
+        By.css('span'),
+        microDegreeTitle)), defaultWait);
+    const receivedBadges = await driver.findElements(ExtendedBy.containingText(
+        By.css('bg-learningpathcard'),
+        By.css('span'),
         microDegreeTitle));
     assert.equal(receivedBadges.length, 1, "Expected to have received one micro degree badge with the specified title");
 }
@@ -365,11 +375,13 @@ export async function downloadMicroDegree(driver) {
 /**
  * This assumes that the driver already navigated to badge detail page
  */
-export async function downloadPdfFromIssuer(driver) {
-    await waitForTabs(driver, 2);
-    const tabs = await driver.findElements(
-        By.css('hlm-tabs-list > button'));
-    await tabs[1].click(); // move to recipients tabs
+export async function downloadPdfFromIssuer(driver, isMicroDegree = false) {
+    if(!isMicroDegree) {
+        await waitForTabs(driver, 2);
+        const tabs = await driver.findElements(
+            By.css('hlm-tabs-list > button'));
+        await tabs[1].click(); // move to recipients tabs
+    }    
 
     await driver.wait(until.elementLocated(
         ExtendedBy.submitButtonWithText('PDF-Zertifikat')),
@@ -459,12 +471,10 @@ export async function revokeMicroDegree(driver) {
         ExtendedBy.submitButtonWithText('zurücknehmen', true, false)),
         defaultWait);
     await revokeButton.click();
-
     const confirmDialog = await driver.findElement(By.css('confirm-dialog'));
     const confirmButton = await confirmDialog.findElement(By.css(
         'button.button:not(.button-secondary)'));
     await confirmButton.click();
-
     await driver.wait(until.elementLocated(ExtendedBy.tagWithText("h3", "0 Micro Degree-Empfänger:innen")), defaultWait);
 }
 
@@ -472,8 +482,15 @@ export async function revokeMicroDegree(driver) {
  * This assumes that the driver already navigated to the backpack page
  */
 export async function confirmRevokedMicroDegree(driver) {
-    const receivedBadges = await driver.findElements(By.linkText(
-        microDegreeTitle));
+    // this switches to the micro degree tab of the backpack
+    await waitForTabs(driver, 5);
+    const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
+    await tabs[3].click();
+
+    await driver.wait(until.elementsLocated(By.css("learningpaths-datatable")));
+
+    const receivedBadges = await driver.findElement(
+        ExtendedBy.tagWithText("p", microDegreeTitle));
     assert.equal(receivedBadges.length, 0, "Expected to have received no micro degree with the specified title");
 }
 
@@ -634,14 +651,16 @@ export async function createMicroDegree(driver, n) {
     await descriptionField.sendKeys(microDegreeDescription);
 
     // Image field
-    // I have NO IDEA why, but for some reason this is required
-    // here for the image upload to work on my machine
+    // Timeouts between image uploads ensure that the server has time to respond
+    // as the images are partially being generated on the server
     await new Promise(r => setTimeout(r, 1000));
     // Testing switching between framed and unframed/owned images is essential as users might experience some issues while doing so
     // 1. Upload own image
-    await uploadImage(driver, "image_field", 1, testImagePath);
-    // 2. Upload own image (insterted into badge frame)
     await uploadImage(driver, "image_field", 0, testImagePath);
+    await new Promise(r => setTimeout(r, 1000));
+    // 2. Upload own image (insterted into badge frame)
+    await uploadImage(driver, "image_field", 1, testImagePath);
+    await new Promise(r => setTimeout(r, 1000));
     // 3. Select an image from nounproject
     await selectNounProjectImage(driver, nounProjectSearchText);
 
@@ -659,8 +678,13 @@ export async function createMicroDegree(driver, n) {
             testBadgeTitle
         ));
 
-    for(let i = 0; i < n; i++)
-        await selectableCards[i].findElement(By.css('hlm-checkbox')).click();
+    for(let i = 0; i < n; i++) {
+        const card = selectableCards[i];
+        const checkboxInCard = await card.findElement(By.css('button[role="checkbox"]'));
+        await scrollIntoView(driver, checkboxInCard);
+        await checkboxInCard.click();
+    }
+        
 
     // Next step: Order of the badges
     await nextButton.click();
@@ -676,9 +700,8 @@ export async function createMicroDegree(driver, n) {
     await addNewTag(driver, tagName); 
 
     // activate Micro Degree
-    const activationCheckbox = await driver.findElement(By.css('hlm-checkbox'))
+    const activationCheckbox = await driver.findElement(By.css('button[role="checkbox"]'))
     activationCheckbox.click()
-
 
     const submitForm = await driver.findElement(By.css('form'));
     await submitForm.submit();

@@ -1,4 +1,4 @@
-import {By} from "selenium-webdriver";
+import {By, WebElement} from "selenium-webdriver";
 
 export async function setOEBInputValueById(driver, id, value, fieldType='input') {
     const oebInputParent = await driver.findElement(By.id(id));
@@ -36,4 +36,14 @@ export async function clickUntilInteractable(elementCreator, tries=100) {
     const element = await elementCreator();
     await element.click();
     return element;
+}
+
+/**
+ * Scrolls a web element into view preventing the "element has zero size" issue
+ * @param {import("selenium-webdriver").ThenableWebDriver} driver The web driver to use
+ * @param {WebElement} element The element to scroll to
+ */
+export async function scrollIntoView(driver, element) {
+    driver.executeScript("arguments[0].scrollIntoView(true);", element);
+    await new Promise(resolve => setTimeout(resolve, 1_000));
 }
