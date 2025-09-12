@@ -45,7 +45,7 @@ export async function signup(driver) {
     await passwordRepeatField.sendKeys(testUserPassword);
 
     const checkboxes = await driver.findElements(By.css(
-        'hlm-checkbox-check'));
+        'button[role="checkbox"]'));
     const termsCheckbox = checkboxes[0];
     await termsCheckbox.click();
 
@@ -81,6 +81,7 @@ export async function loginToCreatedAccount(driver) {
 export async function navigateToProfile(driver) {
     await driver.get(`${url}/profile/profile`);
 
+    await driver.wait(until.titleIs('Profile - Open Educational Badges'), defaultWait);
     const title = await driver.getTitle();
     assert.equal(title, 'Profile - Open Educational Badges');
 }

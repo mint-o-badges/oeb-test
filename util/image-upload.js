@@ -26,7 +26,7 @@ export async function uploadImage(driver, element_id, nthElement, imagePath) {
 export async function selectNounProjectImage(driver, searchText) {
     // Open noun-project dialog
     const nounProject_option = await driver.wait(
-        until.elementLocated(ExtendedBy.tagWithText("button", "anderes Icon suchen")),
+        until.elementLocated(ExtendedBy.tagWithText("span", "aus bestehenden Icons wählen")),
         defaultWait
     );
     await nounProject_option.click();

@@ -78,7 +78,7 @@ export async function createIssuer(driver) {
     await cityField.sendKeys(testIssuerCity);
 
     const confirmCheckbox = await driver.findElement(By.css
-        ('hlm-checkbox'));
+        ('button[role="checkbox"]'));
     await confirmCheckbox.click();
 
     const submitButton = (await driver.findElement(By.css(
@@ -114,6 +114,7 @@ export async function navigateToIssuerDetails(driver) {
  * This assumes that the driver already navigated to the issuer details
  */
 export async function verifyIssuerDetails(driver) {
+    await driver.wait(until.elementLocated(ExtendedBy.tagWithText('p', testIssuerDescription)), defaultWait);
     const descriptionElements = await driver.findElements(
         ExtendedBy.tagWithText('p', testIssuerDescription));
     assert.equal(descriptionElements.length, 1,
