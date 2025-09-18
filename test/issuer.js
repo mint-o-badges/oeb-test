@@ -1,10 +1,9 @@
-import {By, until, WebElementCondition} from 'selenium-webdriver';
+import {By, until} from 'selenium-webdriver';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url, defaultWait} from '../config.js';
 import {requestToken, findIssuer, deleteIssuer} from '../util/api.js';
 import {ExtendedBy} from '../util/selection.js';
-import path from 'path';
 import { uploadImage } from '../util/image-upload.js';
 
 const testIssuerName = 'automatedTestName';
@@ -14,6 +13,7 @@ const testIssuerDescription = 'automatedTestDescription with a minimum length of
 const testIssuerStreet = 'automatedTestStreet';
 const testIssuerStreetnumber = '42';
 const testIssuerPostalCode = '4242';
+const testLinkedInId = '12345678';
 const testIssuerCity = 'automatedTestCity';
 
 export async function navigateToIssuerCreation(driver) {
@@ -31,6 +31,8 @@ export async function createIssuer(driver) {
 
     const textFields = await driver.findElements(By.css(
         'input[type="text"]'));
+    const numberFields = await driver.findElements(By.css(
+        'input[type="number"]'));
 
     const nameField = textFields[0];
     await nameField.sendKeys(testIssuerName);
@@ -68,10 +70,10 @@ export async function createIssuer(driver) {
     const streetnumberField = textFields[2];
     await streetnumberField.sendKeys(testIssuerStreetnumber);
 
-    const numberFields = await driver.findElements(By.css(
-        'input[type="number"]'));
+    const linkedInId = numberFields[0];
+    await linkedInId.sendKeys(testLinkedInId);
 
-    const postalCodeField = numberFields[0];
+    const postalCodeField = numberFields[1];
     await postalCodeField.sendKeys(testIssuerPostalCode);
 
     const cityField = textFields[3];
