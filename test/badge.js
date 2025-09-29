@@ -449,7 +449,7 @@ export async function revokeBadge(driver) {
     const issuerDatatable = await driver.findElement(By.css(
         'issuer-detail-datatable'));
     const heading = await issuerDatatable.findElement(By.css('h3'));
-    await driver.wait(until.elementTextIs(heading, '0 Badge - Empfänger:innen'), defaultWait);
+    await driver.wait(until.elementTextIs(heading, '0 Badge - Empfänger:innen '), defaultWait);
 }
 
 /**
