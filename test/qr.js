@@ -14,6 +14,7 @@ import {Jimp} from 'jimp';
 import jsQR from 'jsqr';
 import {fromPath} from 'pdf2pic';
 import sharp from 'sharp';
+import { url } from '../config.js';
 
 export async function navigateToQrCreation(driver) {
     await navigateToBadgeDetails(driver);
@@ -58,6 +59,107 @@ export async function generateQrCode(driver) {
     const closeDialogButton = await driver.findElement(By.css(
         'button[brndialogclose]'));
     await closeDialogButton.click();
+}
+
+/**
+ * Generate a QR code with expired validity dates
+ * This assumes that the driver already navigated to the QR creation form
+ */
+export async function generateExpiredQrCode(driver) {
+    const titleField = await driver.findElement(By.css(
+        'input[placeholder="Badge Vergabe Juni 2024"]'));
+    await titleField.sendKeys('automated test expired QR');
+
+    const nameField = await driver.findElement(By.css(
+        'input[placeholder="Mein Vorname und Nachname"]'));
+    await nameField.sendKeys('automated test name');
+
+    // Set validity dates to expired (yesterday)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayFormatted = yesterday.toISOString().split('T')[0];
+
+    const validFromInputs = await driver.findElements(By.css(
+        'input[type="date"]'));
+    
+    if (validFromInputs.length >= 1) {
+        await validFromInputs[0].sendKeys(yesterdayFormatted);
+    }
+
+    if (validFromInputs.length >= 2) {
+        await validFromInputs[1].sendKeys(yesterdayFormatted);
+    }
+
+    const generateQrCodeButton = await driver.findElement(By.css(
+        'oeb-button[type="submit"]'));
+    await generateQrCodeButton.click();
+
+    await driver.wait(until.elementLocated(By.css(
+        'svg.checkmark')), defaultWait);
+    
+    const closeDialogButton = await driver.findElement(By.css(
+        'button[brndialogclose]'));
+    await closeDialogButton.click();
+}
+
+/**
+ * Test that accessing an expired QR code shows the expired message
+ */
+export async function testExpiredQrCodeDisplay(driver, qrCodeValue) {
+    const currentUrl = await driver.getCurrentUrl();
+    const { issuerSlug, badgeSlug } = extractFromCurrentUrl(currentUrl);
+    
+    const qrCodeId = extractQrCodeIdFromUrl(qrCodeValue);
+    
+    await driver.navigate().to(`${url}/public/issuer/issuers/${issuerSlug}/badges/${badgeSlug}/request/${qrCodeId}`);
+
+    await driver.wait(until.elementLocated(By.css(
+        'bg-not-found')), defaultWait);
+
+    const errorElement = await driver.findElement(By.css(
+        'bg-not-found'));
+    const errorText = await errorElement.getText();
+
+    assert(errorText.includes('nicht mehr gültig'), 
+        'Expected expired QR code error message');
+}
+
+/**
+ * Test that the form is NOT displayed for an expired QR code
+ */
+export async function testExpiredQrCodeNoForm(driver, qrCodeValue) {
+    const currentUrl = await driver.getCurrentUrl();
+    const { issuerSlug, badgeSlug } = extractFromCurrentUrl(currentUrl);
+    
+    const qrCodeId = extractQrCodeIdFromUrl(qrCodeValue);
+    
+    await driver.navigate().to(`${url}/public/issuer/issuers/${issuerSlug}/badges/${badgeSlug}/request/${qrCodeId}`);
+
+    await driver.sleep(1000);
+
+    // Verify that the request form is NOT present
+    const formElements = await driver.findElements(By.css(
+        'oeb-input[fieldtype="text"]'));
+    
+    assert.equal(formElements.length, 0, 
+        'Request form should not be displayed for expired QR code');
+}
+
+function extractFromCurrentUrl(currentUrl) {
+    const urlParts = currentUrl.split('/');
+    
+    const issuersIndex = urlParts.indexOf('issuers');
+    const issuerSlug = urlParts[issuersIndex + 1];
+    
+    const badgesIndex = urlParts.indexOf('badges');
+    const badgeSlug = urlParts[badgesIndex + 1];
+    
+    return { issuerSlug, badgeSlug };
+}
+
+function extractQrCodeIdFromUrl(qrCodeValue) {
+    const parts = qrCodeValue.split('/');
+    return parts[parts.length - 1];
 }
 
 /**
