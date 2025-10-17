@@ -19,7 +19,10 @@ import {
     downloadQrCode,
     readQrCode,
     requestBadgeViaQr,
-    confirmBadgeAwarding
+    confirmBadgeAwarding,
+    generateExpiredQrCode,
+    testExpiredQrCodeDisplay,
+    testExpiredQrCodeNoForm, 
 } from './qr.js';
 
 const downloadDirectory = '/tmp'
@@ -78,6 +81,35 @@ describe('QR test', function() {
     it('should delete the badge', async function() {
         await deleteBadgeOverApi();
     });
+
+    describe('Expired QR Code', function() {
+        before(async function() {
+            await login(driver);
+            await navigateToBadgeCreation(driver);
+            await createBadge(driver);
+        });
+
+        it('should create an expired QR code', async function() {
+            await navigateToQrCreation(driver);
+            await generateExpiredQrCode(driver);
+            await downloadQrCode(driver, 'automated test expired QR');
+        });
+
+        it('should show expired message when accessing expired QR code', async function() {
+            const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`), 'automated test expired QR.pdf');
+            await testExpiredQrCodeDisplay(driver, qrCodeUrl);
+        });
+
+        it('should not display request form for expired QR code', async function() {
+            const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`), 'automated test expired QR.pdf');
+            await testExpiredQrCodeNoForm(driver, qrCodeUrl);
+        });
+
+        after(async function() {
+            await deleteBadgeOverApi();
+        });
+    });
+
 
     afterEach(async function () {
         try {
