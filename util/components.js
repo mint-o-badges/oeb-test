@@ -25,7 +25,8 @@ export async function clickUntilInteractable(elementCreator, tries=100) {
             await element.click();
             return element;
         } catch(e) {
-            if (e.name === 'ElementNotInteractableError') {
+            if (e.name === 'ElementNotInteractableError' || 
+                e.name === 'StaleElementReferenceError') {
                 await new Promise(res => setTimeout(res, 100));
                 continue;
             }

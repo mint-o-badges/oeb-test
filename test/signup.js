@@ -14,8 +14,8 @@ const verificationPageTitle = 'Verification - Open Educational Badges';
 export async function navigateToSignup(driver) {
     await driver.get(`${url}/signup`);
 
-    let title = await driver.getTitle();
-    assert.equal(title, 'Signup - Open Educational Badges');
+    const expectedTitle = 'Signup - Open Educational Badges';
+    await driver.wait(until.titleIs(expectedTitle), defaultWait);
 }
 
 /**
