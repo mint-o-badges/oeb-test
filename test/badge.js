@@ -476,7 +476,10 @@ export async function revokeMicroDegree(driver) {
     const confirmButton = await confirmDialog.findElement(By.css(
         'button.button:not(.button-secondary)'));
     await confirmButton.click();
-    await driver.wait(until.elementLocated(ExtendedBy.tagWithText("h3", "0 Micro Degree-Empfänger:innen")), defaultWait);
+
+    const heading = await driver.findElement(By.css('h3:has(+ learningpath-graduates-datatable)'));
+    await driver.wait(until.elementTextContains(heading, '0'), defaultWait);    
+    assert.equal((await heading.getText()).toLowerCase().trim(), '0 Micro Degree-Empfänger:innen'.toLowerCase().trim());
 }
 
 /**
@@ -642,9 +645,11 @@ export async function createMicroDegree(driver, n) {
 
     // Next step: Badge details
     // Title field
-    const titleField = await driver.findElement(By.css(
-        'input[type="text"]'));
-    await titleField.sendKeys(microDegreeTitle);
+    await avoidStale(async () => {
+        const titleField = await driver.wait(until.elementLocated(By.css(
+            'input[type="text"]')));
+        await titleField.sendKeys(microDegreeTitle);
+    });
 
     // Description
     const descriptionField = await driver.findElement(By.css(
