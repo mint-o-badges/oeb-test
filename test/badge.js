@@ -490,10 +490,10 @@ export async function confirmRevokedMicroDegree(driver) {
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[3].click();
 
-    await driver.wait(until.elementsLocated(By.css("learningpaths-datatable")));
+    await driver.wait(until.elementsLocated(By.css('input[placeholder="Lernpfade durchsuchen"]')));
 
-    const receivedBadges = await driver.findElement(
-        ExtendedBy.tagWithText("p", microDegreeTitle));
+    const receivedBadges = await driver.findElements(
+        ExtendedBy.tagWithText("span", microDegreeTitle));
     assert.equal(receivedBadges.length, 0, "Expected to have received no micro degree with the specified title");
 }
 
