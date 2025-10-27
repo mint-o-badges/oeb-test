@@ -50,7 +50,7 @@ export async function generateQrCode(driver) {
     // TODO: Validity fields
 
     const generateQrCodeButton = await driver.findElement(By.css(
-        'oeb-button[type="submit"]'));
+        'button[type="submit"]'));
     await generateQrCodeButton.click();
 
     await driver.wait(until.elementLocated(By.css(
@@ -75,23 +75,38 @@ export async function generateExpiredQrCode(driver) {
     await nameField.sendKeys('automated test name');
 
     // Set validity dates to expired (yesterday)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    const today = new Date();
+    const aDayInMs = 1000 * 60 * 60 * 24;
+    const yesterday = new Date(today.getTime() - aDayInMs);
+    const twoDaysAgo = new Date(yesterday.getTime() - aDayInMs);
     const yesterdayFormatted = yesterday.toISOString().split('T')[0];
+    const twoDaysAgoFormatted= twoDaysAgo.toISOString().split('T')[0];
 
     const validFromInputs = await driver.findElements(By.css(
         'input[type="date"]'));
     
     if (validFromInputs.length >= 1) {
-        await validFromInputs[0].sendKeys(yesterdayFormatted);
+        await driver.executeScript(`
+            arguments[0].valueAsNumber = arguments[1];
+            arguments[0].dispatchEvent(new Event('input'));
+            arguments[0].dispatchEvent(new Event('change'));`,
+            validFromInputs[0],
+            twoDaysAgo.getTime()
+        );
     }
 
     if (validFromInputs.length >= 2) {
-        await validFromInputs[1].sendKeys(yesterdayFormatted);
+        await driver.executeScript(`
+            arguments[0].valueAsNumber = arguments[1];
+            arguments[0].dispatchEvent(new Event('input'));
+            arguments[0].dispatchEvent(new Event('change'));`,
+            validFromInputs[1],
+            yesterday.getTime()
+        );
     }
 
     const generateQrCodeButton = await driver.findElement(By.css(
-        'oeb-button[type="submit"]'));
+        'button[type="submit"]'));
     await generateQrCodeButton.click();
 
     await driver.wait(until.elementLocated(By.css(
@@ -249,7 +264,7 @@ export async function requestBadgeViaQr(driver) {
     await ageConfirmationCheckbox.click();
 
     const submitButton = await driver.findElement(By.css(
-        'oeb-button[type="submit"]'));
+        'button[type="submit"]'));
     await submitButton.click();
 
     await driver.wait(until.elementLocated(By.css(

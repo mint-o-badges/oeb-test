@@ -289,9 +289,9 @@ export async function receiveBadge(driver) {
     const tabs = await driver.findElements(By.css("hlm-tabs-list > button"));
     await tabs[1].click();
 
-    // Try three times, since receiving the badge can take some time
+    // Try a couple of times, since receiving the badge can take some time
     let receivedBadges;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 10; i++) {
         try {
             await driver.wait(until.elementLocated(By.linkText(
                 testBadgeTitle)), 1000);
