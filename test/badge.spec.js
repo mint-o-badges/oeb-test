@@ -223,11 +223,21 @@ describe('Badge Test', function() {
         it('should validate a v2 badge as such on upload', async () => {
             await navigateToReceivedBadge(driver);
             await validateUploadedV2Badge(driver);
+
+            // in the process of doing this `validateUploadedV2Badge`
+            // revokes the badge. Restoring initial state with this.
+            await navigateToBadgeAwarding(driver);
+            await awardBadge(driver);
         });
 
         it('should validate a v3 badge as such on upload', async () => {
             await navigateToReceivedBadge(driver);
             await validateUploadedV3Badge(driver);
+
+            // in the process of doing this `validateUploadedV3Badge`
+            // revokes the badge. Restoring initial state with this.
+            await navigateToBadgeAwarding(driver);
+            await awardBadge(driver);
         });
 
         it('should delete the badge to test with', async function() {

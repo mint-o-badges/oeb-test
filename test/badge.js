@@ -7,7 +7,6 @@ import { Actions } from 'selenium-webdriver/lib/input.js';
 import assert from 'assert';
 import {username, password} from '../secret.js';
 import {url, defaultWait, extendedWait} from '../config.js';
-import path from 'path';
 import fs from 'fs';
 import {
     requestToken,
@@ -805,7 +804,6 @@ export async function validateUploadedInvalidBadge(driver) {
     const badgeStringToUpload = JSON.stringify(badge);
 
     await navigateToBackpack(driver);
-
     await uploadBadgeJson(driver, badgeStringToUpload);
 
     await driver.wait(until.elementLocated(
@@ -899,8 +897,10 @@ export async function validateUploadedV2Badge(driver) {
     const badge = JSON.parse(file);
     const v2Url = badge['id'].replace('3_0', '2_0');
     const badgeV2Response = await fetch(v2Url);
-    const badgeV2JsonString = await badgeV2Response.text();
+    const badgeV2String = await badgeV2Response.text();
 
+    await navigateToBadgeDetails(driver);
+    await revokeBadge(driver);
     await navigateToBackpack(driver);
 
     await driver.wait(until.elementLocated(
@@ -909,7 +909,7 @@ export async function validateUploadedV2Badge(driver) {
     const badgeCards = await driver.findElements(By.css('bg-badgecard'));
     const badgesBefore = badgeCards.length;
 
-    await uploadBadgeJson(driver, badgeV2JsonString);    
+    await uploadBadgeJson(driver, badgeV2String);
 
     // Wait until dialog disappears and the backpack updated itself
     await driver.wait(until.elementLocated(
@@ -929,6 +929,8 @@ export async function validateUploadedV2Badge(driver) {
 export async function validateUploadedV3Badge(driver) {
     const file = await downloadBadgeJson(driver, testBadgeTitle);
     await clearDownloadDirectory();
+    await navigateToBadgeDetails(driver);
+    await revokeBadge(driver);
     await navigateToBackpack(driver);
 
     await driver.wait(until.elementLocated(
