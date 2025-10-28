@@ -32,7 +32,7 @@ export async function navigateToQrCreation(driver) {
     await confirmButton.click();
 
     await driver.wait(until.elementLocated(By.css(
-        'input[placeholder="Badge Vergabe Juni 2024"]')), defaultWait);
+        'input[placeholder="Badge Vergabe Juni 2025 in Berlin"]')), defaultWait);
 }
 
 /**
@@ -40,7 +40,7 @@ export async function navigateToQrCreation(driver) {
  */
 export async function generateQrCode(driver) {
     const titelField = await driver.findElement(By.css(
-        'input[placeholder="Badge Vergabe Juni 2024"]'));
+        'input[placeholder="Badge Vergabe Juni 2025 in Berlin"]'));
     await titelField.sendKeys('automated test QR title');
 
     const nameField = await driver.findElement(By.css(
@@ -67,7 +67,7 @@ export async function generateQrCode(driver) {
  */
 export async function generateExpiredQrCode(driver) {
     const titleField = await driver.findElement(By.css(
-        'input[placeholder="Badge Vergabe Juni 2024"]'));
+        'input[placeholder="Badge Vergabe Juni 2025 in Berlin"]'));
     await titleField.sendKeys('automated test expired QR');
 
     const nameField = await driver.findElement(By.css(
