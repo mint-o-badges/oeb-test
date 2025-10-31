@@ -61,7 +61,7 @@ export async function generateQrCode(driver) {
     await closeDialogButton.click();
 
     // the qr code is generated onto a canvas
-    await driver.wait(until.elementLocated(By.css('canvas')), defaultWait);
+    await new Promise(r => setTimeout(r, 1000));
 }
 
 /**
@@ -91,7 +91,7 @@ export async function generateExpiredQrCode(driver) {
             arguments[0].valueAsNumber = arguments[1];
             arguments[0].dispatchEvent(new Event('input'));
             arguments[0].dispatchEvent(new Event('change'));`,
-            validFromInputs[0],
+            validFromInputs[2],
             twoDaysAgo.getTime()
         );
     }
@@ -101,7 +101,7 @@ export async function generateExpiredQrCode(driver) {
             arguments[0].valueAsNumber = arguments[1];
             arguments[0].dispatchEvent(new Event('input'));
             arguments[0].dispatchEvent(new Event('change'));`,
-            validFromInputs[1],
+            validFromInputs[3],
             yesterday.getTime()
         );
     }
@@ -117,8 +117,9 @@ export async function generateExpiredQrCode(driver) {
         'button[brndialogclose]'));
     await closeDialogButton.click();
 
-    // the qr code is generated onto a canvas
-    await driver.wait(until.elementLocated(By.css('canvas')), defaultWait);
+    // the qr code is generated onto a canvas which takes a bit of time and
+    // may shift the layout leading to elementinterceptederror
+    await new Promise(r => setTimeout(r, 1000));
 }
 
 /**
