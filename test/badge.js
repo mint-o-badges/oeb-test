@@ -273,8 +273,11 @@ export async function awardBadge(driver, email = username) {
 
     // TODO: optional details
 
-    const submitButton = await driver.findElement(By.css(
-        'button[type="submit"].tw-relative'));
+    const submitButton = await driver.wait(until.elementLocated(
+        ExtendedBy.submitButtonWithText('Badge vergeben')),
+        defaultWait,
+        "Couldn't find confirm button");
+    await driver.wait(until.elementIsEnabled(submitButton));
     submitButton.click();
 
     await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
