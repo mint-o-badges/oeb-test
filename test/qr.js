@@ -59,6 +59,9 @@ export async function generateQrCode(driver) {
     const closeDialogButton = await driver.findElement(By.css(
         'button[brndialogclose]'));
     await closeDialogButton.click();
+
+    // the qr code is generated onto a canvas
+    await driver.wait(until.elementLocated(By.css('canvas')), defaultWait);
 }
 
 /**
@@ -79,8 +82,6 @@ export async function generateExpiredQrCode(driver) {
     const aDayInMs = 1000 * 60 * 60 * 24;
     const yesterday = new Date(today.getTime() - aDayInMs);
     const twoDaysAgo = new Date(yesterday.getTime() - aDayInMs);
-    const yesterdayFormatted = yesterday.toISOString().split('T')[0];
-    const twoDaysAgoFormatted= twoDaysAgo.toISOString().split('T')[0];
 
     const validFromInputs = await driver.findElements(By.css(
         'input[type="date"]'));
@@ -115,6 +116,9 @@ export async function generateExpiredQrCode(driver) {
     const closeDialogButton = await driver.findElement(By.css(
         'button[brndialogclose]'));
     await closeDialogButton.click();
+
+    // the qr code is generated onto a canvas
+    await driver.wait(until.elementLocated(By.css('canvas')), defaultWait);
 }
 
 /**
@@ -181,9 +185,9 @@ function extractQrCodeIdFromUrl(qrCodeValue) {
  * This assumes that the QR code already got created
  */
 export async function downloadQrCode(driver, title = 'automated test QR title') {
-    const downloadQrButton = await driver.findElement(
+    const downloadQrButton = await driver.wait(until.elementLocated(
         // TODO: Also test PNG download
-        ExtendedBy.submitButtonWithText('Download QR-Code-Plakat'));
+        ExtendedBy.submitButtonWithText('Download QR-Code-Plakat')), defaultWait);
     await downloadQrButton.click();
 
     await waitForDownload(driver, new RegExp(`^${title}\\.pdf$`));
