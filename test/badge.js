@@ -277,7 +277,7 @@ export async function awardBadge(driver, email = username) {
         'button[type="submit"].tw-relative'));
     submitButton.click();
 
-    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), 20000);
+    await driver.wait(until.titleIs(`Badge Class - ${testBadgeTitle} - Open Educational Badges`), extendedWait);
 }
 
 /**
