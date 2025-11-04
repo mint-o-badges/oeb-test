@@ -645,12 +645,17 @@ export async function createMicroDegree(driver, n) {
     const selectedBadgeType = await driver.wait(until.elementLocated(By.css('[href*="learningpaths/create"]')), defaultWait);
     await selectedBadgeType.click();
 
+    // Without this, the following steps produce either stale references or 
+    // result in an ElementNotInteractable error
+    await driver.sleep(2000);
+
     // Next step: Badge details
     // Title field
-    const titleField = await driver.wait(
-        until.elementIsVisible(By.css('input[type="text"]')));
-    await driver.wait(until.elementIsEnabled(titleField));
-    await titleField.sendKeys(microDegreeTitle);
+    await avoidStale(async () => {
+        const titleField = await driver.wait(until.elementLocated(By.css(
+            'input[type="text"]')));
+        await titleField.sendKeys(microDegreeTitle);
+    });
 
     // Description
     const descriptionField = await driver.findElement(By.css(

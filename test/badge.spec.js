@@ -44,7 +44,7 @@ const GLOBAL_TIMEOUT_MS = 30_000;
 const BADGES_FOR_MICRO_DEGREE = 3;
 
 /** Extra timeout granted per badge for micro degree tests */
-const EXTRA_TIMEOUT_PER_BADGE_MS = 10_000;
+const EXTRA_TIMEOUT_PER_BADGE_MS = 15_000;
 
 let driver;
 describe('Badge Test', function() {
