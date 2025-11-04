@@ -647,11 +647,10 @@ export async function createMicroDegree(driver, n) {
 
     // Next step: Badge details
     // Title field
-    await avoidStale(async () => {
-        const titleField = await driver.wait(until.elementLocated(By.css(
-            'input[type="text"]')));
-        await titleField.sendKeys(microDegreeTitle);
-    });
+    const titleField = await driver.wait(
+        until.elementIsVisible(By.css('input[type="text"]')));
+    await driver.wait(until.elementIsEnabled(titleField));
+    await titleField.sendKeys(microDegreeTitle);
 
     // Description
     const descriptionField = await driver.findElement(By.css(
