@@ -5,3 +5,4 @@ secret.js
 *.swp
 screenshots/
 playwright-report/
+test-results/
