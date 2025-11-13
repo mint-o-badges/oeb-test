@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { url } from "../config.js";
 import { screenshot } from "../util/screenshot.js";
+import { initBrowserSettings } from "../util/browser-setup.js";
 
 test.describe("Title Test", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().setDefaultTimeout(20000);
     await page.context().addInitScript(() => {
-      Object.defineProperty(navigator, "language", { get: () => "de-DE" });
-      Object.defineProperty(navigator, "languages", { get: () => ["de-DE"] });
+      initBrowserSettings();
     });
   });
 

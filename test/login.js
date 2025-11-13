@@ -1,60 +1,61 @@
-import assert from 'assert';
-import {By, until} from 'selenium-webdriver';
-import {username, password} from '../secret.js';
-import {url, defaultWait} from '../config.js';
-import {ExtendedBy} from '../util/selection.js';
+import { username, password } from "../secret.js";
+import { url, defaultWait } from "../config.js";
+import { expect } from "@playwright/test";
 
-const issuersPageTitle = 'Issuers - Open Educational Badges';
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {string} userName
+ * @param {string} userPassword
+ * @param {string} pageTitle
+ */
+export async function login(
+  page,
+  userName = username,
+  userPassword = password,
+  pageTitle = issuersPageTitle
+) {
+  await page.goto(`${url}/auth/login`);
+  await expect(page).toHaveTitle(
+    "Login - Open Educational Badges",
+    defaultWait
+  );
 
-export async function login(driver, userName = username, userPassword = password, pageTitle = issuersPageTitle) {
-    await driver.get(`${url}/auth/login`);
+  await page.fill('input[placeholder="Deine E-Mail-Adresse"]', userName);
+  await page.fill('input[placeholder="Dein Passwort"]', userPassword);
 
-    await driver.wait(until.titleIs(
-        'Login - Open Educational Badges'), defaultWait);
+  const loginForm = page.locator("login");
+  await loginForm.getByRole("button", { name: /login|einloggen/i }).click();
 
-    const emailField = await driver.findElement(By.css(
-        'input[placeholder="Deine E-Mail-Adresse"]'));
-    await emailField.sendKeys(userName);
+  await expect(page).toHaveTitle(pageTitle, defaultWait);
 
-    const passwordField = await driver.findElement(By.css(
-        'input[placeholder="Dein Passwort"]'));
-    await passwordField.sendKeys(userPassword);
-
-    const loginButton = await driver.findElement(By.css(
-        'oeb-button[type="submit"]'));
-    loginButton.click();
-
-    await driver.wait(until.titleIs(pageTitle), defaultWait);
-
-    await acceptTerms(driver);
+  await acceptTerms(page);
 }
 
-export async function acceptTerms(driver) {
-    let termsBox = undefined;
-    try {
-        // The box to accept terms only appears in a later step in
-        // rendering; first the issuer page is shown. Thus we wait
-        // a second to check if it appears then. If it didn't appear
-        // within a second, we just hope it never will.
-        const headline = await driver.wait(until.elementLocated(
-            ExtendedBy.tagWithText('h1',
-                'Neue Nutzungsbedingungen')),
-            1000);
-        termsBox = await driver.findElement(
-            ExtendedBy.parentElement(headline));
-    } catch(e) {
-        // No new terms to accept
-        return;
-    }
-    
-    const checkbox = await termsBox.findElement(
-        By.css('hlm-checkbox-check'));
-    await checkbox.click();
+/**
+ * @param {import('@playwright/test').Page} page
+ */
+export async function acceptTerms(page) {
+  // The box to accept terms only appears in a later step in
+  // rendering; first the issuer page is shown. Thus we wait
+  // a second to check if it appears then. If it didn't appear
+  // within a second, we just hope it never will.
+  const headingLocator = page.locator("h1", {
+    hasText: "Neue Nutzungsbedingungen",
+  });
 
-    const submitButton = await termsBox.findElement(
-        By.css('button'));
-    await submitButton.click();
+  try {
+    // Wait up to 1 s for the heading; if it never appears we skip the flow.
+    await headingLocator.waitFor({ timeout: 1_000 });
 
-    await driver.get(`${url}/issuer`);
-    await driver.wait(until.titleIs(issuersPageTitle), defaultWait);
+    // The terms container is the parent of the heading.
+    const termsBox = headingLocator.locator(".."); // parent element
+
+    await termsBox.locator("hlm-checkbox-check").click();
+    await termsBox.locator("button").click();
+    await page.goto(`${url}/issuer`);
+    await expect(page).toHaveTitle(issuersPageTitle, defaultWait);
+  } catch (e) {
+    // If the heading never appears, there are no new terms – just return.
+    return;
+  }
 }

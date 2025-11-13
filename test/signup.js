@@ -1,122 +1,109 @@
-import {By, until} from 'selenium-webdriver';
-import assert from 'assert';
-import {url, defaultWait} from '../config.js';
-import {requestToken, deleteUser, getUser} from '../util/api.js';
-import {ExtendedBy} from '../util/selection.js';
-import { login } from './login.js';
+import { url, defaultWait } from "../config.js";
+import { requestToken, deleteUser, getUser } from "../util/api.js";
+import { login } from "./login.js";
+import { expect } from "@playwright/test";
 
-const testUserEmail = 'automated@test.de';
-const testUserFirstName = 'automated';
-const testUserLastName = 'test';
-const testUserPassword = 'automatedTestPassword1!';
-const verificationPageTitle = 'Verification - Open Educational Badges';
+const testUserEmail = "automated@test.de";
+const testUserFirstName = "automated";
+const testUserLastName = "test";
+const testUserPassword = "automatedTestPassword1!";
+const verificationPageTitle = "Verification - Open Educational Badges";
 
-export async function navigateToSignup(driver) {
-    await driver.get(`${url}/signup`);
-
-    const expectedTitle = 'Signup - Open Educational Badges';
-    await driver.wait(until.titleIs(expectedTitle), defaultWait);
+export async function navigateToSignup(page) {
+  await page.goto(`${url}/signup`);
+  await expect(page).toHaveTitle(
+    "Signup - Open Educational Badges",
+    defaultWait
+  );
 }
 
 /**
- * This assumes that the driver already navigated to the signup page
+ * This assumes `page` is already on the signup URL.
  */
-export async function signup(driver) {
-    const emailField = await driver.findElement(By.css(
-        'input[type="email"]'));
-    await emailField.sendKeys(testUserEmail);
+export async function signup(page) {
+  await page.fill('input[type="email"]', testUserEmail);
+  const textFields = await page.locator('input[type="text"]').all();
+  await textFields[0].fill(testUserFirstName);
+  await textFields[1].fill(testUserLastName);
 
-    const textFields = await driver.findElements(By.css(
-        'input[type="text"]'));
+  const passwordFields = await page.locator('input[type="password"]').all();
+  await passwordFields[0].fill(testUserPassword);
+  await passwordFields[1].fill(testUserPassword);
 
-    const firstNameField = textFields[0];
-    await firstNameField.sendKeys(testUserFirstName);
+  await page.locator('button[role="checkbox"]').first().click();
 
-    const lastNameField = textFields[1];
-    await lastNameField.sendKeys(testUserLastName);
+  await page.locator("#altcha_checkbox").click();
 
-    const passwordFields = await driver.findElements(By.css(
-        'input[type="password"]'));
+  await page.waitForSelector('div[data-state="verified"]', {
+    timeout: 200_000,
+  });
 
-    const passwordField = passwordFields[0];
-    await passwordField.sendKeys(testUserPassword);
+  await page.getByRole("button", { name: "Account erstellen" }).click();
 
-    const passwordRepeatField = passwordFields[1];
-    await passwordRepeatField.sendKeys(testUserPassword);
-
-    const checkboxes = await driver.findElements(By.css(
-        'button[role="checkbox"]'));
-    const termsCheckbox = checkboxes[0];
-    await termsCheckbox.click();
-
-    const altchaCheckbox = await driver.findElement(By.id(
-        'altcha_checkbox'));
-    await altchaCheckbox.click();
-
-    await driver.wait(until.elementLocated(By.css(
-        'div[data-state="verified"]')), 200*1000);
-
-    const submitButton = await driver.findElement(
-        ExtendedBy.submitButtonWithText('Account erstellen'));
-    await submitButton.click();
-
-    await driver.wait(until.titleIs('Verification - Open Educational Badges'), defaultWait);
+  await expect(page).toHaveTitle(
+    "Verification - Open Educational Badges",
+    defaultWait
+  );
 }
 
-export async function verifyUserOverApi(username = testUserEmail, password = testUserPassword) {
-    const apiToken = await requestToken(username, password);
-    assert(apiToken, "Failed to request an API token");
-    const user = await getUser(apiToken);
-    assert(user);
+export async function verifyUserOverApi(
+  username = testUserEmail,
+  password = testUserPassword
+) {
+  const apiToken = await requestToken(username, password);
+  expect(apiToken, "Failed to request an API token").toBeTruthy();
+  const user = await getUser(apiToken);
+  expect(user).toBeTruthy();
 
-    assert.equal(user.email, testUserEmail);
-    assert.equal(user.first_name, testUserFirstName);
-    assert.equal(user.last_name, testUserLastName);
+  expect(user.email).toBe(testUserEmail);
+  expect(user.first_name).toBe(testUserFirstName);
+  expect(user.last_name).toBe(testUserLastName);
 }
 
-export async function loginToCreatedAccount(driver) {
-    await login(driver, testUserEmail, testUserPassword, verificationPageTitle);
+export async function loginToCreatedAccount(page) {
+  await login(page, testUserEmail, testUserPassword, verificationPageTitle);
 }
 
-export async function navigateToProfile(driver) {
-    await driver.get(`${url}/profile/profile`);
+export async function navigateToProfile(page) {
+  await page.goto(`${url}/profile/profile`);
+  await expect(page).toHaveTitle(
+    "Profile - Open Educational Badges",
+    defaultWait
+  );
+}
 
-    await driver.wait(until.titleIs('Profile - Open Educational Badges'), defaultWait);
-    const title = await driver.getTitle();
-    assert.equal(title, 'Profile - Open Educational Badges');
+export async function deleteUserOverApi(
+  username = testUserEmail,
+  password = testUserPassword
+) {
+  const apiToken = await requestToken(username, password);
+  // If the token request returns an error, the user was already removed via UI.
+  if (apiToken.error) return;
+
+  expect(apiToken, "Failed to request an API token").toBeTruthy();
+  const deletionResult = await deleteUser(apiToken);
+  if (!deletionResult) {
+    throw new Error(
+      "The user deletion failed, probably because the HTTP response code wasn't 2xx"
+    );
+  }
 }
 
 /**
- * Delete a user account using API.
+ * Delete a user via the UI.
+ * Assumes the page is already on the profile screen.
  */
-export async function deleteUserOverApi(username = testUserEmail, password = testUserPassword) {
-    const apiToken = await requestToken(username, password);
-    // if an error is returned, the user was successfully deleted using the UI
-    if(apiToken.error){
-        return;
-    }
-    assert(apiToken, "Failed to request an API token");
-    const deletionResult = await deleteUser(apiToken);
-    await assert.equal(deletionResult, true, "The user deletion failed, probably because the HTTP response code wasn't 2xx");
-}
+export async function deleteUserViaUI(page) {
+  await page.locator("#trigger2").click();
 
-/**
- * Delete a user account using UI.
- * This assumes that the driver already navigated to the profile page.
- */
-export async function deleteUserViaUI(driver) {
-    const menuButton = await driver.wait(until.elementLocated((By.id(
-        'trigger2'))), defaultWait)
-    await menuButton.click();
+  const deleteButton = page.locator("#menu2").first();
+  await deleteButton.click();
 
-    const dropdownButtons = await driver.findElements(By.id(
-        'menu2'));
-    const deleteButton = dropdownButtons[0];
-    await deleteButton.click();
+  const confirmBtn = page.getByRole("button", { name: "Account löschen" });
+  await confirmBtn.click();
 
-    const confirmDeleteButton = await driver.wait(until.elementLocated((By.xpath("//button[text()=' Account löschen ']"))), defaultWait)    
-    await confirmDeleteButton.click();
-
-    const deleteSuccessMessage = await driver.wait(until.urlMatches(/\/public\/start[^\/]*$/), defaultWait);
-    assert(deleteSuccessMessage, "The user account deletion failed!");
+  // wait for navigation to the start page (URL pattern /public/start…)
+  await page.waitForURL(/\/public\/start[^\/]*$/, {
+    timeout: defaultWait,
+  });
 }
