@@ -1,127 +1,136 @@
-import {By, WebElement} from 'selenium-webdriver';
-
-export async function avoidStale(f) {
-    // Try 5 times to avoid stale reference errors
-    for (let i = 0; i < 5; i++) {
-        try {
-            return await f();
-        } catch(e) {
-            if (e.name === 'StaleElementReferenceError')
-                continue;
-            throw e;
-        }
-        break;
-    }
+export async function avoidStale(fn) {
+  return await fn();
 }
 
 export class ExtendedBy {
-    static containingText(selector, childSelector, text,
-        trim = true, caseSensitive = true) {
-        return (async (driver) => {
-            return await avoidStale(async () => {
-                // Find elements from outer selector
-                const selected = await driver.findElements(selector);
-                const selectedArray = Array.from(selected);
-                // Filter the elements.
-                // Since the filtering is done async, first map them
-                const mappedPromises = await selectedArray.map(async node => {
-                    // Find the children from the child selector
-                    const children = await node.findElements(childSelector);
-                    const childrenArray = Array.from(children);
-                    // Find if one or more children match the text.
-                    // Since this is done asnyc, first map them
-                    const innerMappedPromises = childrenArray.map(async node => {
-                        let nodeText = await node.getText();
-                        if (trim && nodeText) {
-                            nodeText = nodeText.trim();
-                            text = text.trim();
-                        }
-                        if (!caseSensitive && nodeText) {
-                            nodeText = nodeText.toLowerCase();
-                            text = text.toLowerCase();
-                        }
-                        return nodeText == text;
-                    });
-                    // Wait for the results of the mapping
-                    const mapped = await Promise.all(innerMappedPromises);
-                    // Check if at least one element matched
-                    return mapped.some(_ => _);
-                });
-                // Wait for the results of the mapping
-                const mapped = await Promise.all(mappedPromises);
-                // Filter the elements where the mapping yielded true
-                return selectedArray.filter((_, i) => mapped[i]);
-            });
-        });
-    }
+  static containingText(
+    selector,
+    childSelector,
+    text,
+    trim = true,
+    caseSensitive = true
+  ) {
+    return async (page) => {
+      return await avoidStale(async () => {
+        const outer = page.locator(selector);
+        const count = await outer.count();
+        const matches = [];
 
-    /**
-     * This assumes that the text is contained by a span by default
-     */
-    static submitButtonWithText(
-        text, trim = true, caseSensitive = true, textTag = 'span') {
-        return ExtendedBy.containingText(
-            By.css('button[type="submit"]'), By.css('span'),
-            text, trim, caseSensitive);
-    }
+        for (let i = 0; i < count; i++) {
+          const outerElem = outer.nth(i);
+          const children = outerElem.locator(childSelector);
+          const childCount = await children.count();
 
-    static tagWithText(
-        tag, text, trim = true, caseSensitive = true) {
-        return (async (driver) => {
-            return await avoidStale(async () => {
-                const selected = await driver.findElements(By.css(tag));
-                const selectedArray = Array.from(selected);
-                const mappedPromises = selectedArray.map(async node => {
-                    let nodeText = await node.getText();
-                    if (trim && nodeText) {
-                        nodeText = nodeText.trim();
-                        text = text.trim();
-                    }
-                    if (!caseSensitive && nodeText) {
-                        nodeText = nodeText.toLowerCase();
-                        text = text.toLowerCase();
-                    }
-                    return nodeText === text;
-                });
-                const mapped = await Promise.all(mappedPromises);
-                return selectedArray.filter((_, i) => mapped[i]);
-            });
-        });
-    }
+          for (let j = 0; j < childCount; j++) {
+            const child = children.nth(j);
+            let childText = await child.textContent();
 
-    static withParent(parentBy, childBy) {
-        return (async (driver) => {
-            return await avoidStale(async () => {
-                const parentNodes = await driver.findElements(parentBy);
-                const parentArray = Array.from(parentNodes);
-                const childrenPromises = parentArray.map(async node => await node.findElements(childBy));
-                const childrenNotFlat = await Promise.all(childrenPromises);
-                const children = childrenNotFlat.flat();
-                return children;
-            });
-        });
-    }
+            if (trim && childText) {
+              childText = childText.trim();
+              text = text.trim();
+            }
+            if (!caseSensitive && childText) {
+              childText = childText.toLowerCase();
+              text = text.toLowerCase();
+            }
+            if (childText === text) {
+              matches.push(outerElem);
+              break;
+            }
+          }
+        }
+        return matches;
+      });
+    };
+  }
 
-    static parentElement(element) {
-        return (async (driver) => {
-            const res = await element.findElement(By.xpath('./..'));
-            return res;
-        });
-    }
+  /**
+   * This assumes that the text is contained by a span by default
+   */
+  static submitButtonWithText(
+    text,
+    trim = true,
+    caseSensitive = true,
+    textTag = "span"
+  ) {
+    return ExtendedBy.containingText(
+      'button[type="submit"]',
+      textTag,
+      text,
+      trim,
+      caseSensitive
+    );
+  }
 
-    static sibling(element, selector) {
-        return (async (driver) => {
-            const parentElement = await driver.findElement(
-                ExtendedBy.parentElement(element));
-            const children = await parentElement.findElements(selector);
-            const mappedPromises = children.map(async (child) => {
-                const parentOfChild = await driver.findElement(
-                    ExtendedBy.parentElement(child));
-                return await WebElement.equals(parentElement, parentOfChild);
-            });
-            const map = await Promise.all(mappedPromises);
-            return children.filter((_, i) => map[i]);
-        });
-    }
+  static tagWithText(tag, text, trim = true, caseSensitive = true) {
+    return async (page) => {
+      return await avoidStale(async () => {
+        const elems = page.locator(tag);
+        const count = await elems.count();
+        const matches = [];
+
+        for (let i = 0; i < count; i++) {
+          const el = elems.nth(i);
+          let elText = await el.textContent();
+
+          if (trim && elText) {
+            elText = elText.trim();
+            text = text.trim();
+          }
+          if (!caseSensitive && elText) {
+            elText = elText.toLowerCase();
+            text = text.toLowerCase();
+          }
+          if (elText === text) matches.push(el);
+        }
+        return matches;
+      });
+    };
+  }
+
+  static withParent(parentBy, childBy) {
+    return async (page) => {
+      return await avoidStale(async () => {
+        const parents = page.locator(parentBy);
+        const parentCount = await parents.count();
+        const allChildren = [];
+
+        for (let i = 0; i < parentCount; i++) {
+          const children = parents.nth(i).locator(childBy);
+          const childCount = await children.count();
+          for (let j = 0; j < childCount; j++) {
+            allChildren.push(children.nth(j));
+          }
+        }
+        return allChildren;
+      });
+    };
+  }
+
+  static parentElement(elementLocator) {
+    return async (page) => {
+      // Playwright can traverse up with `locator('..')`
+      return elementLocator.locator("..");
+    };
+  }
+
+  static sibling(elementLocator, selector) {
+    return async (page) => {
+      const parent = await ExtendedBy.parentElement(elementLocator)(page);
+      const siblings = parent.locator(selector);
+      const count = await siblings.count();
+      const matches = [];
+
+      for (let i = 0; i < count; i++) {
+        const sibling = siblings.nth(i);
+        // Exclude the original element itself
+        const isSame = await sibling.evaluate(
+          (node, original) => node === original,
+          await elementLocator.elementHandle()
+        );
+        if (!isSame) matches.push(sibling);
+      }
+      return matches;
+    };
+  }
 }
-

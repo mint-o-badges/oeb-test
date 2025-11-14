@@ -9,15 +9,8 @@ import {
   deleteUserOverApi,
   loginToCreatedAccount,
 } from "./signup.js";
-import { initBrowserSettings } from "../util/browser-setup.js";
 
 test.describe("Signup Test", () => {
-  test.beforeEach(async ({ page }) => {
-    const ctx = await page.context();
-    ctx.setDefaultTimeout(20000);
-    ctx.addInitScript(initBrowserSettings);
-  });
-
   test("should be able to sign up", async function ({ page }) {
     await navigateToSignup(page);
     await signup(page);

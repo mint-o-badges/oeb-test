@@ -23,12 +23,6 @@ import {
 } from "./qr.js";
 
 test.describe("QR test", () => {
-  test.beforeEach(async ({ page }) => {
-    const ctx = await page.context();
-    ctx.setDefaultTimeout(30_000);
-    ctx.addInitScript(initBrowserSettings);
-  });
-
   test("should create a badge", async ({ page }) => {
     await login(page);
     await navigateToBadgeCreation(page);
