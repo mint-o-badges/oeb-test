@@ -2,6 +2,8 @@ import { username, password } from "../secret.js";
 import { url, defaultWait } from "../config.js";
 import { expect } from "@playwright/test";
 
+const issuersPageTitle = "Issuers - Open Educational Badges";
+
 /**
  * @param {import('@playwright/test').Page} page
  * @param {string} userName
