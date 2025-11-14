@@ -104,10 +104,12 @@ export async function navigateToIssuerDetails(page) {
  * @param {import('@playwright/test').Page} page
  */
 export async function verifyIssuerDetails(page) {
-  const description = page.locator(`p:has-text("${testIssuerDescription}")`);
+  await page.waitForSelector("loading-dots", { state: "detached" });
+  const description = await page.getByText(testIssuerDescription);
+  expect(description).toBeVisible();
   expect(
     description,
-    `Expected only one element with the specified description`
+    `Expected exactly one element with the specified description`
   ).toHaveCount(1);
 }
 
@@ -117,7 +119,7 @@ export async function verifyIssuerOverApi() {
   const issuer = await findIssuer(apiToken, testIssuerName);
   expect(issuer, "Failed to find the issuer");
 
-  expect(issuer.name, testIssuerName).toBe();
+  expect(issuer.name).toBe(testIssuerName);
   // The url is always pretended with "http://" or "https://"
   expect(issuer.url).toBe(`http://${testIssuerWebsite}`);
   expect(issuer.description).toBe(testIssuerDescription);
