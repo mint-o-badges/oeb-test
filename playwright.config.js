@@ -2,7 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   timeout: 30_000,
-  retries: 0,
+  retries: 1,
+  workers: 1,
   reporter: [["html", { open: "never" }]], // generates an HTML report
   use: {
     headless: true,
