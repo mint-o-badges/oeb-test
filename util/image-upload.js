@@ -1,6 +1,5 @@
 import path from "node:path";
 import { defaultWait } from "../config.js";
-import { ExtendedBy } from "./selection.js";
 
 /**
  * Uploads the image at {@link imagePath} to the {@link n}th element whose id starts with {@link elementId}
@@ -26,9 +25,9 @@ export async function uploadImage(page, elementId, nthElement, imagePath) {
  * @param {string} searchText
  */
 export async function selectNounProjectImage(page, searchText) {
-  const nounProjectOption = await page
-    .locator(ExtendedBy.tagWithText("span", "aus bestehenden Icons wählen"))
-    .first();
+  const nounProjectOption = await page.getByText(
+    "aus bestehenden Icons wählen"
+  );
   await nounProjectOption.waitFor({ timeout: defaultWait });
   await nounProjectOption.click();
 

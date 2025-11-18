@@ -1,40 +1,32 @@
 import { expect } from "@playwright/test";
-import assert from "assert";
 import { username } from "../secret.js";
-import { ExtendedBy } from "../util/selection.js";
-import { clickUntilInteractable } from "../util/components.js";
-import {
-  downloadDirectory,
-  navigateToBadgeDetails,
-  waitForDownload,
-} from "./badge.js";
-import { defaultWait } from "../config.js";
-import Jimp from "jimp";
+import { downloadDirectory, navigateToBadgeDetails } from "./badge.js";
+import { defaultWait, url } from "../config.js";
+import { Jimp } from "jimp";
 import jsQR from "jsqr";
 import { fromPath } from "pdf2pic";
 import sharp from "sharp";
-import { url } from "../config.js";
-
-const waitOpts = { timeout: defaultWait };
 
 export async function navigateToQrCreation(page) {
   await navigateToBadgeDetails(page);
 
-  const qrBtn = page.locator(
-    ExtendedBy.submitButtonWithText("Badge über QR-Code vergeben")
-  );
-  await expect(qrBtn).toBeVisible(waitOpts);
+  const qrBtn = page
+    .locator("button", {
+      hasText: "Badge über QR-Code vergeben",
+    })
+    .first();
+  await expect(qrBtn).toBeVisible({ timeout: defaultWait });
   await qrBtn.click();
 
-  const confirmBtn = page.locator(
-    ExtendedBy.submitButtonWithText("QR-Code-Vergabe erstellen")
-  );
-  await expect(confirmBtn).toBeVisible(waitOpts);
+  const confirmBtn = page.locator("button", {
+    hasText: "QR-Code-Vergabe erstellen",
+  });
+  await expect(confirmBtn).toBeVisible({ timeout: defaultWait });
   await confirmBtn.click();
 
   await expect(
     page.locator('input[placeholder="Badge Vergabe Juni 2025 in Berlin"]')
-  ).toBeVisible(waitOpts);
+  ).toBeVisible({ timeout: defaultWait });
 }
 
 /**
@@ -51,7 +43,9 @@ export async function generateQrCode(page) {
   );
 
   await page.click('button[type="submit"]');
-  await expect(page.locator("svg.checkmark")).toBeVisible(waitOpts);
+  await expect(page.locator("svg.checkmark")).toBeVisible({
+    timeout: defaultWait,
+  });
   await page.click("button[brndialogclose]");
   await page.waitForTimeout(1000);
 }
@@ -59,6 +53,8 @@ export async function generateQrCode(page) {
 /**
  * Generate a QR code with expired validity dates
  * This assumes that the driver already navigated to the QR creation form
+ *
+ * @param {import("playwright/test").Page} page
  */
 export async function generateExpiredQrCode(page) {
   await page.fill(
@@ -75,33 +71,24 @@ export async function generateExpiredQrCode(page) {
   const yesterday = new Date(today.getTime() - dayMs);
   const twoDaysAgo = new Date(yesterday.getTime() - dayMs);
 
-  const dateInputs = await page.locator('input[type="date"]').elementHandles();
+  const unfold = page.locator("button", { hasText: "Gültigkeit des QR-Codes" });
+  await expect(unfold).toBeVisible();
+  await unfold.click();
 
-  if (dateInputs.length > 2) {
-    await page.evaluate(
-      (el, value) => {
-        el.valueAsNumber = value;
-        el.dispatchEvent(new Event("input"));
-        el.dispatchEvent(new Event("change"));
-      },
-      dateInputs[2],
-      twoDaysAgo.getTime()
-    );
-  }
-  if (dateInputs.length > 3) {
-    await page.evaluate(
-      (el, value) => {
-        el.valueAsNumber = value;
-        el.dispatchEvent(new Event("input"));
-        el.dispatchEvent(new Event("change"));
-      },
-      dateInputs[3],
-      yesterday.getTime()
-    );
-  }
+  const dateInputs = page.locator('input[type="date"]');
+  const inputCount = await dateInputs.count();
+  expect(inputCount).toBeGreaterThanOrEqual(2);
+
+  const elem = dateInputs.nth(0);
+  await elem.fill(twoDaysAgo.toISOString().split("T")[0]);
+
+  const elem2 = dateInputs.nth(1);
+  await elem2.fill(yesterday.toISOString().split("T")[0]);
 
   await page.click('button[type="submit"]');
-  await expect(page.locator("svg.checkmark")).toBeVisible(waitOpts);
+  await expect(page.locator("svg.checkmark")).toBeVisible({
+    timeout: defaultWait,
+  });
   await page.click("button[brndialogclose]");
 
   // the qr code is generated onto a canvas which takes a bit of time and
@@ -122,7 +109,7 @@ export async function testExpiredQrCodeDisplay(page, qrCodeValue) {
   );
 
   const notFound = page.locator("bg-not-found");
-  await expect(notFound).toBeVisible(waitOpts);
+  await expect(notFound).toBeVisible({ timeout: defaultWait });
   const errorText = await notFound.textContent();
 
   expect(
@@ -144,30 +131,30 @@ export async function testExpiredQrCodeNoForm(page, qrCodeValue) {
   );
 
   const formInputs = page.locator('oeb-input[fieldtype="text"]');
-  const count = await formInputs.count();
-  expect(
-    count,
+  await expect(
+    formInputs,
     "Request form should not be displayed for expired QR code"
-  ).toHaveLength(0);
+  ).toBeHidden();
 }
 
 /**
  * This assumes that the QR code already got created
+ *
+ * @param {import("playwright/test").Page} page
  */
-export async function downloadQrCode(page, title = "automated test QR title") {
-  const downloadBtn = page.locator(
-    ExtendedBy.submitButtonWithText("Download QR-Code-Plakat")
-  );
-  await expect(downloadBtn).toBeVisible(waitOpts);
+export async function downloadQrCode(page) {
+  const downloadBtn = page.locator("button", {
+    hasText: "Download QR-Code-Plakat",
+  });
+  await expect(downloadBtn).toBeVisible({ timeout: defaultWait });
+  const downloadPromise = page.waitForEvent("download");
   await downloadBtn.click();
-  await waitForDownload(page, new RegExp(`^${title}\\.pdf$`));
+  const download = await downloadPromise;
+  return download.path();
 }
 
-export async function readQrCode(
-  pattern,
-  filename = "automated test QR title.pdf"
-) {
-  await convertPdfToImg(filename, "qrcode.png");
+export async function readQrCode(pattern, path) {
+  await convertPdfToImg(path, "qrcode.png");
 
   const imgPath = `${downloadDirectory}/qrcode.png`;
   const image = await Jimp.read(imgPath);
@@ -182,12 +169,12 @@ export async function readQrCode(
   expect(decoded, "QR code reading failed!").toBeTruthy();
 
   const qrCodeValue = decoded.data;
-  expect(qrCodeValue).toBe(pattern);
+  expect(qrCodeValue).toMatch(pattern);
   return qrCodeValue;
 }
 
 async function convertPdfToImg(
-  pdfFilename,
+  path,
   imageFilename,
   cropOptions = { left: 600, top: 850, width: 900, height: 900 }
 ) {
@@ -195,7 +182,7 @@ async function convertPdfToImg(
   // Remove the file ending, since it gets attached again anyway
   let imageName = imageFilename;
   if (splitFilename.length > 1) {
-    assert.equal(splitFilename.at(-1), "png");
+    expect(splitFilename.at(-1)).toBe("png");
     imageName = splitFilename
       .slice(0, -1)
       .reduce((a, b) => a.concat(".").concat(b));
@@ -209,7 +196,7 @@ async function convertPdfToImg(
     width: 2100,
     height: 2970,
   };
-  const convert = fromPath(`${downloadDirectory}/${pdfFilename}`, options);
+  const convert = fromPath(path, options);
   const pageToConvertAsImage = 1;
 
   await convert(pageToConvertAsImage, { responseType: "image" });
@@ -221,7 +208,7 @@ async function convertPdfToImg(
 
 export async function requestBadgeViaQr(page) {
   const textInputs = page.locator('oeb-input[fieldtype="text"]');
-  await expect(textInputs).toHaveCount(2, waitOpts);
+  await expect(textInputs).toHaveCount(2, { timeout: defaultWait });
 
   await textInputs.nth(0).locator("input").fill("automatedName");
   await textInputs.nth(1).locator("input").fill("automatedSurname");
@@ -233,7 +220,9 @@ export async function requestBadgeViaQr(page) {
 
   await page.locator('button[role="checkbox"]').click();
   await page.click('button[type="submit"]');
-  await expect(page.locator("svg.checkmark")).toBeVisible(waitOpts);
+  await expect(page.locator("svg.checkmark")).toBeVisible({
+    timeout: defaultWait,
+  });
 }
 
 /**
@@ -243,31 +232,39 @@ export async function requestBadgeViaQr(page) {
 export async function confirmBadgeAwarding(page) {
   // Open the dropdown that lists pending requests
   const dropdownButton = page.locator('button[role="heading"]');
-  await expect(dropdownButton).toBeVisible(waitOpts);
+  await expect(dropdownButton).toBeVisible({ timeout: defaultWait });
   await dropdownButton.click();
 
   // Click the first checkbox in the list (the only request)
-  await clickUntilInteractable(async () => {
-    const cb = page.locator('button[role="checkbox"]').first();
-    await expect(cb).toBeEnabled(waitOpts);
-    await cb.click();
-  });
+  const cb = page.locator('button[role="checkbox"]').first();
+  await expect(cb).toBeEnabled({ timeout: defaultWait });
+  await cb.click();
 
   // “Badge vergeben” confirm button
-  const confirmButton = page.locator(
-    ExtendedBy.submitButtonWithText("Badge vergeben")
-  );
-  await expect(confirmButton).toBeVisible(waitOpts);
+  const confirmButton = page.locator("button", { hasText: "Badge vergeben" });
+  await expect(confirmButton).toBeVisible({ timeout: defaultWait });
   await confirmButton.click();
 
   // Verify the success message contains the user’s e‑mail address
-  const successSpan = page.locator(
-    ExtendedBy.tagWithText(
-      "span",
-      `Der Badge wurde erfolgreich an ${username} vergeben`
-    )
-  );
-  await expect(successSpan).toBeVisible(waitOpts);
+  const successSpan = page.locator("span", {
+    hasText: `Der Badge wurde erfolgreich an ${username} vergeben`,
+  });
+  await expect(successSpan).toBeVisible({ timeout: defaultWait });
+}
+
+/**
+ * @param {import("playwright/test").Page} page
+ */
+export async function goToQRCode(page) {
+  await navigateToBadgeDetails(page);
+  const qrAward = page.locator("qrcode-awards");
+  expect(qrAward).toBeVisible({ timeout: defaultWait });
+
+  const moreButton = qrAward.locator("oeb-dropdown");
+  await moreButton.click();
+
+  const toQR = page.getByRole("menuitem").getByText("Zum QR-Code");
+  await toQR.click();
 }
 
 function extractFromCurrentUrl(currentUrl) {

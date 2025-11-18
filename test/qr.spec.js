@@ -20,11 +20,15 @@ import {
   generateExpiredQrCode,
   testExpiredQrCodeDisplay,
   testExpiredQrCodeNoForm,
+  goToQRCode,
 } from "./qr.js";
 
 test.describe("QR test", () => {
-  test("should create a badge", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await login(page);
+  });
+
+  test("should create a badge", async ({ page }) => {
     await navigateToBadgeCreation(page);
     await createBadge(page);
   });
@@ -32,11 +36,12 @@ test.describe("QR test", () => {
   test("should create the QR code", async ({ page }) => {
     await navigateToQrCreation(page);
     await generateQrCode(page);
-    await downloadQrCode(page);
   });
 
   test("should read the QR code", async ({ page }) => {
-    const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`));
+    await goToQRCode(page);
+    const downloadPath = await downloadQrCode(page);
+    const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`), downloadPath);
     await page.goto(qrCodeUrl);
     await requestBadgeViaQr(page);
   });
@@ -56,8 +61,7 @@ test.describe("QR test", () => {
   });
 
   test.describe("Expired QR Code", () => {
-    test.beforeAll(async ({ page }) => {
-      await login(page);
+    test("should create a badge", async ({ page }) => {
       await navigateToBadgeCreation(page);
       await createBadge(page);
     });
@@ -65,30 +69,27 @@ test.describe("QR test", () => {
     test("should create an expired QR code", async ({ page }) => {
       await navigateToQrCreation(page);
       await generateExpiredQrCode(page);
-      await downloadQrCode(page, "automated test expired QR");
     });
 
     test("should show expired message when accessing expired QR code", async ({
       page,
     }) => {
-      const qrCodeUrl = await readQrCode(
-        new RegExp(`^${url}.*`),
-        "automated test expired QR.pdf"
-      );
+      await goToQRCode(page);
+      const qrPath = await downloadQrCode(page);
+      const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`), qrPath);
       await testExpiredQrCodeDisplay(page, qrCodeUrl);
     });
 
     test("should not display request form for expired QR code", async ({
       page,
     }) => {
-      const qrCodeUrl = await readQrCode(
-        new RegExp(`^${url}.*`),
-        "automated test expired QR.pdf"
-      );
+      await goToQRCode(page);
+      const qrPath = await downloadQrCode(page);
+      const qrCodeUrl = await readQrCode(new RegExp(`^${url}.*`), qrPath);
       await testExpiredQrCodeNoForm(page, qrCodeUrl);
     });
 
-    test.afterAll(async () => {
+    test("should delete the badge", async () => {
       await deleteBadgeOverApi();
     });
   });
