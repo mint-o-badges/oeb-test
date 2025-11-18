@@ -405,8 +405,9 @@ export async function downloadPdfFromBackpack(page) {
  * This assumes that the page already navigated to the received micro degree
  */
 export async function downloadMicroDegree(page) {
-  const downloadPdfButton = page.locator("oeb-button[variant='secondary']");
-  await downloadPdfButton.waitFor({ timeout: defaultWait });
+  const downloadPdfButton = page
+    .locator("oeb-button[variant='secondary']")
+    .getByText("PDF-Zertifikat herunterladen");
   const downloadPromise = page.waitForEvent("download");
   await downloadPdfButton.click();
   await downloadPromise;
@@ -728,8 +729,7 @@ export async function createMicroDegree(page, n) {
   const activationCheckbox = form.locator('button[role="checkbox"]');
   await activationCheckbox.click();
 
-  const submitForm = page.locator("form");
-  await submitForm.evaluate((form) => form.submit());
+  await page.getByRole("button").getByText("Lernpfad erstellen").click();
 
   // The regular expression is for urls of the micro degree like
   // '/issuer/issuers/{issuerID}/learningpaths/{learningpathID}'
@@ -739,6 +739,9 @@ export async function createMicroDegree(page, n) {
     /\/issuer\/issuers\/[^\/]+\/learningpaths\/(?!create$)[^\/]+$/,
     { timeout: extendedWait }
   );
+  await page
+    .locator("oeb-learning-path")
+    .waitFor({ state: "visible", timeout: extendedWait });
 }
 
 /**
