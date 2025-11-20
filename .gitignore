@@ -4,3 +4,5 @@ node_modules/
 secret.js
 *.swp
 screenshots/
+playwright-report/
+test-results/

@@ -1,56 +1,47 @@
-import { By, until } from "selenium-webdriver";
+import path from "node:path";
 import { defaultWait } from "../config.js";
-import path from "path";
-import { ExtendedBy } from "./selection.js";
 
 /**
- * Uploads the image at {@link imagePath} to the {@link n}th element whose id starts with {@link element_id}
- * @param {any} driver 
- * @param {string} element_id Id of the element to upload the image to
- * @param {number} nthElement Number of the element with the given id
- * @param {string} imagePath Path to the image file to upload
+ * Uploads the image at {@link imagePath} to the {@link n}th element whose id starts with {@link elementId}
+ * @param {import('@playwright/test').Page} page
+ * @param {string} elementId   Id prefix of the <input type="file"> elements
+ * @param {number} nthElement  Zero‑based index of the matching element
+ * @param {string} imagePath   Relative path to the image file
  */
-export async function uploadImage(driver, element_id, nthElement, imagePath) {
-    const fields = Array.from(await driver.findElements(By.css(`[id^='${element_id}']`)));
-    const imageField = fields[nthElement];
-    const image = path.resolve(imagePath);
-    await imageField.sendKeys(image);
-    await driver.wait(
-        until.elementLocated(
-            By.css('img[src^="data:image/png;base64,iVBORw0KGg"]')
-        ),
-        defaultWait
-    );
+export async function uploadImage(page, elementId, nthElement, imagePath) {
+  const fields = await page.locator(`[id^='${elementId}']`).all();
+  const fileInput = fields[nthElement];
+  const absolutePath = path.resolve(imagePath);
+
+  await fileInput.setInputFiles(absolutePath);
+  await page
+    .locator('img[src^="data:image/png;base64,iVBORw0KGg"]')
+    .waitFor({ timeout: defaultWait });
 }
 
-export async function selectNounProjectImage(driver, searchText) {
-    // Open noun-project dialog
-    const nounProject_option = await driver.wait(
-        until.elementLocated(ExtendedBy.tagWithText("span", "aus bestehenden Icons wählen")),
-        defaultWait
-    );
-    await nounProject_option.click();
+/**
+ * Opens the Noun‑Project dialog, searches for {@link searchText} and selects the first result.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} searchText
+ */
+export async function selectNounProjectImage(page, searchText) {
+  const nounProjectOption = await page.getByText(
+    "aus bestehenden Icons wählen"
+  );
+  await nounProjectOption.waitFor({ timeout: defaultWait });
+  await nounProjectOption.click();
 
-    // Search for an image
-    const searchIconField = await driver.wait(
-        until.elementLocated(By.id("forminput")),
-        defaultWait
-    );
-    await searchIconField.sendKeys(searchText);
-    // Select first image in the list
-    const chooseIconButton = await driver.wait(
-        until.elementLocated(
-            By.css(
-                "tr.datatable-x-row:nth-child(1) > td:nth-child(3) > button:nth-child(1)"
-            )
-        ),
-        defaultWait
-    );
-    await chooseIconButton.click();
-    await driver.wait(
-        until.elementLocated(
-            By.css('img[src^="data:image/png;base64,iVBORw0KGg"]')
-        ),
-        defaultWait
-    );
+  const searchField = page.locator("#forminput");
+  await searchField.waitFor({ timeout: defaultWait });
+  await searchField.fill(searchText);
+
+  const chooseButton = page.locator(
+    "tr.datatable-x-row:nth-child(1) > td:nth-child(3) > button:nth-child(1)"
+  );
+  await chooseButton.waitFor({ timeout: defaultWait });
+  await chooseButton.click();
+
+  await page
+    .locator('img[src^="data:image/png;base64,iVBORw0KGg"]')
+    .waitFor({ timeout: defaultWait });
 }

@@ -1,64 +1,40 @@
-import {Builder, Browser} from 'selenium-webdriver';
-import {screenshot} from '../util/screenshot.js';
-import chrome from 'selenium-webdriver/chrome.js';
+import { screenshot } from "../util/screenshot.js";
+import { test } from "@playwright/test";
 import {
-    navigateToSignup,
-    signup,
-    navigateToProfile,
-    deleteUserViaUI,
-    verifyUserOverApi,
-    deleteUserOverApi,
-    loginToCreatedAccount
-} from './signup.js';
+  navigateToSignup,
+  signup,
+  navigateToProfile,
+  deleteUserViaUI,
+  verifyUserOverApi,
+  deleteUserOverApi,
+  loginToCreatedAccount,
+} from "./signup.js";
 
-describe('Signup Test', function() {
-    this.timeout(20000);
-    let driver;
+test.describe("Signup Test", () => {
+  test("should be able to sign up", async function ({ page }) {
+    await navigateToSignup(page);
+    await signup(page);
+  });
 
-    before(async () => {
-        const host = process.env.SELENIUM || undefined;
-        const server = host ? `http://${host}:4444` : '';
+  test("should verify user details", async function ({ page }) {
+    await verifyUserOverApi();
+  });
 
-        let options = new chrome.Options();
-        options.addArguments("--lang=de");
-        options.setUserPreferences({
-            "intl.accept_languages": "de"
-        });
-        driver = await new Builder()
-            .usingServer(server)
-            .forBrowser(Browser.CHROME)
-            .setChromeOptions(options)
-            .build();
-    });
+  test("should delete user account using UI", async function ({ page }) {
+    await loginToCreatedAccount(page);
+    await navigateToProfile(page);
+    await deleteUserViaUI(page);
+  });
 
-    it('should be able to sign up', async function() {
-        await navigateToSignup(driver);
-        await signup(driver);
-    });
+  test("should ensure user is deleted over API", async function ({ page }) {
+    await deleteUserOverApi();
+  });
 
-    it('should verify user details', async function() {
-        await verifyUserOverApi();
-    });
-
-    it('should delete user account using UI', async function() {
-        await loginToCreatedAccount(driver);
-        await navigateToProfile(driver);
-        await deleteUserViaUI(driver);
-    });
-
-    it('should ensure user is deleted over API', async function () {
-        await deleteUserOverApi();
-    });
-
-    afterEach(async function () {
-        try {
-            await screenshot(driver, this.currentTest);
-        } catch(e) {
-            console.error(`Screenshotting failed: ${e}`);
-        }
-    });
-
-    after(async () => {
-        await driver.quit()
-    });
+  test.afterEach(async ({ page }, testInfo) => {
+    try {
+      await screenshot(page, testInfo);
+    } catch (e) {
+      console.error(`Screenshotting failed: ${e}`);
+    }
+  });
 });

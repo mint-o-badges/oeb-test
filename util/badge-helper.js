@@ -1,81 +1,79 @@
-import {By, until, Key, Condition} from "selenium-webdriver";
-import {defaultWait, extendedWait} from '../config.js';
-import {ExtendedBy} from './selection.js';
-import {setOEBInputValueById, setOEBInputValueByCSS } from './components.js';
+import { defaultWait, extendedWait } from "../config.js";
+import { setOEBInputValueById } from "./components.js";
+import { expect } from "@playwright/test";
 
-export async function addNewTag(driver, tagName ){
-    await driver.wait(until.elementLocated(By.css('input[placeholder^="Einen Tag eingeben"]')), defaultWait);
-    const tagField = await driver.findElement(By.css('input[placeholder^="Einen Tag eingeben"]'));
-    await tagField.sendKeys(tagName);
-    // Clicking the button is harder then pushing enter, since the click is intercepted,
-    // if the tag is new
-    await tagField.sendKeys(Key.RETURN);
+export async function addNewTag(page, tagName) {
+  await page.waitForSelector('input[placeholder^="Einen Tag eingeben"]', {
+    timeout: defaultWait,
+  });
+  const tagField = page.locator('input[placeholder^="Einen Tag eingeben"]');
+  await tagField.fill(tagName);
+  // Clicking the button is harder then pushing enter, since the click is intercepted,
+  // if the tag is new
+  await tagField.press("Enter");
 }
 
-export async function setBadgeValidity(driver){
-    // Set duration number
-    setOEBInputValueById(driver, "duration-number", 2);
-    // Set duration type
-    const durationDropdownRegion = await driver.findElement(By.id(
-        'duration-type'));
-    const durationDropdownButton = await durationDropdownRegion.findElement(
-        By.css('button'));
-    await durationDropdownButton.click(); 
-    const monthOption = await driver.findElement(ExtendedBy.tagWithText('hlm-option', 'Monate'))        
-    await monthOption.click(); 
+export async function setBadgeValidity(page) {
+  // Set duration number
+  await setOEBInputValueById(page, "duration-number", "2");
+  // Set duration type
+  const durationDropdownButton = page.locator("#duration-type button");
+  await durationDropdownButton.click();
+  const monthOption = page.locator("hlm-option", { hasText: "Monate" });
+  await monthOption.click();
 }
 
-export async function addCompetenciesByHand(driver){
-    const competenciesByHandSection = await driver.findElement(By.id(
-      'competencies-by-hand-section'));
-    await competenciesByHandSection.click();
+export async function addCompetenciesByHand(page) {
+  const competenciesByHandSection = page.locator(
+    "#competencies-by-hand-section"
+  );
+  await competenciesByHandSection.click();
 
-    const addOwnCompetencyButton = await driver.findElement(By.css(
-        'oeb-button[icon="lucidePlus"]'));
-    await addOwnCompetencyButton.click();
+  const addOwnCompetencyButton = page.locator('oeb-button[icon="lucidePlus"]');
+  await addOwnCompetencyButton.click();
 
-
-    setOEBInputValueById(driver, "competencyTitle_0", "competency title");
-    setOEBInputValueById(driver, "competencyDescriptionInput_0", "competency description", "textarea");
-    setOEBInputValueById(driver, "competencyDurationHour_0", 2);
-    setOEBInputValueById(driver, "competencyDurationMinutes_0", 30);
-    const competencyCategoryDropdownButton = await driver.findElement(By.id(
-        'competencyCategory_0'));
-    await competencyCategoryDropdownButton.click();
-    await driver.wait(until.elementLocated(
-        ExtendedBy.tagWithText('hlm-option', "Fähigkeit")), defaultWait);
-    const skillOption = await driver.findElement(
-        ExtendedBy.tagWithText('hlm-option', "Fähigkeit"));
-    await skillOption.click();
+  await setOEBInputValueById(page, "competencyTitle_0", "competency title");
+  await setOEBInputValueById(
+    page,
+    "competencyDescriptionInput_0",
+    "competency description",
+    "textarea"
+  );
+  await setOEBInputValueById(page, "competencyDurationHour_0", "2");
+  await setOEBInputValueById(page, "competencyDurationMinutes_0", "30");
+  const competencyCategoryDropdownButton = page.locator(
+    "#competencyCategory_0"
+  );
+  await competencyCategoryDropdownButton.click();
+  await page.waitForSelector("hlm-option", { timeout: defaultWait });
+  const skillOption = page.locator("hlm-option", { hasText: "Fähigkeit" });
+  await skillOption.click();
 }
 
-export async function addCompetenciesViaAI(driver, aiCompetenciesDescriptionText){
-    const aiCompetenciesDescField = await driver.findElement(By.id(
-      'ai-competencies-description'));
-    await aiCompetenciesDescField.sendKeys(aiCompetenciesDescriptionText);
-    const suggestCompetenciesButton = await driver.findElement(By.id(
-        'suggest-competencies-btn'));
-    await suggestCompetenciesButton.click();
-    
-    // Only use first skill to always ensure we have only one resulting in a deterministic
-    // total number of competencies
-    await driver.wait(until.elementLocated(By.id('checkboxAiSkill_0')), extendedWait);
-    const firstAISkillCheckbox = await driver.findElement(By.id(
-        'checkboxAiSkill_0'));
-    firstAISkillCheckbox.click();
-    await driver.wait(until.elementIsEnabled(firstAISkillCheckbox), defaultWait);
+export async function addCompetenciesViaAI(
+  page,
+  aiCompetenciesDescriptionText
+) {
+  const aiCompetenciesDescField = page.locator("#ai-competencies-description");
+  await aiCompetenciesDescField.fill(aiCompetenciesDescriptionText);
+  const suggestCompetenciesButton = page.locator("#suggest-competencies-btn");
+  await suggestCompetenciesButton.click();
+
+  // Only use first skill to always ensure we have only one resulting in a deterministic
+  // total number of competencies
+  await page.waitForSelector("#checkboxAiSkill_0", { timeout: extendedWait });
+  const firstAISkillCheckbox = page.locator("#checkboxAiSkill_0");
+  await firstAISkillCheckbox.click();
+  await expect(firstAISkillCheckbox).toBeEnabled({ timeout: defaultWait });
 }
 
 /**
  * Waits for (at least) count tabs (i.e. buttons in hlm-tabs-list)
  */
-export async function waitForTabs(driver, count) {
-    const condition = new Condition("multiple tabs",
-        async (driver) => {
-            const tabs = await driver.findElements(
-                By.css("hlm-tabs-list > button"));
-            return tabs.length >= count;
-        });
-    await driver.wait(condition, defaultWait,
-        `Waiting for ${count} tabs timed out`);
+export async function waitForTabs(page, count) {
+  await page.waitForFunction(
+    (cnt) => document.querySelectorAll("hlm-tabs-list > button").length >= cnt,
+    count,
+    { timeout: defaultWait }
+  );
 }

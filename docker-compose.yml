@@ -1,29 +1,23 @@
-# Inspired by https://www.testmo.com/guides/github-actions-selenium/
+version: "3.9"
 services:
-  chrome:
-    image: selenium/standalone-chrome
-    #platform: linux/amd64 #comment in if you are on Apple Silicon
-    shm_size: '2gb'
-    ports:
-      - 4444:4444 # Selenium service
-      - 5900:5900 # VNC server
-      - 7900:7900 # VNC browser client
-    volumes:
-      - ./assets:/project/assets
-      - download:/tmp
-    working_dir: /project
-
   node:
-    image: node:23
+    image: mcr.microsoft.com/playwright:v1.56.1
+    command: ["npx", "playwright", "test"]
+    # Mount your source code (adjust the path to your project)
     volumes:
-      - ./:/project
-      - download:/tmp
-      - ./screenshots/:/project/screenshots
-    working_dir: /project
-    tty: true
-    depends_on:
-      - chrome
-    entrypoint: ["bash", "/project/entrypoint.sh"]
-
-volumes:
-  download:
+      - ./:/home
+      - ./screenshots:/home/screenshots
+    entrypoint: /bin/sh -c "\
+      cd /home && \
+      npm ci && \
+      npx playwright install --with-deps && \
+      exec \"$@\""
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=0   # use bundled browsers
+    # Expose a port if you need to view a UI (e.g., a test server)
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G

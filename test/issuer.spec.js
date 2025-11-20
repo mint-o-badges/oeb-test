@@ -1,61 +1,40 @@
-import {Builder, Browser} from 'selenium-webdriver';
-import {login} from './login.js';
-import {screenshot} from '../util/screenshot.js';
-import chrome from 'selenium-webdriver/chrome.js';
+import { test } from "@playwright/test";
+import { login } from "./login.js";
+import { screenshot } from "../util/screenshot.js";
 import {
-    navigateToIssuerCreation,
-    createIssuer,
-    deleteIssuerOverApi,
-    navigateToIssuerDetails,
-    verifyIssuerDetails,
-    verifyIssuerOverApi
-} from './issuer.js';
+  navigateToIssuerCreation,
+  createIssuer,
+  deleteIssuerOverApi,
+  navigateToIssuerDetails,
+  verifyIssuerDetails,
+  verifyIssuerOverApi,
+} from "./issuer.js";
 
-describe('Issuer Test', function() {
-    this.timeout(20000);
-    let driver;
+test.describe("Issuer Test", () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
 
-    before(async () => {
-        const host = process.env.SELENIUM || undefined;
-        const server = host ? `http://${host}:4444` : '';
-        let options = new chrome.Options();
-        options.addArguments("--lang=de");
-        options.setUserPreferences({
-            "intl.accept_languages": "de"
-        });
-        driver = await new Builder()
-            .usingServer(server)
-            .forBrowser(Browser.CHROME)
-            .setChromeOptions(options)
-            .build();
-    });
+  test("should create an issuer", async ({ page }) => {
+    await navigateToIssuerCreation(page);
+    await createIssuer(page);
+  });
 
+  test("should verify the issuer details", async ({ page }) => {
+    await navigateToIssuerDetails(page);
+    await verifyIssuerDetails(page);
+    await verifyIssuerOverApi();
+  });
 
-    it('should create an issuer', async function() {
-        await login(driver);
-        await navigateToIssuerCreation(driver);
-        await createIssuer(driver);
-    });
+  test("should delete the issuer", async () => {
+    await deleteIssuerOverApi();
+  });
 
-    it('should verify the issuer details', async function() {
-        await navigateToIssuerDetails(driver);
-        await verifyIssuerDetails(driver);
-        await verifyIssuerOverApi();
-    });
-
-    it('should delete the issuer', async function () {
-        await deleteIssuerOverApi();
-    });
-
-    afterEach(async function () {
-        try {
-            await screenshot(driver, this.currentTest);
-        } catch(e) {
-            console.error(`Screenshotting failed: ${e}`);
-        }
-    });
-
-    after(async () => {
-        await driver.quit();
-    });
+  test.afterEach(async ({ page }, testInfo) => {
+    try {
+      await screenshot(page, testInfo);
+    } catch (e) {
+      console.error(`Screenshotting failed: ${e}`);
+    }
+  });
 });

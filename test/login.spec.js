@@ -1,39 +1,17 @@
-import {Builder, Browser} from 'selenium-webdriver';
-import {login} from './login.js';
-import {screenshot} from '../util/screenshot.js';
-import chrome from 'selenium-webdriver/chrome.js';
+import { test } from "@playwright/test";
+import { login } from "./login.js";
+import { screenshot } from "../util/screenshot.js";
 
-describe('Login Test', function() {
-    this.timeout(20000);
-    let driver;
+test.describe("Login Test", () => {
+  test("should be able to log in", async ({ page }) => {
+    await login(page);
+  });
 
-    before(async () => {
-        const host = process.env.SELENIUM || undefined;
-        const server = host ? `http://${host}:4444` : '';
-
-        let options = new chrome.Options();
-        options.addArguments("--lang=de");
-        options.setUserPreferences({
-            "intl.accept_languages": "de"
-        });
-        driver = await new Builder()
-            .usingServer(server)
-            .forBrowser(Browser.CHROME)
-            .setChromeOptions(options)
-            .build();
-    });
-
-    it('should be able to log in', async function() {
-        await login(driver);
-    });
-
-    afterEach(async function () {
-        try {
-            await screenshot(driver, this.currentTest);
-        } catch(e) {
-            console.error(`Screenshotting failed: ${e}`);
-        }
-    });
-
-    after(async () => await driver.quit());
+  test.afterEach(async ({ page }, testInfo) => {
+    try {
+      await screenshot(page, testInfo);
+    } catch (e) {
+      console.error(`Screenshotting failed: ${e}`);
+    }
+  });
 });
