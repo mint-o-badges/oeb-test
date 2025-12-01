@@ -171,6 +171,9 @@ export async function navigateToBackpack(page) {
   });
 }
 
+/**
+ * @param {import("playwright/test").Page} page
+ */
 export async function navigateToReceivedBadge(page) {
   await navigateToBackpack(page);
 
@@ -184,7 +187,7 @@ export async function navigateToReceivedBadge(page) {
     .first()
     .waitFor({ state: "attached", timeout: defaultWait });
 
-  const receivedBadgeLinks = page.locator("a", { hasText: testBadgeTitle });
+  const receivedBadgeLinks = page.locator("a").getByText(testBadgeTitle);
   expect(
     receivedBadgeLinks,
     "Expected to find only one badge matching the title in my backpack"
@@ -335,7 +338,8 @@ export async function receiveBadge(page) {
   for (let i = 0; i < 10; i++) {
     try {
       await page
-        .locator(`a:has-text("${testBadgeTitle}")`)
+        .locator("a")
+        .getByText(testBadgeTitle)
         .waitFor({ timeout: 1000 });
     } catch (e) {
       if (e.name === "TimeoutError") {
@@ -901,6 +905,11 @@ export async function validateUploadedV2Badge(page) {
   await revokeBadge(page);
   await navigateToBackpack(page);
 
+  // move to the badges tab
+  await waitForTabs(page, 5);
+  const tabs = page.locator("hlm-tabs-list > button");
+  await tabs.nth(1).click();
+
   await page
     .locator("bg-badgecard")
     .first()
@@ -931,6 +940,11 @@ export async function validateUploadedV3Badge(page) {
   await navigateToBadgeDetails(page);
   await revokeBadge(page);
   await navigateToBackpack(page);
+
+  // move to the badges tab
+  await waitForTabs(page, 5);
+  const tabs = page.locator("hlm-tabs-list > button");
+  await tabs.nth(1).click();
 
   await page
     .locator("bg-badgecard")
