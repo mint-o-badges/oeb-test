@@ -4,13 +4,17 @@ services:
     image: mcr.microsoft.com/playwright:v1.56.1
     # Mount your source code (adjust the path to your project)
     volumes:
-      - ./:/home
-      - ./screenshots:/home/screenshots
-    entrypoint: /bin/sh -c "\
-      cd /home && \
-      npm ci && \
-      npx playwright install --with-deps && \
-      npx playwright test"
+      - ./:/test
+      - ./screenshots:/test/screenshots
+    working_dir: /test
+    command: >
+      sh -c "
+        apt update &&
+        apt install -y graphicsmagick &&
+        npm ci &&
+        npx playwright install --with-deps &&
+        npx playwright test
+      "
     environment:
       - PLAYWRIGHT_BROWSERS_PATH=0   # use bundled browsers
     # Expose a port if you need to view a UI (e.g., a test server)
